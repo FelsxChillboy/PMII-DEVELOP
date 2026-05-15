@@ -1,9 +1,27 @@
-import HeroSection from "@/components/HeroSection"
+import type { Metadata } from "next"
+import dynamic from "next/dynamic"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import FeatureCard from "@/components/FeatureCard"
 import DonationCTA from "@/components/DonationCTA"
+import LottieShowcase from "@/components/LottieShowcase"
 import { Brain, Cog, ShieldCheck } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Beranda",
+  description:
+    "PR PMII Rayon Teknik UNUSIA Jakarta Pusat — Organisasi pergerakan mahasiswa di Fakultas Teknik UNUSIA. Kaderisasi intelektual berbasis Ahlussunnah wal Jama'ah.",
+}
+
+const HeroSection = dynamic(() => import("@/components/HeroSection"), {
+  ssr: true,
+  loading: () => <div className="min-h-screen bg-[#0F172A]" />,
+})
+
+const Interactive3DSection = dynamic(
+  () => import("@/components/Interactive3DSection"),
+  { loading: () => null }
+)
 
 const FEATURES = [
   {
@@ -48,14 +66,19 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-4">
-              {FEATURES.map((feature, i) => (
-                <FeatureCard key={feature.title} {...feature} />
-              ))}
+            <div className="flex flex-col items-center gap-6">
+              <LottieShowcase type="pulse" className="mb-2" />
+              <div className="grid gap-4 w-full">
+                {FEATURES.map((feature) => (
+                  <FeatureCard key={feature.title} {...feature} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </AnimatedSection>
+
+      <Interactive3DSection />
 
       <DonationCTA />
     </>

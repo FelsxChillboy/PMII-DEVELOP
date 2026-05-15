@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  
 }
 
 enum UserRole {
@@ -33,8 +32,8 @@ model User {
 model Donation {
   id          String   @id @default(cuid())
   amount      Float
-  status      String   @default("PENDING") // PENDING, SUCCESS, FAILED
-  type        String   @default("ONE_TIME") // ONE_TIME, RECURRING
+  status      String   @default("PENDING")
+  type        String   @default("ONE_TIME")
   message     String?
   userId      String?
   user        User?    @relation(fields: [userId], references: [id])

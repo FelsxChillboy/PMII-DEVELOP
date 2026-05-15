@@ -1,6 +1,13 @@
+import type { Metadata } from "next"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import { BookOpen, Lightbulb, Target } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Tentang Kami",
+  description:
+    "Profil organisasi PR PMII Rayon Teknik UNUSIA Jakarta Pusat — visi, misi, nilai-nilai, dan struktur kepengurusan. Wadah kaderisasi intelektual pergerakan mahasiswa teknik.",
+}
 
 const MISI = [
   "Menyelenggarakan kaderisasi yang berkualitas dan berkelanjutan.",

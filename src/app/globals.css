@@ -116,3 +116,51 @@ body {
     opacity: 0.5;
   }
 }
+
+/* === View Transitions API === */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 0.35s ease-out both vt-exit;
+}
+
+::view-transition-new(root) {
+  animation: 0.35s ease-out both vt-enter;
+}
+
+@keyframes vt-exit {
+  from { opacity: 1; transform: scale(1); filter: blur(0); }
+  to { opacity: 0; transform: scale(0.98); filter: blur(4px); }
+}
+
+@keyframes vt-enter {
+  from { opacity: 0; transform: scale(1.02); filter: blur(4px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* === GPU Animation Layer === */
+.anim-layer {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}

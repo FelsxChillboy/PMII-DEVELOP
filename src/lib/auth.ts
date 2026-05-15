@@ -1,50 +1,35 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import { prisma } from "@/lib/prisma";
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import NextAuth from "next-auth"
+import GitHubProvider from "next-auth/providers/github"
+import { prisma } from "@/lib/prisma"
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login",
-  },
+  session: { strategy: "jwt" },
+  pages: { signIn: "/login" },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    GitHubProvider({
+      clientId: process.env.AUTH_GITHUB_ID || process.env.GITHUB_ID || "",
+      clientSecret: process.env.AUTH_GITHUB_SECRET || process.env.GITHUB_SECRET || "",
     }),
   ],
   callbacks: {
-    async session({ token, session }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.role = token.role as string;
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub!
+        session.user.role = (token.role as string) || "USER"
       }
-      return session;
+      return session
     },
-    async jwt({ token, user }) {
-      const dbUser = await prisma.user.findFirst({
-        where: { email: token.email },
-      });
-
-      if (!dbUser) {
-        if (user) {
-          token.id = user.id;
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        return {
+          ...token,
+          id: user.id,
+          role: (user as { role?: string }).role || "USER",
         }
-        return token;
       }
-
-      return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        role: dbUser.role,
-      };
+      return token
     },
   },
-};
+})

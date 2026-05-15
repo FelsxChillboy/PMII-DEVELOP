@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -36,10 +37,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  useEffect(() => {
-    setMobileOpen(false)
-  }, [pathname])
-
   return (
     <motion.header
       initial={false}
@@ -49,10 +46,13 @@ export default function Navbar() {
     >
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <img
+          <Image
             src="https://media.base44.com/images/public/6a0614bbe8ea40108cd58983/6842b6f37_Logo_RayonTeknik2022.svg"
             alt="Logo PR PMII Rayon Teknik"
+            width={36}
+            height={36}
             className="h-9 w-9"
+            priority
           />
           <span className="hidden sm:inline font-heading text-sm font-semibold tracking-tight text-foreground">
             PR PMII<span className="text-primary"> Rayon Teknik</span>

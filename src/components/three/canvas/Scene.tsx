@@ -1,10 +1,21 @@
-"use client";
+"use client"
 
-import { Canvas } from "@react-three/fiber";
-import { Preload, OrbitControls } from "@react-three/drei";
-import { Suspense } from "react";
+import { Canvas } from "@react-three/fiber"
+import { Preload } from "@react-three/drei"
+import { Suspense } from "react"
+import { cn } from "@/lib/utils"
 
-export default function Scene({ children }: { children: React.ReactNode }) {
+interface SceneCanvasProps {
+  children: React.ReactNode
+  className?: string
+  pointerEvents?: boolean
+}
+
+export default function SceneCanvas({
+  children,
+  className,
+  pointerEvents = false,
+}: SceneCanvasProps) {
   return (
     <Canvas
       gl={{ antialias: true, alpha: true }}
@@ -15,14 +26,15 @@ export default function Scene({ children }: { children: React.ReactNode }) {
         left: 0,
         width: "100vw",
         height: "100vh",
-        pointerEvents: "none", // Agar tidak menghalangi klik pada UI HTML
-        zIndex: 0,
+        pointerEvents: pointerEvents ? "auto" : "none",
+        zIndex: pointerEvents ? 10 : 0,
       }}
+      className={cn(className)}
     >
       <Suspense fallback={null}>
         {children}
         <Preload all />
       </Suspense>
     </Canvas>
-  );
+  )
 }

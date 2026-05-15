@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
-import { Calendar, User, ArrowRight } from "lucide-react"
+import { Calendar, User } from "lucide-react"
 
 interface NewsItem {
   id: string
@@ -80,10 +81,12 @@ export default function BeritaPage() {
                 >
                   <div className="aspect-[16/9] bg-secondary relative overflow-hidden">
                     {item.image ? (
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">

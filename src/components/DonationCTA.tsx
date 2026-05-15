@@ -1,7 +1,16 @@
+"use client"
+
+import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowRight, Heart } from "lucide-react"
+import { useDonationStream } from "@/lib/useDonationStream"
+import { useUIStore } from "@/store/ui"
+import AnimatedCounter from "@/components/AnimatedCounter"
 
 export default function DonationCTA() {
+  useDonationStream()
+  const donationTotal = useUIStore((s) => s.donationTotal)
+
   return (
     <section className="relative overflow-hidden border-t border-border bg-background py-20 lg:py-28">
       <div
@@ -14,31 +23,81 @@ export default function DonationCTA() {
       />
 
       <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-accent/10 mb-6">
-          <Heart className="h-6 w-6 text-accent" />
-        </div>
+        <motion.div
+          initial={{ scale: 0 }}
+          whileInView={{ scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-accent/10 mb-6"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Heart className="h-6 w-6 text-accent" />
+          </motion.div>
+        </motion.div>
 
-        <p className="text-xs tracking-[0.2em] uppercase text-accent font-medium mb-3">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-xs tracking-[0.2em] uppercase text-accent font-medium mb-3"
+        >
           DUKUNG PERGERAKAN
-        </p>
+        </motion.p>
 
-        <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1] mb-6"
+        >
           Jadilah Bagian dari{" "}
           <span className="text-accent">Perubahan</span>
-        </h2>
+        </motion.h2>
 
-        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+        {donationTotal > 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mb-8"
+          >
+            <p className="text-sm text-muted-foreground mb-1">Terkumpul</p>
+            <p className="font-heading text-3xl font-bold text-accent">
+              <AnimatedCounter value={donationTotal} currency />
+            </p>
+          </motion.div>
+        )}
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+        >
           Dukungan Anda akan memperkuat program kaderisasi, kegiatan sosial, dan
           pengembangan kapasitas kader teknik UNUSIA.
-        </p>
+        </motion.p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
           <Link
             href="/donasi"
-            className="inline-flex h-12 px-8 items-center justify-center rounded-xl bg-accent text-accent-foreground font-semibold text-sm hover:bg-accent/90 transition-colors gap-2"
+            className="inline-flex h-12 px-8 items-center justify-center rounded-xl bg-accent text-accent-foreground font-semibold text-sm hover:bg-accent/90 transition-all gap-2 group"
           >
             Donasi Sekarang
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
             href="/kontak"
@@ -46,7 +105,7 @@ export default function DonationCTA() {
           >
             Hubungi Kami
           </Link>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

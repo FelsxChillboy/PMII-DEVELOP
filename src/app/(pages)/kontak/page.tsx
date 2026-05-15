@@ -3,7 +3,7 @@
 import { useState } from "react"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
-import { MapPin, Mail, Phone, CheckCircle, Send } from "lucide-react"
+import { MapPin, Mail, Phone, Send } from "lucide-react"
 
 const CONTACT_INFO = [
   {
