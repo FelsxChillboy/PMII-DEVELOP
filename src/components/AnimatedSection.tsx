@@ -3,30 +3,30 @@
 import { useRef } from "react"
 import { motion, useInView, type Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { duration, easing, variants as globalVariants } from "@/lib/animation"
 
-type AnimationVariant = "fadeUp" | "fadeLeft" | "scaleIn" | "stagger" | "clipReveal"
+type AnimationVariant = "fadeUp" | "fadeDown" | "fadeLeft" | "fadeRight" | "fadeIn" | "scaleIn" | "staggerContainer"
 
 const variantMap: Record<AnimationVariant, Variants> = {
-  fadeUp: {
-    hidden: { opacity: 0, y: 60, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+  fadeUp: globalVariants.fadeUp,
+  fadeDown: {
+    hidden: { opacity: 0, y: -40 },
+    visible: { opacity: 1, y: 0, transition: { duration: duration.normal, ease: easing.standard } },
   },
   fadeLeft: {
-    hidden: { opacity: 0, x: -60 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+    hidden: { opacity: 0, x: -40 },
+    visible: { opacity: 1, x: 0, transition: { duration: duration.normal, ease: easing.standard } },
   },
+  fadeRight: {
+    hidden: { opacity: 0, x: 40 },
+    visible: { opacity: 1, x: 0, transition: { duration: duration.normal, ease: easing.standard } },
+  },
+  fadeIn: globalVariants.fadeIn,
   scaleIn: {
-    hidden: { opacity: 0, scale: 0.8, filter: "blur(8px)" },
-    visible: { opacity: 1, scale: 1, filter: "blur(0px)", transition: { duration: 0.5 } },
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { opacity: 1, scale: 1, transition: { duration: duration.normal, ease: easing.standard } },
   },
-  stagger: {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
-  },
-  clipReveal: {
-    hidden: { clipPath: "inset(0 100% 0 0)" },
-    visible: { clipPath: "inset(0 0% 0 0)", transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
-  },
+  staggerContainer: globalVariants.staggerContainer,
 }
 
 interface AnimatedSectionProps {
@@ -35,6 +35,7 @@ interface AnimatedSectionProps {
   delay?: number
   className?: string
   once?: boolean
+  as?: "div" | "section"
 }
 
 export default function AnimatedSection({
@@ -43,19 +44,31 @@ export default function AnimatedSection({
   delay = 0,
   className,
   once = true,
+  as = "div",
 }: AnimatedSectionProps) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once, margin: "-80px" })
 
+  const MotionTag = as === "section" ? motion.section : motion.div
+
   return (
-    <motion.div
+    <MotionTag
       ref={ref}
       variants={variantMap[variant]}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       transition={{ delay }}
       className={cn(className)}
+      style={{ willChange: "transform, opacity" }}
     >
+      {children}
+    </MotionTag>
+  )
+}
+
+export function StaggerItem({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <motion.div variants={globalVariants.staggerItem} className={cn(className)}>
       {children}
     </motion.div>
   )

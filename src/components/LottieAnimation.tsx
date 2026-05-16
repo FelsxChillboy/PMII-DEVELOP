@@ -21,7 +21,7 @@ export default function LottieAnimation({
   height = 200,
 }: LottieAnimationProps) {
   const { View } = useLottie({
-    animationData: animationData as any,
+    animationData: animationData as Record<string, unknown>,
     loop,
     autoplay,
   })

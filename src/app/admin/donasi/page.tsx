@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma"
-import { DollarSign, TrendingUp } from "lucide-react"
+import { DollarSign, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
 
-async function getDonations() {
+const PER_PAGE = 20
+
+async function getDonations(page: number) {
   try {
-    const [donations, total] = await Promise.all([
+    const [donations, total, count] = await Promise.all([
       prisma.donation.findMany({
         orderBy: { createdAt: "desc" },
-        take: 50,
+        take: PER_PAGE,
+        skip: (page - 1) * PER_PAGE,
         include: { user: { select: { name: true } } },
       }),
       prisma.donation.aggregate({
@@ -14,8 +18,9 @@ async function getDonations() {
         _count: true,
         where: { status: "SUCCESS" },
       }),
+      prisma.donation.count(),
     ])
-    return { donations, total: total._sum.amount || 0, count: total._count }
+    return { donations, total: total._sum.amount || 0, count: total._count, totalCount: total._count }
   } catch {
     return null
   }
@@ -27,8 +32,11 @@ const STATUS_COLORS: Record<string, string> = {
   FAILED: "bg-red-500/10 text-red-500",
 }
 
-export default async function AdminDonasi() {
-  const data = await getDonations()
+export default async function AdminDonasi(props: { searchParams?: Promise<{ page?: string }> }) {
+  const sp = await props.searchParams
+  const page = Math.max(1, Number(sp?.page) || 1)
+  const data = await getDonations(page)
+  const totalPages = data ? Math.ceil(data.totalCount / PER_PAGE) : 0
 
   return (
     <div>
@@ -64,6 +72,12 @@ export default async function AdminDonasi() {
         </div>
       )}
 
+      {data && (
+        <div className="mb-4 text-xs text-muted-foreground">
+          Total {data.totalCount} donasi &middot; Halaman {page} dari {totalPages}
+        </div>
+      )}
+
       <div className="rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -91,11 +105,7 @@ export default async function AdminDonasi() {
                     Rp{d.amount.toLocaleString("id-ID")}
                   </td>
                   <td className="p-4 hidden sm:table-cell">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
-                        STATUS_COLORS[d.status] || "bg-gray-500/10 text-gray-500"
-                      }`}
-                    >
+                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[d.status] || "bg-gray-500/10 text-gray-500"}`}>
                       {d.status}
                     </span>
                   </td>
@@ -111,6 +121,34 @@ export default async function AdminDonasi() {
           </table>
         </div>
       </div>
+
+      {data && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Link
+            href={`/admin/donasi?page=${page - 1}`}
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page <= 1 ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+            aria-disabled={page <= 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Link>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <Link
+              key={p}
+              href={`/admin/donasi?page=${p}`}
+              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-secondary"}`}
+            >
+              {p}
+            </Link>
+          ))}
+          <Link
+            href={`/admin/donasi?page=${page + 1}`}
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page >= totalPages ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+            aria-disabled={page >= totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

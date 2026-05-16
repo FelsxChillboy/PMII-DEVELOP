@@ -10,7 +10,7 @@ export default function RootLayout({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen pt-16">
+      <main id="main-content" role="main" className="min-h-screen pt-16 outline-none">
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer />

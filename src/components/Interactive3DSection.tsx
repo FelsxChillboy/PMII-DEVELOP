@@ -1,7 +1,8 @@
 "use client"
 
 import { Canvas } from "@react-three/fiber"
-import { Suspense } from "react"
+import { Suspense, useState, useEffect } from "react"
+import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import dynamic from "next/dynamic"
 import AnimatedSection from "@/components/AnimatedSection"
 
@@ -22,6 +23,20 @@ const ORBS = [
   { position: [-1.2, 7, -1.5] as [number, number, number], color: "#FBBF24", hoverColor: "#38BDF8", geometry: "torus" as const },
   { position: [4, 6, -5] as [number, number, number], color: "#F472B6", hoverColor: "#34D399", geometry: "octahedron" as const },
 ]
+
+function Effects() {
+  return (
+    <EffectComposer>
+      <Bloom
+        luminanceThreshold={0.2}
+        luminanceSmoothing={0.9}
+        intensity={0.8}
+      />
+    </EffectComposer>
+  )
+}
+
+const SIZES = [0.75, 0.85, 0.7, 0.9, 0.8]
 
 function PhysicsScene() {
   return (
@@ -51,16 +66,20 @@ function PhysicsScene() {
               color={orb.color}
               hoverColor={orb.hoverColor}
               geometry={orb.geometry}
-              size={0.7 + Math.random() * 0.2}
+              size={SIZES[i]}
             />
           ))}
         </PhysicsWorld>
       </Suspense>
+      <Effects />
     </Canvas>
   )
 }
 
 export default function Interactive3DSection() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   return (
     <section className="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-background via-background to-background/50">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -82,7 +101,7 @@ export default function Interactive3DSection() {
         style={{ height: "500px" }}
       >
         <div className="relative w-full h-full rounded-2xl border border-border bg-card/50 overflow-hidden">
-          <PhysicsScene />
+          {mounted && <PhysicsScene />}
         </div>
       </div>
     </section>

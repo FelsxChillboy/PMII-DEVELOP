@@ -1,32 +1,23 @@
-"use client"
-
-import { useState } from "react"
 import Image from "next/image"
+import { prisma } from "@/lib/prisma"
 import SectionTag from "@/components/SectionTag"
-import AnimatedSection from "@/components/AnimatedSection"
-import { Calendar, User } from "lucide-react"
+import AnimatedSection, { StaggerItem } from "@/components/AnimatedSection"
+import Card3D from "@/components/Card3D"
+import { Calendar, User, ArrowRight } from "lucide-react"
 
-interface NewsItem {
-  id: string
-  title: string
-  excerpt: string
-  category: string
-  image: string
-  author: string
-  date: string
-}
+export default async function BeritaPage() {
+  const news = await prisma.news.findMany({
+    where: { published: true },
+    orderBy: { createdAt: "desc" },
+    include: { author: { select: { name: true } } },
+  })
 
-const DEMO_NEWS: NewsItem[] = []
-
-const CATEGORIES = ["Semua", "Kaderisasi", "Diskusi", "Sosial", "Pengumuman"]
-
-export default function BeritaPage() {
-  const [activeCategory, setActiveCategory] = useState("Semua")
-
-  const filtered =
-    activeCategory === "Semua"
-      ? DEMO_NEWS
-      : DEMO_NEWS.filter((n) => n.category === activeCategory)
+  const formatDate = (d: Date) =>
+    new Intl.DateTimeFormat("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(d)
 
   return (
     <div className="divide-y divide-border">
@@ -45,25 +36,9 @@ export default function BeritaPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 lg:py-24">
+      <AnimatedSection variant="staggerContainer" className="py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap gap-2 mb-10">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeCategory === cat
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {filtered.length === 0 ? (
+          {news.length === 0 ? (
             <div className="text-center py-20">
               <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                 <Calendar className="h-6 w-6 text-muted-foreground" />
@@ -74,45 +49,38 @@ export default function BeritaPage() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((item) => (
-                <article
-                  key={item.id}
-                  className="group rounded-xl border border-border bg-card overflow-hidden hover:border-primary/30 transition-all duration-300"
-                >
-                  <div className="aspect-[16/9] bg-secondary relative overflow-hidden">
-                    {item.image ? (
+              {news.map((item) => (
+                <StaggerItem key={item.id}>
+                  <Card3D asLink href={`/berita/${item.slug}`} className="h-full">
+                    <div className="aspect-[16/9] bg-secondary relative overflow-hidden flex items-center justify-center">
                       <Image
-                        src={item.image}
+                        src="/og-image.svg"
                         alt={item.title}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="object-cover opacity-40"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <Calendar className="h-8 w-8" />
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-md bg-primary/90 text-primary-foreground text-xs font-medium">
-                      {item.category}
-                    </span>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                      {item.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {item.author}
-                      </span>
-                      <span>{item.date}</span>
                     </div>
-                  </div>
-                </article>
+                    <div className="p-5">
+                      <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                        {item.content.replace(/<[^>]+>/g, "").slice(0, 200)}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {item.author.name || "Penulis"}
+                        </span>
+                        <span>{formatDate(item.createdAt)}</span>
+                      </div>
+                      <div className="mt-3 flex items-center gap-1 text-primary text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        Baca selengkapnya <ArrowRight className="h-3 w-3" />
+                      </div>
+                    </div>
+                  </Card3D>
+                </StaggerItem>
               ))}
             </div>
           )}

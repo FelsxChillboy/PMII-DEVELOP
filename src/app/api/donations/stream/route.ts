@@ -1,35 +1,16 @@
-import { prisma } from "@/lib/prisma"
+import { donationBroadcaster } from "@/lib/sse-broadcaster"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export async function GET(request: Request) {
-  const encoder = new TextEncoder()
-
   const stream = new ReadableStream({
-    async start(controller) {
-      const sendTotal = async () => {
-        try {
-          const result = await prisma.donation.aggregate({
-            _sum: { amount: true },
-            where: { status: "SUCCESS" },
-          })
-          const data = JSON.stringify({ total: result._sum.amount || 0 })
-          controller.enqueue(encoder.encode(`data: ${data}\n\n`))
-        } catch {
-          controller.enqueue(encoder.encode(`data: {"error":"fetch_failed"}\n\n`))
-        }
-      }
-
-      await sendTotal()
-      const interval = setInterval(sendTotal, 5000)
-
-      const cleanup = () => {
-        clearInterval(interval)
+    start(controller) {
+      donationBroadcaster.addClient(controller)
+      request.signal.addEventListener("abort", () => {
+        donationBroadcaster.removeClient(controller)
         controller.close()
-      }
-
-      request.signal.addEventListener("abort", cleanup)
+      })
     },
   })
 

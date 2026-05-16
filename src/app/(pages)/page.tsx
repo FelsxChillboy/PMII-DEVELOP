@@ -3,9 +3,12 @@ import dynamic from "next/dynamic"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import FeatureCard from "@/components/FeatureCard"
-import DonationCTA from "@/components/DonationCTA"
-import LottieShowcase from "@/components/LottieShowcase"
+import LazyLottie from "@/components/LazyLottie"
 import { Brain, Cog, ShieldCheck } from "lucide-react"
+
+const DonationCTA = dynamic(() => import("@/components/DonationCTA"), {
+  loading: () => null,
+})
 
 export const metadata: Metadata = {
   title: "Beranda",
@@ -67,7 +70,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-col items-center gap-6">
-              <LottieShowcase type="pulse" className="mb-2" />
+              <LazyLottie type="pulse" className="mb-2" />
               <div className="grid gap-4 w-full">
                 {FEATURES.map((feature) => (
                   <FeatureCard key={feature.title} {...feature} />

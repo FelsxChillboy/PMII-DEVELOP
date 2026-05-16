@@ -28,7 +28,7 @@ export interface Event {
 export interface FinancialReport {
   id: string
   title: string
-  type: "pemasukan" | "pengeluaran"
+  type: "INCOME" | "EXPENSE"
   amount: number
   category: string
   description: string

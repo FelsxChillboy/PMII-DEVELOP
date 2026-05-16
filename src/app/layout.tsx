@@ -110,9 +110,12 @@ export default function RootLayout({
             `,
           }}
         />
+        <a href="#main-content" className="skip-to-content">
+          Langsung ke konten utama
+        </a>
         <Providers>
           <ServiceWorker />
-          {children}
+          <div className="contents">{children}</div>
         </Providers>
       </body>
     </html>

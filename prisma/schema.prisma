@@ -12,6 +12,22 @@ enum UserRole {
   ADMIN
 }
 
+enum DonationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum DonationType {
+  ONE_TIME
+  RECURRING
+}
+
+enum FinancialReportType {
+  INCOME
+  EXPENSE
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -30,26 +46,30 @@ model User {
 }
 
 model Donation {
-  id          String   @id @default(cuid())
-  amount      Float
-  status      String   @default("PENDING")
-  type        String   @default("ONE_TIME")
+  id          String         @id @default(cuid())
+  amount      Int
+  status      DonationStatus @default(PENDING)
+  type        DonationType   @default(ONE_TIME)
   message     String?
+  donorName   String?
+  donorEmail  String?
+  donorPhone  String?
   userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  user        User?          @relation(fields: [userId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String   @db.Text
-  date        DateTime
-  location    String
-  capacity    Int
+  id            String         @id @default(cuid())
+  title         String
+  slug          String         @unique
+  description   String         @db.Text
+  date          DateTime
+  location      String
+  capacity      Int
   registrations Registration[]
-  createdAt   DateTime @default(now())
+  createdAt     DateTime       @default(now())
 }
 
 model Registration {
@@ -67,10 +87,31 @@ model News {
   title     String
   slug      String   @unique
   content   String   @db.Text
+  imageUrl  String?
   published Boolean  @default(false)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model FinancialReport {
+  id        String             @id @default(cuid())
+  title     String
+  type      FinancialReportType
+  amount    Int
+  category  String
+  date      DateTime
+  createdAt DateTime           @default(now())
 }
 
 model Account {

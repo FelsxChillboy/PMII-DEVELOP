@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { usePathname, useRouter } from "next/navigation"
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion"
+import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LayoutDashboard, LogOut } from "lucide-react"
 
 const NAV_LINKS = [
   { label: "Beranda", path: "/" },
@@ -22,20 +23,25 @@ export default function Navbar() {
   const [hidden, setHidden] = useState(false)
   const lastScrollY = useRef(0)
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  const handleLogout = () => signOut({ callbackUrl: "/" })
+
+  const { scrollY, scrollYProgress } = useScroll()
+  const progressScale = useSpring(scrollYProgress, { stiffness: 200, damping: 30 })
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY
-      if (currentY > lastScrollY.current && currentY > 80) {
+    const unsubscribe = scrollY.on("change", (current) => {
+      if (current > lastScrollY.current && current > 80) {
         setHidden(true)
       } else {
         setHidden(false)
       }
-      lastScrollY.current = currentY
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      lastScrollY.current = current
+    })
+    return () => unsubscribe()
+  }, [scrollY])
 
   return (
     <motion.header
@@ -44,6 +50,10 @@ export default function Navbar() {
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="fixed top-0 inset-x-0 z-50 h-16 bg-background/80 backdrop-blur-md border-b border-border"
     >
+      <motion.div
+        className="absolute bottom-0 left-0 h-[2px] bg-primary origin-left"
+        style={{ scaleX: progressScale }}
+      />
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image
@@ -81,6 +91,7 @@ export default function Navbar() {
                     layoutId="activeNav"
                     className="absolute inset-0 rounded-lg bg-primary/10"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    aria-hidden="true"
                   />
                 )}
                 <span className="relative z-10">{link.label}</span>
@@ -96,6 +107,40 @@ export default function Navbar() {
           >
             Hubungi Kami
           </Link>
+
+          {session?.user ? (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                href="/admin"
+                className="inline-flex h-9 px-3 items-center gap-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                title="Keluar"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                href="/daftar"
+                className="inline-flex h-9 px-4 items-center justify-center rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              >
+                Daftar
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex h-9 px-4 items-center justify-center rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-colors"
+              >
+                Masuk
+              </Link>
+            </div>
+          )}
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -152,6 +197,43 @@ export default function Navbar() {
                     </motion.div>
                   )
                 })}
+                <div className="border-t border-border my-2" />
+                {session?.user ? (
+                  <>
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => { handleLogout(); setMobileOpen(false) }}
+                      className="px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-2 text-left"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Keluar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/daftar"
+                      onClick={() => setMobileOpen(false)}
+                      className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors block text-center"
+                    >
+                      Daftar
+                    </Link>
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors block text-center"
+                    >
+                      Masuk
+                    </Link>
+                  </>
+                )}
                 <Link
                   href="/kontak"
                   onClick={() => setMobileOpen(false)}

@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber"
 import { MeshDistortMaterial, useCursor } from "@react-three/drei"
 import { RigidBody, type RapierRigidBody } from "@react-three/rapier"
 import * as THREE from "three"
+import { useScrollProgress } from "@/hooks/useScrollProgress"
 
 interface PhysicsOrbProps {
   position?: [number, number, number]
@@ -34,17 +35,15 @@ export default function PhysicsOrb({
 }: PhysicsOrbProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null)
   const meshRef = useRef<THREE.Mesh>(null)
+  const glowRef = useRef<THREE.Mesh>(null)
   const [hovered, setHovered] = useState(false)
   const [clicked, setClicked] = useState(false)
-  const [dragging, setDragging] = useState(false)
-  const dragPlane = useRef(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0))
-  const dragOffset = useRef(new THREE.Vector3())
-  const worldPos = useRef(new THREE.Vector3())
+  const scrollProgress = useScrollProgress()
 
   useCursor(hovered)
 
   const handlePointerDown = useCallback(
-    (e: any) => {
+    (e: { stopPropagation: () => void }) => {
       e.stopPropagation()
       setClicked((p) => !p)
 
@@ -64,15 +63,20 @@ export default function PhysicsOrb({
   useFrame((state) => {
     if (!meshRef.current) return
 
-    if (!dragging) {
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.1
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.2
+    const t = state.clock.elapsedTime
+
+    meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.1 + scrollProgress * Math.PI * 2
+    meshRef.current.rotation.y = Math.sin(t * 0.5) * 0.2 + scrollProgress * Math.PI
+
+    if (glowRef.current) {
+      glowRef.current.scale.setScalar(hovered ? 1.6 : 1 + Math.sin(t * 0.5) * 0.1)
+      glowRef.current.position.copy(meshRef.current.position)
     }
 
-    if (clicked && !dragging) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 4) * 0.08
+    if (clicked) {
+      const scale = 1 + Math.sin(t * 4) * 0.08
       meshRef.current.scale.setScalar(scale)
-    } else if (!clicked) {
+    } else {
       meshRef.current.scale.setScalar(1)
     }
   })
@@ -90,6 +94,18 @@ export default function PhysicsOrb({
       scale={size}
     >
       <mesh
+        ref={glowRef}
+        scale={1}
+      >
+        <icosahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial
+          color={hovered ? hoverColor : color}
+          transparent
+          opacity={hovered ? 0.2 : 0.08}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh
         ref={meshRef}
         onPointerDown={handlePointerDown}
         onPointerEnter={handlePointerEnter}
@@ -103,6 +119,8 @@ export default function PhysicsOrb({
           radius={1}
           transparent
           opacity={0.9}
+          emissive={hovered ? hoverColor : color}
+          emissiveIntensity={hovered ? 0.4 : 0.1}
         />
       </mesh>
     </RigidBody>

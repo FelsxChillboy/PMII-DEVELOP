@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PR PMII Rayon Teknik UNUSIA Jakarta Pusat
 
-## Getting Started
+Platform digital terpadu untuk manajemen kader PR PMII Rayon Teknik UNUSIA Jakarta Pusat. Dibangun dengan Next.js 16, Prisma + MariaDB, dan animasi framer-motion.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Database**: MariaDB via Prisma ORM
+- **Auth**: NextAuth v5 (Credentials + GitHub OAuth)
+- **Animasi**: framer-motion, @react-spring/web, three.js (@react-three/fiber)
+- **Styling**: Tailwind CSS v4
+- **Komponen UI**: Lucide React, Recharts, Lottie
+
+## Memulai
+
+### 1. Clone & Install
+
+```bash
+npm install
+```
+
+### 2. Environment Variables
+
+Salin `.env.example` ke `.env.local` dan isi:
+
+```env
+DATABASE_URL="mysql://user:password@localhost:3306/fullstack_db"
+AUTH_SECRET="your-secret"
+AUTH_GITHUB_ID=""
+AUTH_GITHUB_SECRET=""
+```
+
+### 3. Setup Database
+
+```bash
+npx prisma db push
+npm run seed
+```
+
+### 4. Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Perintah | Deskripsi |
+|----------|-----------|
+| `npm run dev` | Jalankan dev server (port 3000) |
+| `npm run dev:alt` | Jalankan dev server (port 3006) |
+| `npm run build` | Generate Prisma client + build Next.js |
+| `npm run seed` | Seed database dengan data dummy |
+| `npm run lint` | Jalankan ESLint |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Struktur
 
-## Learn More
+```
+src/
+├── app/            # Rute & halaman (App Router)
+│   ├── (pages)/    # Halaman publik (/, /berita, /donasi, ...)
+│   ├── admin/      # Panel admin (protected)
+│   ├── api/        # API routes (REST + SSE)
+│   └── login/      # Halaman login
+├── components/     # Komponen React
+│   ├── three/      # Komponen Three.js (3D, fisika)
+│   └── admin/      # Komponen khusus admin
+├── hooks/          # Custom hooks
+├── lib/            # Utility, auth, prisma client
+├── store/          # Zustand state
+└── types/          # TypeScript types
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Fitur
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Animasi 3D**: Hero section dengan particle system + floating orb interaktif
+- **Physics Playground**: Objek 3D clickable dengan fisika realistic (Rapier)
+- **Smooth Scroll**: Lenis + framer-motion scroll animations
+- **Donasi Real-time**: SSE stream untuk live donation total
+- **PWA**: Service worker dengan cache-first strategy
+- **Dark Mode**: Full dark theme dengan design system terintegrasi
+- **Admin Panel**: CRUD berita, kegiatan, manajemen donasi & kontak
+- **SEO**: Sitemap, robots.txt, Open Graph, JSON-LD structured data
+- **Accessibility**: Skip-to-content, reduced motion support, aria labels
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+Build untuk production:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy ke Vercel atau platform Node.js lainnya. Pastikan variabel environment `DATABASE_URL` dan `AUTH_SECRET` terisi.

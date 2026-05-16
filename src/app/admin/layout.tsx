@@ -6,6 +6,7 @@ import {
   Newspaper,
   DollarSign,
   Calendar,
+  Mail,
   LogOut,
   ChevronRight,
 } from "lucide-react"
@@ -15,6 +16,7 @@ const SIDEBAR = [
   { label: "Berita", href: "/admin/berita", icon: Newspaper },
   { label: "Donasi", href: "/admin/donasi", icon: DollarSign },
   { label: "Kegiatan", href: "/admin/kegiatan", icon: Calendar },
+  { label: "Kontak", href: "/admin/kontak", icon: Mail },
 ]
 
 export default async function AdminLayout({
@@ -63,7 +65,7 @@ export default async function AdminLayout({
           <form
             action={async () => {
               "use server"
-              await signOut()
+              await signOut({ redirectTo: "/" })
             }}
           >
             <button

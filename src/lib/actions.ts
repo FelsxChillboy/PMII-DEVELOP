@@ -2,13 +2,9 @@
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { DonationSchema } from "@/lib/schemas"
 import { z } from "zod"
-
-const DonationSchema = z.object({
-  amount: z.number().min(1000, "Minimum donasi Rp 1.000"),
-  message: z.string().optional(),
-  type: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
-})
+import bcrypt from "bcryptjs"
 
 export async function createDonation(formData: FormData) {
   const session = await auth()
@@ -48,4 +44,47 @@ export async function getDonationTotal() {
     where: { status: "SUCCESS" },
   })
   return result._sum.amount || 0
+}
+
+const RegisterSchema = z.object({
+  name: z.string().min(1, "Nama wajib diisi").max(100),
+  email: z.string().email("Email tidak valid").max(100),
+  password: z.string().min(6, "Password minimal 6 karakter").max(100),
+})
+
+export async function registerUser(formData: FormData) {
+  const name = formData.get("name") as string
+  const email = formData.get("email") as string
+  const password = formData.get("password") as string
+  const confirmPassword = formData.get("confirmPassword") as string
+
+  if (password !== confirmPassword) {
+    return { error: "password_mismatch" }
+  }
+
+  const parsed = RegisterSchema.safeParse({ name, email, password })
+  if (!parsed.success) {
+    return { error: "validation" }
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { email: parsed.data.email },
+  })
+
+  if (existing) {
+    return { error: "email_exists" }
+  }
+
+  const hashedPassword = await bcrypt.hash(parsed.data.password, 12)
+
+  await prisma.user.create({
+    data: {
+      name: parsed.data.name,
+      email: parsed.data.email,
+      password: hashedPassword,
+      role: "USER",
+    },
+  })
+
+  return { success: true }
 }

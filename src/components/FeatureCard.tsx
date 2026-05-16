@@ -1,8 +1,9 @@
 "use client"
 
-import { useRef, useCallback } from "react"
-import { motion, useSpring } from "framer-motion"
+import { useRef, useCallback, useState } from "react"
+import { motion, useSpring, useMotionTemplate, useTransform } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { duration } from "@/lib/animation"
 
 interface FeatureCardProps {
   icon: React.ReactNode
@@ -18,64 +19,77 @@ export default function FeatureCard({
   className,
 }: FeatureCardProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [glare, setGlare] = useState({ x: 50, y: 50 })
 
   const rotateX = useSpring(0, { stiffness: 300, damping: 30 })
   const rotateY = useSpring(0, { stiffness: 300, damping: 30 })
-  const scale = useSpring(1, { stiffness: 300, damping: 20 })
+  const cardScale = useSpring(1, { stiffness: 300, damping: 20 })
+
+  const shadowX = useTransform(rotateX, [-10, 10], [5, -5])
+  const shadowY = useTransform(rotateY, [-10, 10], [5, -5])
+  const shadow = useMotionTemplate`${shadowX}px ${shadowY}px 25px rgba(0,0,0,0.4)`
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
       const rect = e.currentTarget.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      rotateX.set(-y * 10)
-      rotateY.set(x * 10)
-      scale.set(1.02)
+      const x = (e.clientX - rect.left) / rect.width
+      const y = (e.clientY - rect.top) / rect.height
+      rotateX.set(-(y - 0.5) * 12)
+      rotateY.set((x - 0.5) * 12)
+      cardScale.set(1.03)
+      setGlare({ x: x * 100, y: y * 100 })
     },
-    [rotateX, rotateY, scale]
+    [rotateX, rotateY, cardScale]
   )
 
   const handlePointerLeave = useCallback(() => {
     rotateX.set(0)
     rotateY.set(0)
-    scale.set(1)
-  }, [rotateX, rotateY, scale])
+    cardScale.set(1)
+    setGlare({ x: 50, y: 50 })
+  }, [rotateX, rotateY, cardScale])
 
   return (
     <motion.div
       ref={ref}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      style={
-        {
-          rotateX,
-          rotateY,
-          scale,
-          transformStyle: "preserve-3d",
-        } as any
-      }
+      style={{
+        rotateX: rotateX as unknown as number,
+        rotateY: rotateY as unknown as number,
+        scale: cardScale as unknown as number,
+        boxShadow: shadow,
+        transformStyle: "preserve-3d" as const,
+      }}
       className={cn(
-        "group p-6 sm:p-8 rounded-xl border border-border bg-card hover:border-primary/30 transition-colors duration-300 cursor-default",
+        "group relative p-6 sm:p-8 rounded-xl border border-border bg-card hover:border-primary/30 cursor-default overflow-hidden",
         "[perspective:800px]",
         className
       )}
+      transition={{ duration: duration.fast }}
     >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(56,189,248,0.08) 0%, transparent 60%)`,
+        }}
+      />
       <motion.div
         whileHover={{ rotate: [0, -10, 10, -10, 0] }}
         transition={{ duration: 0.5 }}
-        className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors"
+        className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors relative"
         style={{ transformStyle: "preserve-3d", transform: "translateZ(30px)" }}
       >
         <div className="text-primary">{icon}</div>
       </motion.div>
       <h3
-        className="font-heading font-semibold text-lg text-foreground mb-2"
+        className="font-heading font-semibold text-lg text-foreground mb-2 relative"
         style={{ transform: "translateZ(20px)" }}
       >
         {title}
       </h3>
       <p
-        className="text-sm text-muted-foreground leading-relaxed"
+        className="text-sm text-muted-foreground leading-relaxed relative"
         style={{ transform: "translateZ(10px)" }}
       >
         {description}
