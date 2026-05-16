@@ -1,14 +1,16 @@
 "use client"
 
-import { useRef, useMemo, useState } from "react"
+import { useRef, useMemo } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { Float, MeshDistortMaterial, useCursor } from "@react-three/drei"
+import { Float, Environment } from "@react-three/drei"
+import { EffectComposer, Bloom, ChromaticAberration, Vignette } from "@react-three/postprocessing"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import * as THREE from "three"
 import Link from "next/link"
 import { ArrowRight, Users, Calendar, Award } from "lucide-react"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import AnimatedCounter from "@/components/AnimatedCounter"
+import Logo3D from "@/components/Logo3D"
 import { duration, easing } from "@/lib/animation"
 
 function seededRandom(seed: number) {
@@ -16,87 +18,50 @@ function seededRandom(seed: number) {
   return x - Math.floor(x)
 }
 
-function generatePositions(count: number) {
-  const pos = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    pos[i * 3] = (seededRandom(i * 1) - 0.5) * 20
-    pos[i * 3 + 1] = (seededRandom(i * 2 + 1) - 0.5) * 20
-    pos[i * 3 + 2] = (seededRandom(i * 3 + 2) - 0.5) * 10 - 5
-  }
-  return pos
-}
+function Particles({ count = 250, mouse }: { count?: number; mouse?: React.MutableRefObject<THREE.Vector2> }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null!)
+  const dummy = useRef(new THREE.Object3D())
 
-function Particles({ count = 60, mouse }: { count?: number; mouse?: React.MutableRefObject<THREE.Vector2> }) {
-  const mesh = useRef<THREE.InstancedMesh>(null!)
-  const dummyRef = useRef(new THREE.Object3D())
-
-  const positions = useMemo(() => generatePositions(count), [count])
+  const positions = useMemo(() => {
+    const pos = new Float32Array(count * 3)
+    for (let i = 0; i < count; i++) {
+      const radius = 3 + seededRandom(i * 5) * 8
+      const theta = seededRandom(i * 7) * Math.PI * 2
+      const phi = (seededRandom(i * 11) - 0.5) * Math.PI * 0.4
+      const i3 = i * 3
+      pos[i3] = Math.cos(theta) * Math.cos(phi) * radius
+      pos[i3 + 1] = Math.sin(phi) * radius * 0.6
+      pos[i3 + 2] = Math.sin(theta) * Math.cos(phi) * radius
+    }
+    return pos
+  }, [count])
 
   useFrame((state) => {
-    if (!mesh.current) return
-    const dummy = dummyRef.current
+    if (!meshRef.current) return
     const t = state.clock.elapsedTime
     const mx = mouse?.current ? mouse.current.x * 0.3 : 0
     const my = mouse?.current ? mouse.current.y * 0.3 : 0
     for (let i = 0; i < count; i++) {
       const i3 = i * 3
-      dummy.position.set(
-        positions[i3] + Math.sin(t * 0.3 + i) * 0.5 + mx,
-        positions[i3 + 1] + Math.cos(t * 0.2 + i) * 0.5 + my,
+      dummy.current.position.set(
+        positions[i3] + Math.sin(t * 0.12 + i * 0.3) * 0.25 + mx,
+        positions[i3 + 1] + Math.cos(t * 0.1 + i * 0.3) * 0.25 + my,
         positions[i3 + 2]
       )
-      dummy.rotation.set(t * 0.1 + i, t * 0.15 + i, 0)
-      dummy.scale.setScalar(0.5 + Math.sin(t * 0.5 + i) * 0.3)
-      dummy.updateMatrix()
-      mesh.current.setMatrixAt(i, dummy.matrix)
+      dummy.current.rotation.set(t * 0.04 + i, t * 0.06 + i, 0)
+      const scale = 0.3 + Math.sin(t * 0.2 + i) * 0.2
+      dummy.current.scale.setScalar(scale)
+      dummy.current.updateMatrix()
+      meshRef.current.setMatrixAt(i, dummy.current.matrix)
     }
-    mesh.current.instanceMatrix.needsUpdate = true
+    meshRef.current.instanceMatrix.needsUpdate = true
   })
 
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
-      <icosahedronGeometry args={[0.15, 0]} />
-      <meshStandardMaterial color="#38BDF8" transparent opacity={0.6} wireframe />
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+      <icosahedronGeometry args={[0.06, 0]} />
+      <meshStandardMaterial color="#38BDF8" transparent opacity={0.4} wireframe />
     </instancedMesh>
-  )
-}
-
-function FloatingOrb({ mouse }: { mouse?: React.MutableRefObject<THREE.Vector2> }) {
-  const meshRef = useRef<THREE.Mesh>(null!)
-  const [hovered, setHovered] = useState(false)
-  const targetPos = useRef(new THREE.Vector3(0, 0, -3))
-  useCursor(hovered)
-
-  useFrame((state) => {
-    if (!meshRef.current) return
-    const t = state.clock.elapsedTime
-    meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.3
-    meshRef.current.rotation.y = Math.sin(t * 0.5) * 0.5
-
-    if (mouse?.current) {
-      targetPos.current.x = mouse.current.x * 1.5
-      targetPos.current.y = mouse.current.y * 1.5
-    }
-    targetPos.current.y += Math.sin(t * 0.4) * 0.2
-
-    meshRef.current.position.lerp(targetPos.current, 0.05)
-  })
-
-  return (
-    <mesh
-      ref={meshRef}
-      position={[0, 0, -3]}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-    >
-      <icosahedronGeometry args={[0.8, 2]} />
-      <MeshDistortMaterial
-        color={hovered ? "#FBBF24" : "#38BDF8"}
-        speed={3}
-        distort={hovered ? 0.5 : 0.15}
-        radius={1}
-      />
-    </mesh>
   )
 }
 
@@ -121,13 +86,32 @@ function HeroCanvas({ mouse }: { mouse: React.MutableRefObject<THREE.Vector2> })
         pointerEvents: "none",
       }}
     >
-      <ambientLight intensity={0.5} />
-      <pointLight position={[5, 5, 5]} intensity={0.8} />
+      <ambientLight intensity={0.3} />
+      <pointLight position={[5, 5, 5]} intensity={0.5} />
+      <spotLight position={[-5, 5, 5]} angle={0.5} penumbra={0.5} intensity={1.5} color="#38BDF8" />
+      <spotLight position={[5, -5, 5]} angle={0.5} penumbra={0.5} intensity={1} color="#A78BFA" />
+      <Environment preset="night" environmentIntensity={1.2} />
       <MouseTracker mouse={mouse} />
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-        <Particles count={80} mouse={mouse} />
+      <EffectComposer multisampling={4}>
+        <Bloom
+          luminanceThreshold={0.1}
+          luminanceSmoothing={0.1}
+          intensity={0.6}
+          mipmapBlur
+        />
+        <ChromaticAberration
+          offset={new THREE.Vector2(0.002, 0.002)}
+          opacity={0.3}
+        />
+        <Vignette
+          offset={0.3}
+          darkness={0.6}
+        />
+      </EffectComposer>
+      <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.3}>
+        <Particles count={250} mouse={mouse} />
       </Float>
-      <FloatingOrb mouse={mouse} />
+      <Logo3D mouse={mouse} />
     </Canvas>
   )
 }

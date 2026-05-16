@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { env } from "@/lib/env"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -41,16 +42,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
-    ...(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET
+    ...(env.AUTH_GITHUB_ID && env.AUTH_GITHUB_SECRET
       ? [GitHubProvider({
-          clientId: process.env.AUTH_GITHUB_ID,
-          clientSecret: process.env.AUTH_GITHUB_SECRET,
+          clientId: env.AUTH_GITHUB_ID,
+          clientSecret: env.AUTH_GITHUB_SECRET,
         })]
       : []),
-    ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
+    // Google — only enabled if env vars are set
+    ...(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET
       ? [GoogleProvider({
-          clientId: process.env.AUTH_GOOGLE_ID,
-          clientSecret: process.env.AUTH_GOOGLE_SECRET,
+          clientId: env.AUTH_GOOGLE_ID,
+          clientSecret: env.AUTH_GOOGLE_SECRET,
         })]
       : []),
   ],
