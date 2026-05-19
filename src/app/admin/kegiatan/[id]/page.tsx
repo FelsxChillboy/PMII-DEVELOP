@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/server/auth"
 import { notFound, redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import Link from "next/link"
@@ -21,8 +22,8 @@ export default async function EditKegiatanPage({ params }: Props) {
 
   async function update(formData: FormData) {
     "use server"
-    const session = await auth()
-    if (!session?.user) return
+    const { session, error: authErr } = await requireAdmin()
+    if (authErr || !session) return
 
     const eventId = formData.get("id") as string
     const title = formData.get("title") as string
@@ -34,10 +35,15 @@ export default async function EditKegiatanPage({ params }: Props) {
 
     if (!title || !slug || !description || !date || !location) return
 
-    await prisma.event.update({
-      where: { id: eventId },
-      data: { title, slug, description, location, date: new Date(date), capacity },
-    })
+    try {
+      await prisma.event.update({
+        where: { id: eventId },
+        data: { title, slug, description, location, date: new Date(date), capacity },
+      })
+    } catch (err) {
+      console.error("Update event failed:", err)
+      return
+    }
 
     revalidatePath("/admin/kegiatan")
     redirect("/admin/kegiatan")

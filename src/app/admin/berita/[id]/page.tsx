@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/server/auth"
 import { notFound, redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import Link from "next/link"
@@ -21,8 +22,8 @@ export default async function EditBeritaPage({ params }: Props) {
 
   async function update(formData: FormData) {
     "use server"
-    const session = await auth()
-    if (!session?.user) return
+    const { session, error: authErr } = await requireAdmin()
+    if (authErr || !session) return
 
     const title = formData.get("title") as string
     const slug = formData.get("slug") as string
@@ -32,10 +33,15 @@ export default async function EditBeritaPage({ params }: Props) {
 
     if (!title || !slug || !content) return
 
-    await prisma.news.update({
-      where: { id: newsId },
-      data: { title, slug, content, published },
-    })
+    try {
+      await prisma.news.update({
+        where: { id: newsId },
+        data: { title, slug, content, published },
+      })
+    } catch (err) {
+      console.error("Update news failed:", err)
+      return
+    }
 
     revalidatePath("/admin/berita")
     revalidatePath(`/berita/${slug}`)

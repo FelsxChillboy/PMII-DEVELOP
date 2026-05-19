@@ -33,7 +33,8 @@ export async function createDonation(formData: FormData) {
       },
     })
     return { success: true }
-  } catch {
+  } catch (err) {
+    console.error("Create donation failed:", err)
     return { error: "Gagal menyimpan donasi" }
   }
 }
@@ -77,14 +78,19 @@ export async function registerUser(formData: FormData) {
 
   const hashedPassword = await bcrypt.hash(parsed.data.password, 12)
 
-  await prisma.user.create({
-    data: {
-      name: parsed.data.name,
-      email: parsed.data.email,
-      password: hashedPassword,
-      role: "USER",
-    },
-  })
+  try {
+    await prisma.user.create({
+      data: {
+        name: parsed.data.name,
+        email: parsed.data.email,
+        password: hashedPassword,
+        role: "USER",
+      },
+    })
+  } catch (err) {
+    console.error("Register user failed:", err)
+    return { error: "Gagal mendaftarkan pengguna" }
+  }
 
   return { success: true }
 }

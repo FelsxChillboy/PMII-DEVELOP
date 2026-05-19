@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/server/auth"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import Link from "next/link"
@@ -13,8 +14,8 @@ export default async function BuatBeritaPage() {
 
   async function create(formData: FormData) {
     "use server"
-    const session = await auth()
-    if (!session?.user) return
+    const { session, error: authErr } = await requireAdmin()
+    if (authErr || !session) return
 
     const title = formData.get("title") as string
     const slug = formData.get("slug") as string
@@ -23,15 +24,20 @@ export default async function BuatBeritaPage() {
 
     if (!title || !slug || !content) return
 
-    await prisma.news.create({
-      data: {
-        title,
-        slug,
-        content,
-        published,
-        authorId: session.user.id!,
-      },
-    })
+    try {
+      await prisma.news.create({
+        data: {
+          title,
+          slug,
+          content,
+          published,
+          authorId: session.user.id!,
+        },
+      })
+    } catch (err) {
+      console.error("Create news failed:", err)
+      return
+    }
 
     revalidatePath("/admin/berita")
     redirect("/admin/berita")

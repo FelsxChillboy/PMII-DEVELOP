@@ -10,7 +10,8 @@ export async function GET(request: Request) {
     const parsed = FinancialReportQuerySchema.safeParse(params)
 
     if (!parsed.success) {
-      return error("Invalid query parameters")
+      const messages = parsed.error.issues.map((i) => i.message).join("; ")
+      return error(messages)
     }
 
     const where: Prisma.FinancialReportWhereInput = {}
@@ -18,8 +19,16 @@ export async function GET(request: Request) {
     if (parsed.data.category) where.category = parsed.data.category
     if (parsed.data.startDate || parsed.data.endDate) {
       where.date = {}
-      if (parsed.data.startDate) where.date.gte = new Date(parsed.data.startDate)
-      if (parsed.data.endDate) where.date.lte = new Date(parsed.data.endDate)
+      if (parsed.data.startDate) {
+        const d = new Date(parsed.data.startDate)
+        if (isNaN(d.getTime())) return error("startDate: invalid date")
+        where.date.gte = d
+      }
+      if (parsed.data.endDate) {
+        const d = new Date(parsed.data.endDate)
+        if (isNaN(d.getTime())) return error("endDate: invalid date")
+        where.date.lte = d
+      }
     }
 
     const reports = await prisma.financialReport.findMany({
@@ -39,7 +48,8 @@ export async function GET(request: Request) {
     return success(data, 200, {
       "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
     })
-  } catch {
+  } catch (err) {
+    console.error("Financial reports fetch failed:", err)
     return serverError("Failed to fetch financial reports")
   }
 }

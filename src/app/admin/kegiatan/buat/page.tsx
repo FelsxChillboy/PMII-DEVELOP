@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/server/auth"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import Link from "next/link"
@@ -13,8 +14,8 @@ export default async function BuatKegiatanPage() {
 
   async function create(formData: FormData) {
     "use server"
-    const session = await auth()
-    if (!session?.user) return
+    const { session, error: authErr } = await requireAdmin()
+    if (authErr || !session) return
 
     const title = formData.get("title") as string
     const slug = formData.get("slug") as string
@@ -25,9 +26,14 @@ export default async function BuatKegiatanPage() {
 
     if (!title || !slug || !description || !date || !location) return
 
-    await prisma.event.create({
-      data: { title, slug, description, location, date: new Date(date), capacity },
-    })
+    try {
+      await prisma.event.create({
+        data: { title, slug, description, location, date: new Date(date), capacity },
+      })
+    } catch (err) {
+      console.error("Create event failed:", err)
+      return
+    }
 
     revalidatePath("/admin/kegiatan")
     redirect("/admin/kegiatan")

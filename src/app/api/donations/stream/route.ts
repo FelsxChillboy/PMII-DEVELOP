@@ -9,8 +9,11 @@ export async function GET(request: Request) {
       donationBroadcaster.addClient(controller)
       request.signal.addEventListener("abort", () => {
         donationBroadcaster.removeClient(controller)
-        controller.close()
+        try { controller.close() } catch {}
       })
+    },
+    cancel() {
+      console.log("SSE stream cancelled by client")
     },
   })
 

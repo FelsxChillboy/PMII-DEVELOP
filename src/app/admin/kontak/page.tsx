@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/server/auth"
 import { Mail, CheckCircle2, XCircle, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { revalidatePath } from "next/cache"
 import Link from "next/link"
@@ -6,32 +7,49 @@ import Link from "next/link"
 const PER_PAGE = 20
 
 async function getMessages(page: number) {
-  const [messages, total] = await Promise.all([
-    prisma.contact.findMany({
-      orderBy: { createdAt: "desc" },
-      take: PER_PAGE,
-      skip: (page - 1) * PER_PAGE,
-    }),
-    prisma.contact.count(),
-  ])
-  return { messages, total }
+  try {
+    const [messages, total] = await Promise.all([
+      prisma.contact.findMany({
+        orderBy: { createdAt: "desc" },
+        take: PER_PAGE,
+        skip: (page - 1) * PER_PAGE,
+      }),
+      prisma.contact.count(),
+    ])
+    return { messages, total }
+  } catch (err) {
+    console.error("Get messages failed:", err)
+    return { messages: [], total: 0 }
+  }
 }
 
 async function toggleRead(id: string) {
   "use server"
-  const msg = await prisma.contact.findUnique({ where: { id } })
-  if (!msg) return
-  await prisma.contact.update({
-    where: { id },
-    data: { read: !msg.read },
-  })
-  revalidatePath("/admin/kontak")
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
+  try {
+    const msg = await prisma.contact.findUnique({ where: { id } })
+    if (!msg) return
+    await prisma.contact.update({
+      where: { id },
+      data: { read: !msg.read },
+    })
+    revalidatePath("/admin/kontak")
+  } catch (err) {
+    console.error("Toggle read failed:", err)
+  }
 }
 
 async function deleteMessage(id: string) {
   "use server"
-  await prisma.contact.delete({ where: { id } })
-  revalidatePath("/admin/kontak")
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
+  try {
+    await prisma.contact.delete({ where: { id } })
+    revalidatePath("/admin/kontak")
+  } catch (err) {
+    console.error("Delete message failed:", err)
+  }
 }
 
 export default async function AdminKontakPage(props: { searchParams?: Promise<{ page?: string }> }) {

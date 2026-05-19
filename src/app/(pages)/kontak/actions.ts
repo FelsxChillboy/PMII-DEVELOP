@@ -26,9 +26,14 @@ export async function submitContact(_prevState: State, formData: FormData) {
     return { error: firstError }
   }
 
-  await prisma.contact.create({
-    data: parsed.data,
-  })
+  try {
+    await prisma.contact.create({
+      data: parsed.data,
+    })
+  } catch (err) {
+    console.error("Submit contact failed:", err)
+    return { error: "Gagal mengirim pesan. Silakan coba lagi." }
+  }
 
   return { success: true }
 }

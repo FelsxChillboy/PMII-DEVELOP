@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const DonationSchema = z.object({
-  amount: z.number().int().min(1000, "Minimum donasi Rp 1.000"),
+  amount: z.number().int().min(1000, "Minimum donasi Rp 1.000").max(100_000_000, "Maksimum donasi Rp 100.000.000"),
   message: z.string().max(500).optional(),
   type: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
   donorName: z.string().max(100).optional(),
@@ -16,9 +16,11 @@ export const ContactSchema = z.object({
   message: z.string().min(1, "Pesan wajib diisi").max(2000),
 })
 
+const isoDate = z.string().refine((v) => !isNaN(Date.parse(v)), "Format tanggal tidak valid (YYYY-MM-DD)")
+
 export const FinancialReportQuerySchema = z.object({
   type: z.enum(["INCOME", "EXPENSE"]).optional(),
   category: z.string().max(100).optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  startDate: isoDate.optional(),
+  endDate: isoDate.optional(),
 })

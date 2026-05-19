@@ -1,4 +1,7 @@
-const REQUIRED: string[] = []
+const REQUIRED: string[] = [
+  "DATABASE_URL",
+  "AUTH_SECRET",
+]
 
 const MISSING = REQUIRED.filter((key) => !process.env[key])
 
@@ -11,6 +14,8 @@ if (MISSING.length > 0) {
 export const env = {
   DATABASE_URL: process.env.DATABASE_URL || "",
   AUTH_SECRET: process.env.AUTH_SECRET || "",
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "",
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL || "",
   AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID || "",
   AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET || "",
   AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || "",

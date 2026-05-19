@@ -2,12 +2,19 @@ import { prisma } from "@/lib/prisma"
 
 type StreamController = ReadableStreamDefaultController
 
+const MAX_CLIENTS = 50
+
 class DonationBroadcaster {
   private controllers = new Set<StreamController>()
   private interval: ReturnType<typeof setInterval> | null = null
   private encoder = new TextEncoder()
 
   addClient(controller: StreamController) {
+    if (this.controllers.size >= MAX_CLIENTS) {
+      console.warn(`SSE: max clients (${MAX_CLIENTS}) reached, rejecting`)
+      try { controller.close() } catch {}
+      return
+    }
     this.controllers.add(controller)
     this.start()
   }
@@ -41,16 +48,21 @@ class DonationBroadcaster {
       for (const ctrl of this.controllers) {
         try {
           ctrl.enqueue(message)
-        } catch {
+        } catch (err) {
+          console.error("SSE enqueue failed:", err)
+          try { ctrl.close() } catch {}
           this.controllers.delete(ctrl)
         }
       }
-    } catch {
+    } catch (err) {
+      console.error("SSE broadcast fetch failed:", err)
       const errorMsg = this.encoder.encode(`data: {"error":"fetch_failed"}\n\n`)
       for (const ctrl of this.controllers) {
         try {
           ctrl.enqueue(errorMsg)
-        } catch {
+        } catch (err2) {
+          console.error("SSE error broadcast enqueue failed:", err2)
+          try { ctrl.close() } catch {}
           this.controllers.delete(ctrl)
         }
       }

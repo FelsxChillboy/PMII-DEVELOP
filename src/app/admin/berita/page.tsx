@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/server/auth"
 import Link from "next/link"
 import { revalidatePath } from "next/cache"
 import { Plus, ExternalLink, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
@@ -25,12 +26,16 @@ async function getNews(page: number) {
 
 async function deleteAction(formData: FormData) {
   "use server"
-  const session = await auth()
-  if (!session?.user) return
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
   const id = formData.get("id") as string
   if (!id) return
-  await prisma.news.delete({ where: { id } })
-  revalidatePath("/admin/berita")
+  try {
+    await prisma.news.delete({ where: { id } })
+    revalidatePath("/admin/berita")
+  } catch (err) {
+    console.error("Delete news failed:", err)
+  }
 }
 
 export default async function AdminBerita(props: { searchParams?: Promise<{ page?: string }> }) {

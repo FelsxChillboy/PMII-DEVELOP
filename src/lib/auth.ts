@@ -9,10 +9,20 @@ import { env } from "@/lib/env"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  secret: env.AUTH_SECRET || env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   trustHost: true,
   debug: process.env.NODE_ENV === "development",
+  cookies: {
+    sessionToken: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -61,7 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!
+        session.user.id = (token.sub || token.id) as string
         session.user.role = (token.role as string) || "USER"
       }
       return session
@@ -70,6 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account && user) {
         return {
           ...token,
+          sub: user.id,
           id: user.id,
           role: (user as { role?: string }).role || "USER",
         }

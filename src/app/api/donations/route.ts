@@ -36,7 +36,8 @@ export async function GET(request: Request) {
     }, 200, {
       "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
     })
-  } catch {
+  } catch (err) {
+    console.error("Donations fetch failed:", err)
     return serverError("Failed to fetch donations")
   }
 }
@@ -68,7 +69,8 @@ export async function POST(request: Request) {
     })
 
     return success(donation, 201)
-  } catch {
+  } catch (err) {
+    console.error("Donation create failed:", err)
     return serverError("Failed to create donation")
   }
 }

@@ -1,20 +1,21 @@
 import { auth } from "@/lib/auth"
+import { unauthorized, error } from "@/lib/api-response"
 
 export async function requireAdmin() {
   const session = await auth()
   if (!session?.user) {
-    throw new Error("Unauthorized")
+    return { session: null, error: unauthorized("Unauthorized") }
   }
   if ((session.user as { role?: string }).role !== "ADMIN") {
-    throw new Error("Forbidden")
+    return { session: null, error: error("Forbidden", 403) }
   }
-  return session
+  return { session, error: null }
 }
 
 export async function requireUser() {
   const session = await auth()
   if (!session?.user?.id) {
-    throw new Error("Unauthorized")
+    return { session: null, error: unauthorized("Unauthorized") }
   }
-  return session
+  return { session, error: null }
 }
