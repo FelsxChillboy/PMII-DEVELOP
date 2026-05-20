@@ -4,8 +4,11 @@ export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export async function GET(request: Request) {
+  let controllerRef: ReadableStreamDefaultController | null = null
+
   const stream = new ReadableStream({
     start(controller) {
+      controllerRef = controller
       donationBroadcaster.addClient(controller)
       request.signal.addEventListener("abort", () => {
         donationBroadcaster.removeClient(controller)
@@ -13,7 +16,10 @@ export async function GET(request: Request) {
       })
     },
     cancel() {
-      console.log("SSE stream cancelled by client")
+      if (controllerRef) {
+        donationBroadcaster.removeClient(controllerRef)
+        controllerRef = null
+      }
     },
   })
 

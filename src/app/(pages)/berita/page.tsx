@@ -3,14 +3,33 @@ import { prisma } from "@/lib/prisma"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection, { StaggerItem } from "@/components/AnimatedSection"
 import Card3D from "@/components/Card3D"
-import { Calendar, User, ArrowRight } from "lucide-react"
+import { Calendar, User, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
 
-export default async function BeritaPage() {
-  const news = await prisma.news.findMany({
-    where: { published: true },
-    orderBy: { createdAt: "desc" },
-    include: { author: { select: { name: true } } },
-  })
+const PER_PAGE = 9
+
+export const revalidate = 60
+
+interface Props {
+  searchParams?: Promise<{ page?: string }>
+}
+
+export default async function BeritaPage({ searchParams }: Props) {
+  const sp = await searchParams
+  const page = Math.max(1, Number(sp?.page) || 1)
+
+  const [news, total] = await Promise.all([
+    prisma.news.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      include: { author: { select: { name: true } } },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+    }),
+    prisma.news.count({ where: { published: true } }),
+  ])
+
+  const totalPages = Math.ceil(total / PER_PAGE)
 
   const formatDate = (d: Date) =>
     new Intl.DateTimeFormat("id-ID", {
@@ -48,41 +67,86 @@ export default async function BeritaPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {news.map((item) => (
-                <StaggerItem key={item.id}>
-                  <Card3D asLink href={`/berita/${item.slug}`} className="h-full">
-                    <div className="aspect-[16/9] bg-secondary relative overflow-hidden flex items-center justify-center">
-                      <Image
-                        src="/og-image.svg"
-                        alt={item.title}
-                        fill
-                        className="object-cover opacity-40"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                        {item.content.replace(/<[^>]+>/g, "").slice(0, 200)}
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {item.author.name || "Penulis"}
-                        </span>
-                        <span>{formatDate(item.createdAt)}</span>
+            <>
+              {totalPages > 1 && (
+                <div className="mb-6 text-xs text-muted-foreground">
+                  {total} berita &middot; Halaman {page} dari {totalPages}
+                </div>
+              )}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {news.map((item) => (
+                  <StaggerItem key={item.id}>
+                    <Card3D asLink href={`/berita/${item.slug}`} className="h-full">
+                      <div className="aspect-[16/9] bg-secondary relative overflow-hidden flex items-center justify-center">
+                        {item.imageUrl ? (
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                        ) : (
+                          <Image
+                            src="/og-image.svg"
+                            alt={item.title}
+                            fill
+                            className="object-cover opacity-40"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                        )}
                       </div>
-                      <div className="mt-3 flex items-center gap-1 text-primary text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Baca selengkapnya <ArrowRight className="h-3 w-3" />
+                      <div className="p-5">
+                        <h3 className="font-heading font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                          {item.content.replace(/<[^>]+>/g, "").slice(0, 200)}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {item.author.name || "Penulis"}
+                          </span>
+                          <span>{formatDate(item.createdAt)}</span>
+                        </div>
+                        <div className="mt-3 flex items-center gap-1 text-primary text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                          Baca selengkapnya <ArrowRight className="h-3 w-3" />
+                        </div>
                       </div>
-                    </div>
-                  </Card3D>
-                </StaggerItem>
-              ))}
-            </div>
+                    </Card3D>
+                  </StaggerItem>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-12">
+                  <Link
+                    href={`/berita?page=${page - 1}`}
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page <= 1 ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+                    aria-disabled={page <= 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Link>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <Link
+                      key={p}
+                      href={`/berita?page=${p}`}
+                      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-secondary"}`}
+                    >
+                      {p}
+                    </Link>
+                  ))}
+                  <Link
+                    href={`/berita?page=${page + 1}`}
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page >= totalPages ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+                    aria-disabled={page >= totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </div>
       </AnimatedSection>

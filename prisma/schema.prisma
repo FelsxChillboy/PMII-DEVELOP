@@ -28,6 +28,12 @@ enum FinancialReportType {
   EXPENSE
 }
 
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -58,6 +64,9 @@ model Donation {
   user        User?          @relation(fields: [userId], references: [id])
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
 }
 
 model Event {
@@ -70,16 +79,22 @@ model Event {
   capacity      Int
   registrations Registration[]
   createdAt     DateTime       @default(now())
+
+  @@index([date])
 }
 
 model Registration {
-  id        String   @id @default(cuid())
+  id        String             @id @default(cuid())
   userId    String
   eventId   String
-  user      User     @relation(fields: [userId], references: [id])
-  event     Event    @relation(fields: [eventId], references: [id])
-  createdAt DateTime @default(now())
+  status    RegistrationStatus @default(PENDING)
+  user      User               @relation(fields: [userId], references: [id])
+  event     Event              @relation(fields: [eventId], references: [id])
+  createdAt DateTime           @default(now())
   @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model News {
@@ -92,6 +107,8 @@ model News {
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
+
+  @@index([published, createdAt])
 }
 
 model Contact {
@@ -112,6 +129,8 @@ model FinancialReport {
   category  String
   date      DateTime
   createdAt DateTime           @default(now())
+
+  @@index([type, category, date])
 }
 
 model Account {

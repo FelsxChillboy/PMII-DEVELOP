@@ -3,11 +3,15 @@ import { prisma } from "@/lib/prisma"
 type StreamController = ReadableStreamDefaultController
 
 const MAX_CLIENTS = 50
+const POLL_INTERVAL = 10_000
+const HEARTBEAT_INTERVAL = 15_000
 
 class DonationBroadcaster {
   private controllers = new Set<StreamController>()
   private interval: ReturnType<typeof setInterval> | null = null
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null
   private encoder = new TextEncoder()
+  private lastTotal: number | null = null
 
   addClient(controller: StreamController) {
     if (this.controllers.size >= MAX_CLIENTS) {
@@ -27,13 +31,29 @@ class DonationBroadcaster {
   private start() {
     if (this.interval) return
     this.broadcast()
-    this.interval = setInterval(() => this.broadcast(), 5000)
+    this.interval = setInterval(() => this.broadcast(), POLL_INTERVAL)
+    this.heartbeatInterval = setInterval(() => this.heartbeat(), HEARTBEAT_INTERVAL)
   }
 
   private stop() {
     if (this.interval) {
       clearInterval(this.interval)
       this.interval = null
+    }
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval)
+      this.heartbeatInterval = null
+    }
+    this.lastTotal = null
+  }
+
+  private heartbeat() {
+    const msg = this.encoder.encode(": heartbeat\n\n")
+    for (const ctrl of this.controllers) {
+      try { ctrl.enqueue(msg) } catch {
+        try { ctrl.close() } catch {}
+        this.controllers.delete(ctrl)
+      }
     }
   }
 
@@ -43,7 +63,12 @@ class DonationBroadcaster {
         _sum: { amount: true },
         where: { status: "SUCCESS" },
       })
-      const data = JSON.stringify({ total: result._sum.amount || 0 })
+      const total = result._sum.amount || 0
+
+      if (total === this.lastTotal) return
+
+      this.lastTotal = total
+      const data = JSON.stringify({ total })
       const message = this.encoder.encode(`data: ${data}\n\n`)
       for (const ctrl of this.controllers) {
         try {

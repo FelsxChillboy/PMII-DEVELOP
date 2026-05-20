@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import dynamic from "next/dynamic"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
-import ConfettiSuccess from "@/components/ConfettiSuccess"
 import AnimatedCounter from "@/components/AnimatedCounter"
+
+const ConfettiSuccess = dynamic(() => import("@/components/ConfettiSuccess"), { ssr: false })
 import { CheckCircle, Banknote, Wallet, QrCode, HandCoins, Heart } from "lucide-react"
 import { useUIStore } from "@/store/ui"
 import { useDonationStream } from "@/lib/useDonationStream"
@@ -33,7 +35,7 @@ const amountBtnVariants = {
   selected: {
     scale: [1, 1.05, 1],
     borderColor: "rgb(56,189,248)",
-    transition: { type: "spring" as const, stiffness: 300, damping: 15 },
+    transition: { duration: 0.3, ease: "easeOut" as const },
   },
 }
 

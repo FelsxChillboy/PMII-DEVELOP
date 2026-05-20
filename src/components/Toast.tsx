@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle2, AlertCircle, X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -21,14 +21,14 @@ export default function Toast({
   duration = 5000,
 }: ToastProps) {
   const [visible, setVisible] = useState(false)
-  const timerRef = useState<ReturnType<typeof setTimeout> | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearTimer = useCallback(() => {
-    if (timerRef[0]) {
-      clearTimeout(timerRef[0])
-      timerRef[1](null)
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
     }
-  }, [timerRef])
+  }, [])
 
   const handleClose = useCallback(() => {
     setVisible(false)
@@ -36,14 +36,21 @@ export default function Toast({
     setTimeout(onClose, 300)
   }, [onClose, clearTimer])
 
-  if (show && !visible) {
-    setVisible(true)
-    const t = setTimeout(() => {
-      setVisible(false)
-      setTimeout(onClose, 300)
-    }, duration)
-    timerRef[1](t)
-  }
+  useEffect(() => {
+    if (show && !visible) {
+      setVisible(true)
+      timerRef.current = setTimeout(() => {
+        setVisible(false)
+        setTimeout(onClose, 300)
+      }, duration)
+    }
+  }, [show, visible, duration, onClose])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   return (
     <AnimatePresence>

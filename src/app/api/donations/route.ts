@@ -20,6 +20,14 @@ export async function GET(request: Request) {
         orderBy: { createdAt: "desc" },
         take,
         skip,
+        select: {
+          id: true,
+          amount: true,
+          message: true,
+          donorName: true,
+          type: true,
+          createdAt: true,
+        },
       }),
       prisma.donation.aggregate({
         _sum: { amount: true },

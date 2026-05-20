@@ -1,8 +1,19 @@
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection, { StaggerItem } from "@/components/AnimatedSection"
 import Card3D from "@/components/Card3D"
-import { MapPin, Clock, Users, Calendar } from "lucide-react"
+import RegisterEventButton from "@/components/RegisterEventButton"
+import { MapPin, Clock, Users, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
+
+const PER_PAGE = 9
+
+export const revalidate = 60
+
+interface Props {
+  searchParams?: Promise<{ page?: string }>
+}
 
 function getStatus(date: Date, capacity: number, registrations: number) {
   const now = new Date()
@@ -20,11 +31,34 @@ const formatDate = (d: Date) => {
   }).format(d)
 }
 
-export default async function KegiatanPage() {
-  const events = await prisma.event.findMany({
-    orderBy: { date: "desc" },
-    include: { _count: { select: { registrations: true } } },
-  })
+export default async function KegiatanPage({ searchParams }: Props) {
+  const session = await auth()
+  const userId = session?.user?.id
+  const sp = await searchParams
+  const page = Math.max(1, Number(sp?.page) || 1)
+
+  const totalPages = Math.ceil(
+    (await prisma.event.count()) / PER_PAGE
+  )
+
+  const [events, userRegistrations] = await Promise.all([
+    prisma.event.findMany({
+      orderBy: { date: "desc" },
+      include: { _count: { select: { registrations: true } } },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+    }),
+    userId
+      ? prisma.registration.findMany({
+          where: { userId },
+          select: { eventId: true, status: true },
+        }).then((regs) => {
+          const map = new Map<string, { status: string }>()
+          for (const r of regs) map.set(r.eventId, { status: r.status })
+          return map
+        })
+      : Promise.resolve(new Map<string, { status: string }>()),
+  ])
 
   return (
     <div className="divide-y divide-border">
@@ -54,56 +88,104 @@ export default async function KegiatanPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => {
-                const statusInfo = getStatus(event.date, event.capacity, event._count.registrations)
-                const day = event.date.getDate()
-                const month = new Intl.DateTimeFormat("id-ID", { month: "short" }).format(event.date)
+            <>
+              {totalPages > 1 && (
+                <div className="mb-6 text-xs text-muted-foreground">
+                  {total} kegiatan &middot; Halaman {page} dari {totalPages}
+                </div>
+              )}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.map((event) => {
+                  const statusInfo = getStatus(event.date, event.capacity, event._count.registrations)
+                  const day = event.date.getDate()
+                  const month = new Intl.DateTimeFormat("id-ID", { month: "short" }).format(event.date)
+                  const userReg = userRegistrations.get(event.id)
 
-                return (
-                  <StaggerItem key={event.id}>
-                    <Card3D className="p-6 h-full">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="text-center">
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                            {month}
-                          </p>
-                          <p className="font-heading text-2xl font-bold text-foreground">
-                            {day}
-                          </p>
-                        </div>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-md text-xs font-medium ${statusInfo.className}`}
-                        >
-                          {statusInfo.label}
-                        </span>
-                      </div>
-
-                      <h3 className="font-heading font-semibold text-foreground mb-3">
-                        {event.title}
-                      </h3>
-
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 shrink-0" />
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-3.5 w-3.5 shrink-0" />
-                          <span>{formatDate(event.date)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Users className="h-3.5 w-3.5 shrink-0" />
-                          <span>
-                            {event._count.registrations}/{event.capacity} Pendaftar
+                  return (
+                    <StaggerItem key={event.id}>
+                      <Card3D className="p-6 h-full">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="text-center">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                              {month}
+                            </p>
+                            <p className="font-heading text-2xl font-bold text-foreground">
+                              {day}
+                            </p>
+                          </div>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-md text-xs font-medium ${statusInfo.className}`}
+                          >
+                            {statusInfo.label}
                           </span>
                         </div>
-                      </div>
-                    </Card3D>
-                  </StaggerItem>
-                )
-              })}
-            </div>
+
+                        <h3 className="font-heading font-semibold text-foreground mb-3">
+                          {event.title}
+                        </h3>
+
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span>{event.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3.5 w-3.5 shrink-0" />
+                            <span>{formatDate(event.date)}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-3.5 w-3.5 shrink-0" />
+                            <span>
+                              {event._count.registrations}/{event.capacity} Pendaftar
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-border/50">
+                          <RegisterEventButton
+                            eventId={event.id}
+                            eventTitle={event.title}
+                            capacity={event.capacity}
+                            registrations={event._count.registrations}
+                            isLoggedIn={!!userId}
+                            isRegistered={!!userReg}
+                            registrationStatus={userReg?.status || null}
+                          />
+                        </div>
+                      </Card3D>
+                    </StaggerItem>
+                  )
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-12">
+                  <Link
+                    href={`/kegiatan?page=${page - 1}`}
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page <= 1 ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+                    aria-disabled={page <= 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Link>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <Link
+                      key={p}
+                      href={`/kegiatan?page=${p}`}
+                      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-secondary"}`}
+                    >
+                      {p}
+                    </Link>
+                  ))}
+                  <Link
+                    href={`/kegiatan?page=${page + 1}`}
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page >= totalPages ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+                    aria-disabled={page >= totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </div>
       </AnimatedSection>

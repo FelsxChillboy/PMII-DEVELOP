@@ -24,3 +24,23 @@ export const FinancialReportQuerySchema = z.object({
   startDate: isoDate.optional(),
   endDate: isoDate.optional(),
 })
+
+export const FinancialReportSchema = z.object({
+  title: z.string().min(1, "Judul wajib diisi").max(200),
+  type: z.enum(["INCOME", "EXPENSE"]),
+  amount: z.number().int().min(1, "Jumlah harus lebih dari 0"),
+  category: z.string().min(1, "Kategori wajib diisi").max(100),
+  date: isoDate,
+})
+
+export const RegistrationSchema = z.object({
+  eventId: z.string().min(1, "Event ID wajib diisi"),
+})
+
+export const UpdateRegistrationSchema = z.object({
+  status: z.enum(["APPROVED", "REJECTED"]),
+})
+
+export const UpdateUserRoleSchema = z.object({
+  role: z.enum(["USER", "MEMBER", "ADMIN"]),
+})

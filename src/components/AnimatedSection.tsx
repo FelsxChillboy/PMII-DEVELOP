@@ -59,7 +59,6 @@ export default function AnimatedSection({
       animate={isInView ? "visible" : "hidden"}
       transition={{ delay }}
       className={cn(className)}
-      style={{ willChange: "transform, opacity" }}
     >
       {children}
     </MotionTag>

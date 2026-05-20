@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { success, error, serverError } from "@/lib/api-response"
+import { success, error, serverError, parseSearchParams } from "@/lib/api-response"
 import { FinancialReportQuerySchema } from "@/lib/schemas"
 import type { Prisma } from "@prisma/client"
 
@@ -31,21 +31,25 @@ export async function GET(request: Request) {
       }
     }
 
-    const reports = await prisma.financialReport.findMany({
-      where,
-      orderBy: { date: "desc" },
-    })
+    const { searchParams, take, skip } = parseSearchParams(request)
+
+    const [reports, total] = await Promise.all([
+      prisma.financialReport.findMany({
+        where,
+        orderBy: { date: "desc" },
+        take,
+        skip,
+        select: { id: true, title: true, type: true, amount: true, category: true, date: true },
+      }),
+      prisma.financialReport.count({ where }),
+    ])
 
     const data = reports.map((r) => ({
-      id: r.id,
-      title: r.title,
-      type: r.type,
-      amount: r.amount,
-      category: r.category,
+      ...r,
       date: r.date.toISOString().split("T")[0],
     }))
 
-    return success(data, 200, {
+    return success({ reports: data, total, hasMore: skip + take < total }, 200, {
       "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
     })
   } catch (err) {

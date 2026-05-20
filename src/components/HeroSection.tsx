@@ -1,120 +1,18 @@
 "use client"
 
-import { useRef, useMemo } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { Float, Environment } from "@react-three/drei"
-import { EffectComposer, Bloom, ChromaticAberration, Vignette } from "@react-three/postprocessing"
+import { useRef } from "react"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
-import * as THREE from "three"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { ArrowRight, Users, Calendar, Award } from "lucide-react"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import AnimatedCounter from "@/components/AnimatedCounter"
-import Logo3D from "@/components/Logo3D"
 import { duration, easing } from "@/lib/animation"
 
-function seededRandom(seed: number) {
-  const x = Math.sin(seed) * 10000
-  return x - Math.floor(x)
-}
-
-function Particles({ count = 250, mouse }: { count?: number; mouse?: React.MutableRefObject<THREE.Vector2> }) {
-  const meshRef = useRef<THREE.InstancedMesh>(null!)
-  const dummy = useRef(new THREE.Object3D())
-
-  const positions = useMemo(() => {
-    const pos = new Float32Array(count * 3)
-    for (let i = 0; i < count; i++) {
-      const radius = 3 + seededRandom(i * 5) * 8
-      const theta = seededRandom(i * 7) * Math.PI * 2
-      const phi = (seededRandom(i * 11) - 0.5) * Math.PI * 0.4
-      const i3 = i * 3
-      pos[i3] = Math.cos(theta) * Math.cos(phi) * radius
-      pos[i3 + 1] = Math.sin(phi) * radius * 0.6
-      pos[i3 + 2] = Math.sin(theta) * Math.cos(phi) * radius
-    }
-    return pos
-  }, [count])
-
-  useFrame((state) => {
-    if (!meshRef.current) return
-    const t = state.clock.elapsedTime
-    const mx = mouse?.current ? mouse.current.x * 0.3 : 0
-    const my = mouse?.current ? mouse.current.y * 0.3 : 0
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3
-      dummy.current.position.set(
-        positions[i3] + Math.sin(t * 0.12 + i * 0.3) * 0.25 + mx,
-        positions[i3 + 1] + Math.cos(t * 0.1 + i * 0.3) * 0.25 + my,
-        positions[i3 + 2]
-      )
-      dummy.current.rotation.set(t * 0.04 + i, t * 0.06 + i, 0)
-      const scale = 0.3 + Math.sin(t * 0.2 + i) * 0.2
-      dummy.current.scale.setScalar(scale)
-      dummy.current.updateMatrix()
-      meshRef.current.setMatrixAt(i, dummy.current.matrix)
-    }
-    meshRef.current.instanceMatrix.needsUpdate = true
-  })
-
-  return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <icosahedronGeometry args={[0.06, 0]} />
-      <meshStandardMaterial color="#38BDF8" transparent opacity={0.4} wireframe />
-    </instancedMesh>
-  )
-}
-
-function MouseTracker({ mouse }: { mouse: React.MutableRefObject<THREE.Vector2> }) {
-  const { pointer } = useThree()
-  useFrame(() => {
-    mouse.current.lerp(pointer, 0.05)
-  })
-  return null
-}
-
-function HeroCanvas({ mouse }: { mouse: React.MutableRefObject<THREE.Vector2> }) {
-  return (
-    <Canvas
-      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      camera={{ position: [0, 0, 6], fov: 60 }}
-      dpr={[1, 1.5]}
-      className="!absolute inset-0 !pointer-events-none"
-      style={{
-        position: "absolute",
-        inset: 0,
-        pointerEvents: "none",
-      }}
-    >
-      <ambientLight intensity={0.3} />
-      <pointLight position={[5, 5, 5]} intensity={0.5} />
-      <spotLight position={[-5, 5, 5]} angle={0.5} penumbra={0.5} intensity={1.5} color="#38BDF8" />
-      <spotLight position={[5, -5, 5]} angle={0.5} penumbra={0.5} intensity={1} color="#A78BFA" />
-      <Environment preset="night" environmentIntensity={1.2} />
-      <MouseTracker mouse={mouse} />
-      <EffectComposer multisampling={4}>
-        <Bloom
-          luminanceThreshold={0.1}
-          luminanceSmoothing={0.1}
-          intensity={0.6}
-          mipmapBlur
-        />
-        <ChromaticAberration
-          offset={new THREE.Vector2(0.002, 0.002)}
-          opacity={0.3}
-        />
-        <Vignette
-          offset={0.3}
-          darkness={0.6}
-        />
-      </EffectComposer>
-      <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.3}>
-        <Particles count={250} mouse={mouse} />
-      </Float>
-      <Logo3D mouse={mouse} />
-    </Canvas>
-  )
-}
+const HeroCanvas = dynamic(() => import("@/components/HeroCanvas"), {
+  ssr: false,
+  loading: () => null,
+})
 
 const STATS = [
   { icon: Users, value: 50, suffix: "+", label: "Kader Aktif" },
@@ -125,7 +23,7 @@ const STATS = [
 export default function HeroSection() {
   const reducedMotion = useReducedMotion()
   const sectionRef = useRef<HTMLDivElement>(null)
-  const mouse = useRef(new THREE.Vector2())
+  const mouse = useRef({ x: 0, y: 0 })
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,

@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth"
 import { DonationSchema } from "@/lib/schemas"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
+import { revalidatePath } from "next/cache"
 
 export async function createDonation(formData: FormData) {
   const session = await auth()
@@ -32,6 +33,7 @@ export async function createDonation(formData: FormData) {
         userId: session.user.id,
       },
     })
+    revalidatePath("/donasi")
     return { success: true }
   } catch (err) {
     console.error("Create donation failed:", err)
@@ -87,6 +89,7 @@ export async function registerUser(formData: FormData) {
         role: "USER",
       },
     })
+    revalidatePath("/admin/pengguna")
   } catch (err) {
     console.error("Register user failed:", err)
     return { error: "Gagal mendaftarkan pengguna" }

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/server/auth"
 import Link from "next/link"
 import { revalidatePath } from "next/cache"
-import { Plus, ExternalLink, Calendar, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, ExternalLink, Calendar, Trash2, ChevronLeft, ChevronRight, Users } from "lucide-react"
 
 const PER_PAGE = 20
 
@@ -103,6 +103,13 @@ export default async function AdminKegiatan(props: { searchParams?: Promise<{ pa
                 </div>
               </div>
               <div className="shrink-0 flex items-center gap-2">
+                <Link
+                  href={`/admin/kegiatan/${event.id}/registrations`}
+                  className="inline-flex items-center gap-1 text-primary hover:underline text-xs"
+                >
+                  <Users className="h-3 w-3" />
+                  Pendaftar
+                </Link>
                 <Link
                   href={`/admin/kegiatan/${event.id}`}
                   className="inline-flex items-center gap-1 text-primary hover:underline text-xs"

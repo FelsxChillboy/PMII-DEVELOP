@@ -28,6 +28,7 @@ export default async function EditBeritaPage({ params }: Props) {
     const title = formData.get("title") as string
     const slug = formData.get("slug") as string
     const content = formData.get("content") as string
+    const imageUrl = formData.get("imageUrl") as string
     const published = formData.get("published") === "on"
     const newsId = formData.get("id") as string
 
@@ -36,7 +37,7 @@ export default async function EditBeritaPage({ params }: Props) {
     try {
       await prisma.news.update({
         where: { id: newsId },
-        data: { title, slug, content, published },
+        data: { title, slug, content, imageUrl: imageUrl || null, published },
       })
     } catch (err) {
       console.error("Update news failed:", err)
@@ -96,6 +97,28 @@ export default async function EditBeritaPage({ params }: Props) {
               defaultValue={news.slug}
               className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
+          </div>
+
+          <div>
+            <label htmlFor="imageUrl" className="block text-sm font-medium mb-1.5">
+              Gambar (URL)
+            </label>
+            <input
+              id="imageUrl"
+              name="imageUrl"
+              type="text"
+              defaultValue={news.imageUrl || ""}
+              className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              placeholder="/uploads/news/12345-abc.jpg atau https://..."
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Upload gambar lewat API atau masukkan URL gambar eksternal
+            </p>
+            {news.imageUrl && (
+              <div className="mt-2">
+                <img src={news.imageUrl} alt="" className="h-20 w-auto rounded-lg object-cover border border-border" />
+              </div>
+            )}
           </div>
 
           <div>

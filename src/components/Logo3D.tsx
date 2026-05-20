@@ -5,35 +5,35 @@ import { useLoader, useFrame } from "@react-three/fiber"
 import { SVGLoader, SVGResultPaths } from "three/examples/jsm/loaders/SVGLoader.js"
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js"
 import { MeshTransmissionMaterial, useCursor } from "@react-three/drei"
-import * as THREE from "three"
+import { Color, Vector2, Vector3, Mesh, BufferGeometry, ExtrudeGeometry, Float32BufferAttribute } from "three"
 
-function getColor(path: SVGResultPaths): THREE.Color {
+function getColor(path: SVGResultPaths): Color {
   if (path.color) return path.color
   const fill = path.userData?.style?.fill
   if (fill && fill !== "none") {
     try {
-      return new THREE.Color(fill)
+      return new Color(fill)
     } catch {
-      return new THREE.Color("#38BDF8")
+      return new Color("#38BDF8")
     }
   }
-  return new THREE.Color("#38BDF8")
+  return new Color("#38BDF8")
 }
 
-function Logo3D({ mouse }: { mouse?: React.MutableRefObject<THREE.Vector2> }) {
-  const meshRef = useRef<THREE.Mesh>(null!)
+function Logo3D({ mouse }: { mouse?: React.MutableRefObject<Vector2> }) {
+  const meshRef = useRef<Mesh>(null!)
   const [hovered, setHovered] = useState(false)
-  const targetPos = useRef(new THREE.Vector3(0, 0, -3))
+  const targetPos = useRef(new Vector3(0, 0, -3))
   useCursor(hovered)
 
-  const svgData = useLoader(SVGLoader, "/logo-rayon.svg")
+  const svgData = useLoader(SVGLoader, "/Logo-rayon.svg")
 
   const { geometry, scale } = useMemo(() => {
     let minX = Infinity
     let maxX = -Infinity
     let minY = Infinity
     let maxY = -Infinity
-    const geoms: THREE.BufferGeometry[] = []
+    const geoms: BufferGeometry[] = []
 
     svgData.paths.forEach((path) => {
       const fillColor = getColor(path)
@@ -48,7 +48,7 @@ function Logo3D({ mouse }: { mouse?: React.MutableRefObject<THREE.Vector2> }) {
           if (p.y > maxY) maxY = p.y
         })
 
-        const geom = new THREE.ExtrudeGeometry(shape, {
+        const geom = new ExtrudeGeometry(shape, {
           depth: 0.15,
           bevelEnabled: true,
           bevelThickness: 0.03,
@@ -69,7 +69,7 @@ function Logo3D({ mouse }: { mouse?: React.MutableRefObject<THREE.Vector2> }) {
           colors[i * 3 + 1] = fillColor.g
           colors[i * 3 + 2] = fillColor.b
         }
-        geom.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3))
+        geom.setAttribute("color", new Float32BufferAttribute(colors, 3))
 
         geoms.push(geom)
       })
@@ -77,7 +77,7 @@ function Logo3D({ mouse }: { mouse?: React.MutableRefObject<THREE.Vector2> }) {
 
     if (geoms.length === 0) return { geometry: null, scale: 1 }
 
-    let merged: THREE.BufferGeometry
+    let merged: BufferGeometry
     if (geoms.length === 1) {
       merged = geoms[0]
     } else {

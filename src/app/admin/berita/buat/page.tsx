@@ -20,6 +20,7 @@ export default async function BuatBeritaPage() {
     const title = formData.get("title") as string
     const slug = formData.get("slug") as string
     const content = formData.get("content") as string
+    const imageUrl = formData.get("imageUrl") as string
     const published = formData.get("published") === "on"
 
     if (!title || !slug || !content) return
@@ -30,6 +31,7 @@ export default async function BuatBeritaPage() {
           title,
           slug,
           content,
+          imageUrl: imageUrl || null,
           published,
           authorId: session.user.id!,
         },
@@ -93,6 +95,22 @@ export default async function BuatBeritaPage() {
             />
             <p className="text-xs text-muted-foreground mt-1">
               Gunakan huruf kecil, tanpa spasi, tanda hubung sebagai pemisah
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="imageUrl" className="block text-sm font-medium mb-1.5">
+              Gambar (URL)
+            </label>
+            <input
+              id="imageUrl"
+              name="imageUrl"
+              type="text"
+              className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              placeholder="/uploads/news/12345-abc.jpg atau https://..."
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Upload gambar lewat API atau masukkan URL gambar eksternal
             </p>
           </div>
 

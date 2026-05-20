@@ -117,29 +117,6 @@ body {
   }
 }
 
-/* === View Transitions API === */
-@view-transition {
-  navigation: auto;
-}
-
-::view-transition-old(root) {
-  animation: 0.35s ease-out both vt-exit;
-}
-
-::view-transition-new(root) {
-  animation: 0.35s ease-out both vt-enter;
-}
-
-@keyframes vt-exit {
-  from { opacity: 1; transform: scale(1); filter: blur(0); }
-  to { opacity: 0; transform: scale(0.98); filter: blur(4px); }
-}
-
-@keyframes vt-enter {
-  from { opacity: 0; transform: scale(1.02); filter: blur(4px); }
-  to { opacity: 1; transform: scale(1); filter: blur(0); }
-}
-
 /* === Reduced Motion === */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

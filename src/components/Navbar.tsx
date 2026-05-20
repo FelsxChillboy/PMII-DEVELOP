@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion"
 import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Menu, X, LayoutDashboard, LogOut } from "lucide-react"
+import SearchBar from "@/components/SearchBar"
 
 const NAV_LINKS = [
   { label: "Beranda", path: "/" },
@@ -100,7 +101,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
+          <SearchBar />
           <Link
             href="/kontak"
             className="hidden sm:inline-flex h-9 px-4 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"

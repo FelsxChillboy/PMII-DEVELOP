@@ -9,6 +9,8 @@ import {
   Mail,
   LogOut,
   ChevronRight,
+  Wallet,
+  Users,
 } from "lucide-react"
 
 const SIDEBAR = [
@@ -16,7 +18,9 @@ const SIDEBAR = [
   { label: "Berita", href: "/admin/berita", icon: Newspaper },
   { label: "Donasi", href: "/admin/donasi", icon: DollarSign },
   { label: "Kegiatan", href: "/admin/kegiatan", icon: Calendar },
+  { label: "Keuangan", href: "/admin/keuangan", icon: Wallet },
   { label: "Kontak", href: "/admin/kontak", icon: Mail },
+  { label: "Pengguna", href: "/admin/pengguna", icon: Users },
 ]
 
 export default async function AdminLayout({

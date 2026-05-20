@@ -4,7 +4,7 @@ import { useRef, useState, useCallback } from "react"
 import { useFrame } from "@react-three/fiber"
 import { MeshDistortMaterial, useCursor } from "@react-three/drei"
 import { RigidBody, type RapierRigidBody } from "@react-three/rapier"
-import * as THREE from "three"
+import { Mesh } from "three"
 import { useScrollProgress } from "@/hooks/useScrollProgress"
 
 interface PhysicsOrbProps {
@@ -34,11 +34,11 @@ export default function PhysicsOrb({
   geometry = "icosahedron",
 }: PhysicsOrbProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null)
-  const meshRef = useRef<THREE.Mesh>(null)
-  const glowRef = useRef<THREE.Mesh>(null)
+  const meshRef = useRef<Mesh>(null)
+  const glowRef = useRef<Mesh>(null)
   const [hovered, setHovered] = useState(false)
   const [clicked, setClicked] = useState(false)
-  const scrollProgress = useScrollProgress()
+  const scrollProgressRef = useScrollProgress()
 
   useCursor(hovered)
 
@@ -64,9 +64,10 @@ export default function PhysicsOrb({
     if (!meshRef.current) return
 
     const t = state.clock.elapsedTime
+    const sp = scrollProgressRef.current
 
-    meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.1 + scrollProgress * Math.PI * 2
-    meshRef.current.rotation.y = Math.sin(t * 0.5) * 0.2 + scrollProgress * Math.PI
+    meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.1 + sp * Math.PI * 2
+    meshRef.current.rotation.y = Math.sin(t * 0.5) * 0.2 + sp * Math.PI
 
     if (glowRef.current) {
       glowRef.current.scale.setScalar(hovered ? 1.6 : 1 + Math.sin(t * 0.5) * 0.1)

@@ -38,12 +38,13 @@ function Effects() {
 
 const SIZES = [0.75, 0.85, 0.7, 0.9, 0.8]
 
-function PhysicsScene() {
+function PhysicsScene({ inView }: { inView: boolean }) {
   return (
     <Canvas
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       camera={{ position: [0, 0, 10], fov: 50 }}
       dpr={[1, 1.5]}
+      frameloop={inView ? "always" : "demand"}
       style={{
         width: "100%",
         height: "100%",
@@ -78,10 +79,23 @@ function PhysicsScene() {
 
 export default function Interactive3DSection() {
   const [mounted, setMounted] = useState(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState(false)
   useEffect(() => setMounted(true), [])
 
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "200px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <section className="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-background via-background to-background/50">
+    <section ref={sectionRef} className="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-background via-background to-background/50">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <AnimatedSection className="text-center mb-12">
           <p className="text-xs tracking-[0.2em] uppercase text-primary font-medium mb-3">
@@ -91,7 +105,7 @@ export default function Interactive3DSection() {
             Sentuh &amp; <span className="text-primary">Interaksikan</span>
           </h2>
           <p className="text-base text-muted-foreground max-w-xl mx-auto mt-4">
-            Klik setiap objek 3D untuk melihat reaksi fisik yang realistis.
+            Klik setiap objk 3D untuk melihat reaksi fisik yang realistis.
           </p>
         </AnimatedSection>
       </div>
@@ -101,7 +115,7 @@ export default function Interactive3DSection() {
         style={{ height: "500px" }}
       >
         <div className="relative w-full h-full rounded-2xl border border-border bg-card/50 overflow-hidden">
-          {mounted && <PhysicsScene />}
+          {mounted && <PhysicsScene inView={inView} />}
         </div>
       </div>
     </section>
