@@ -1,45 +1,11 @@
-import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
-import { requireAdmin } from "@/lib/server/auth"
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import Link from "next/link"
+import { createNews } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
-async function create(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-
-  const title = formData.get("title") as string
-  const slug = formData.get("slug") as string
-  const content = formData.get("content") as string
-  const imageUrl = formData.get("imageUrl") as string
-  const published = formData.get("published") === "on"
-
-  if (!title || !slug || !content) return
-
-  try {
-    await prisma.news.create({
-      data: {
-        title,
-        slug,
-        content,
-        imageUrl: imageUrl || null,
-        published,
-        authorId: session.user.id!,
-      },
-    })
-  } catch (err) {
-    console.error("Create news failed:", err)
-    return
-  }
-
-  revalidatePath("/admin/berita")
-  redirect("/admin/berita")
-}
-
-export default async function BuatBeritaPage() {
+export default async function BuatBeritaPage(props: { searchParams?: Promise<{ error?: string }> }) {
+  const sp = await props.searchParams
   const session = await auth()
   if (!session?.user) redirect("/login")
   const isAdmin = (session.user as { role?: string }).role === "ADMIN"
@@ -65,8 +31,14 @@ export default async function BuatBeritaPage() {
         </div>
       </div>
 
+      {sp?.error && (
+        <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+          {sp.error}
+        </div>
+      )}
+
       <div className="max-w-2xl">
-        <form action={create} className="space-y-6">
+        <form action={createNews} className="space-y-6">
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-1.5">
               Judul

@@ -1,43 +1,13 @@
 import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
-import { requireAdmin } from "@/lib/server/auth"
 import { notFound, redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import Link from "next/link"
+import { updateNews } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
 interface Props {
   params: Promise<{ id: string }>
-}
-
-async function update(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-
-  const title = formData.get("title") as string
-  const slug = formData.get("slug") as string
-  const content = formData.get("content") as string
-  const imageUrl = formData.get("imageUrl") as string
-  const published = formData.get("published") === "on"
-  const newsId = formData.get("id") as string
-
-  if (!title || !slug || !content) return
-
-  try {
-    await prisma.news.update({
-      where: { id: newsId },
-      data: { title, slug, content, imageUrl: imageUrl || null, published },
-    })
-  } catch (err) {
-    console.error("Update news failed:", err)
-    return
-  }
-
-  revalidatePath("/admin/berita")
-  revalidatePath(`/berita/${slug}`)
-  redirect("/admin/berita")
 }
 
 export default async function EditBeritaPage({ params }: Props) {
@@ -69,7 +39,7 @@ export default async function EditBeritaPage({ params }: Props) {
       </div>
 
       <div className="max-w-2xl">
-        <form action={update} className="space-y-6">
+        <form action={updateNews} className="space-y-6">
           <input type="hidden" name="id" value={news.id} />
 
           <div>

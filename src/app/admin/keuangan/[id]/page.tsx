@@ -1,45 +1,14 @@
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/server/auth"
-import { notFound, redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
+import { notFound } from "next/navigation"
 import Link from "next/link"
+import { updateFinancialReport } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
-async function update(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-
-  const id = formData.get("id") as string
-  const title = formData.get("title") as string
-  const type = formData.get("type") as string
-  const amount = parseInt(formData.get("amount") as string) || 0
-  const category = formData.get("category") as string
-  const date = formData.get("date") as string
-
-  if (!title || !type || !amount || !category || !date) return
-
-  try {
-    await prisma.financialReport.update({
-      where: { id },
-      data: { title, type: type as "INCOME" | "EXPENSE", amount, category, date: new Date(date) },
-    })
-  } catch (err) {
-    console.error("Update financial report failed:", err)
-    return
-  }
-
-  revalidatePath("/admin/keuangan")
-  redirect("/admin/keuangan")
-}
-
 export default async function EditLaporanPage({ params }: Props) {
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) redirect("/admin/keuangan")
 
   const { id } = await params
   const report = await prisma.financialReport.findUnique({ where: { id } })
@@ -66,7 +35,7 @@ export default async function EditLaporanPage({ params }: Props) {
       </div>
 
       <div className="max-w-2xl">
-        <form action={update} className="space-y-6">
+        <form action={updateFinancialReport} className="space-y-6">
           <input type="hidden" name="id" value={report.id} />
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-1.5">

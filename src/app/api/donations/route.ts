@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { success, error, unauthorized, serverError, parseSearchParams } from "@/lib/api-response"
 import { DonationSchema } from "@/lib/schemas"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
+import { createSnapTransaction } from "@/lib/payment"
 import type { DonationStatus } from "@prisma/client"
 
 export async function GET(request: Request) {
@@ -56,12 +58,20 @@ export async function POST(request: Request) {
     return unauthorized()
   }
 
+  const ip = getClientIp(request)
+  const limitCheck = checkRateLimit(`donation:${session.user.id || ip}`, 5, 60_000)
+  if (!limitCheck.allowed) {
+    return error(`Terlalu banyak permintaan. Coba lagi dalam ${limitCheck.retryAfter} detik.`, 429)
+  }
+
   try {
     const body = await request.json()
     const parsed = DonationSchema.safeParse(body)
     if (!parsed.success) {
       return error(parsed.error.issues[0].message)
     }
+
+    const orderId = `DON-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
     const donation = await prisma.donation.create({
       data: {
@@ -73,12 +83,35 @@ export async function POST(request: Request) {
         donorName: parsed.data.donorName || null,
         donorEmail: parsed.data.donorEmail || null,
         donorPhone: parsed.data.donorPhone || null,
+        transactionId: orderId,
       },
     })
 
-    return success(donation, 201)
+    let paymentUrl: string | null = null
+    try {
+      const transaction = await createSnapTransaction({
+        orderId,
+        amount: parsed.data.amount,
+        donorName: parsed.data.donorName || undefined,
+        donorEmail: parsed.data.donorEmail || undefined,
+        donorPhone: parsed.data.donorPhone || undefined,
+      })
+      paymentUrl = transaction.paymentUrl
+      await prisma.donation.update({
+        where: { id: donation.id },
+        data: {
+          transactionId: transaction.transactionId,
+          paymentUrl: transaction.paymentUrl,
+          status: transaction.status,
+        },
+      })
+    } catch (paymentErr) {
+      console.error("Payment transaction failed:", paymentErr)
+    }
+
+    return success({ donation: { ...donation, paymentUrl }, paymentUrl }, 201)
   } catch (err) {
     console.error("Donation create failed:", err)
-    return serverError("Failed to create donation")
+    return serverError("Gagal membuat donasi")
   }
 }

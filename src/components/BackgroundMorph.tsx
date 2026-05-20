@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { createTimeline, morphTo } from "animejs"
+import { createTimeline, morphTo, cubicBezier } from "animejs"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 const BLOB_PATHS = [
@@ -57,17 +57,17 @@ export default function BackgroundMorph() {
     const tl = createTimeline({ loop: true })
     tlRef.current = tl
 
-    tl.add(b1, { d: morphTo(r2, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
-    tl.add(b1, { d: morphTo(r3, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
-    tl.add(b1, { d: morphTo(r1, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
+    tl.add(b1, { d: morphTo(r2, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
+    tl.add(b1, { d: morphTo(r3, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
+    tl.add(b1, { d: morphTo(r1, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
 
-    tl.add(b2, { d: morphTo(r3, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" }, 0)
-    tl.add(b2, { d: morphTo(r1, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
-    tl.add(b2, { d: morphTo(r2, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
+    tl.add(b2, { d: morphTo(r3, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) }, 0)
+    tl.add(b2, { d: morphTo(r1, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
+    tl.add(b2, { d: morphTo(r2, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
 
-    tl.add(b3, { d: morphTo(r1, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" }, 0)
-    tl.add(b3, { d: morphTo(r2, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
-    tl.add(b3, { d: morphTo(r3, morphPrecision), duration: morphDuration, ease: "cubicBezier(0.16, 1, 0.3, 1)" })
+    tl.add(b3, { d: morphTo(r1, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) }, 0)
+    tl.add(b3, { d: morphTo(r2, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
+    tl.add(b3, { d: morphTo(r3, morphPrecision), duration: morphDuration, ease: cubicBezier(0.16, 1, 0.3, 1) })
 
     return () => {
       tlRef.current = null

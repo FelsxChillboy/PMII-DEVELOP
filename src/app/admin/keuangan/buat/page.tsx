@@ -1,39 +1,10 @@
-import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/server/auth"
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import Link from "next/link"
+import { createFinancialReport } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
-async function create(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-
-  const title = formData.get("title") as string
-  const type = formData.get("type") as string
-  const amount = parseInt(formData.get("amount") as string) || 0
-  const category = formData.get("category") as string
-  const date = formData.get("date") as string
-
-  if (!title || !type || !amount || !category || !date) return
-
-  try {
-    await prisma.financialReport.create({
-      data: { title, type: type as "INCOME" | "EXPENSE", amount, category, date: new Date(date) },
-    })
-  } catch (err) {
-    console.error("Create financial report failed:", err)
-    return
-  }
-
-  revalidatePath("/admin/keuangan")
-  redirect("/admin/keuangan")
-}
-
-export default async function BuatLaporanPage() {
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) redirect("/admin/keuangan")
+export default async function BuatLaporanPage(props: { searchParams?: Promise<{ error?: string }> }) {
+  const sp = await props.searchParams
 
   return (
     <div>
@@ -53,8 +24,14 @@ export default async function BuatLaporanPage() {
         </div>
       </div>
 
+      {sp?.error && (
+        <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+          {sp.error}
+        </div>
+      )}
+
       <div className="max-w-2xl">
-        <form action={create} className="space-y-6">
+        <form action={createFinancialReport} className="space-y-6">
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-1.5">
               Judul Laporan

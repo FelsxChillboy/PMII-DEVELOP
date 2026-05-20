@@ -1,7 +1,9 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { headers } from "next/headers"
 import { z } from "zod"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 const ContactSchema = z.object({
   name: z.string().min(2, "Nama harus diisi minimal 2 karakter"),
@@ -13,6 +15,12 @@ const ContactSchema = z.object({
 type State = { error?: string; success?: boolean } | null
 
 export async function submitContact(_prevState: State, formData: FormData) {
+  const headersList = await headers()
+  const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown"
+  const limitCheck = checkRateLimit(`contact:${ip}`, 3, 60_000)
+  if (!limitCheck.allowed) {
+    return { error: `Terlalu banyak permintaan. Coba lagi dalam ${limitCheck.retryAfter} detik.` }
+  }
   const raw = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,

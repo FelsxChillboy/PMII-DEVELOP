@@ -15,14 +15,14 @@ export interface Event {
   title: string
   description: string
   type: string
-  status: "draft" | "terbuka" | "penuh" | "berlangsung" | "selesai" | "dibatalkan"
-  date_start: string
-  date_end: string
+  status: "DRAFT" | "TERBUKA" | "PENUH" | "BERLANGSUNG" | "SELESAI" | "DIBATALKAN"
+  date: string
+  dateEnd?: string
   location: string
-  time: string
-  capacity_max: number
-  capacity_registered: number
-  image: string
+  time?: string
+  capacity: number
+  image?: string
+  _count?: { registrations: number }
 }
 
 export interface FinancialReport {
@@ -31,7 +31,7 @@ export interface FinancialReport {
   type: "INCOME" | "EXPENSE"
   amount: number
   category: string
-  description: string
+  description?: string
   date: string
 }
 
@@ -39,3 +39,5 @@ export interface NavLink {
   label: string
   path: string
 }
+
+export type ActionResult = { success: true } | { error: string }

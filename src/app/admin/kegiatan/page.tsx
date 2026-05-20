@@ -1,8 +1,7 @@
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/server/auth"
 import Link from "next/link"
-import { revalidatePath } from "next/cache"
+import { deleteEvent } from "@/lib/admin-actions"
 import { Plus, ExternalLink, Calendar, Trash2, ChevronLeft, ChevronRight, Users } from "lucide-react"
 
 const PER_PAGE = 20
@@ -21,20 +20,6 @@ async function getEvents(page: number) {
     return { events, total }
   } catch {
     return null
-  }
-}
-
-async function deleteAction(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-  const id = formData.get("id") as string
-  if (!id) return
-  try {
-    await prisma.event.delete({ where: { id } })
-    revalidatePath("/admin/kegiatan")
-  } catch (err) {
-    console.error("Delete event failed:", err)
   }
 }
 
@@ -116,7 +101,7 @@ export default async function AdminKegiatan(props: { searchParams?: Promise<{ pa
                 >
                   Edit <ExternalLink className="h-3 w-3" />
                 </Link>
-                <form action={deleteAction}>
+                <form action={deleteEvent}>
                   <input type="hidden" name="id" value={event.id} />
                   <button
                     type="submit"

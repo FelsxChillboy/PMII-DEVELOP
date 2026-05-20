@@ -16,7 +16,7 @@ export const ContactSchema = z.object({
   message: z.string().min(1, "Pesan wajib diisi").max(2000),
 })
 
-const isoDate = z.string().refine((v) => !isNaN(Date.parse(v)), "Format tanggal tidak valid (YYYY-MM-DD)")
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format tanggal harus YYYY-MM-DD")
 
 export const FinancialReportQuerySchema = z.object({
   type: z.enum(["INCOME", "EXPENSE"]).optional(),
@@ -30,7 +30,38 @@ export const FinancialReportSchema = z.object({
   type: z.enum(["INCOME", "EXPENSE"]),
   amount: z.number().int().min(1, "Jumlah harus lebih dari 0"),
   category: z.string().min(1, "Kategori wajib diisi").max(100),
+  description: z.string().max(2000).optional(),
   date: isoDate,
+})
+
+export const NewsSchema = z.object({
+  title: z.string().min(1, "Judul wajib diisi").max(200),
+  slug: z.string().min(1, "Slug wajib diisi").max(200).regex(/^[a-z0-9-]+$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung"),
+  content: z.string().min(1, "Konten wajib diisi"),
+  imageUrl: z.string().max(500).optional(),
+  published: z.boolean().default(false),
+})
+
+export const EventSchema = z.object({
+  title: z.string().min(1, "Nama kegiatan wajib diisi").max(200),
+  slug: z.string().min(1, "Slug wajib diisi").max(200).regex(/^[a-z0-9-]+$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung"),
+  description: z.string().min(1, "Deskripsi wajib diisi"),
+  location: z.string().min(1, "Lokasi wajib diisi").max(200),
+  date: z.string().min(1, "Tanggal wajib diisi"),
+  capacity: z.number().int().min(1, "Kapasitas minimal 1"),
+  type: z.string().max(100).optional(),
+  time: z.string().max(50).optional(),
+  image: z.string().max(500).optional(),
+  dateEnd: z.string().optional(),
+})
+
+export const AdminFinancialReportSchema = z.object({
+  title: z.string().min(1, "Judul wajib diisi").max(200),
+  type: z.enum(["INCOME", "EXPENSE"]),
+  amount: z.number().int().min(1, "Jumlah harus lebih dari 0"),
+  category: z.string().min(1, "Kategori wajib diisi").max(100),
+  description: z.string().max(2000).optional(),
+  date: z.string().min(1, "Tanggal wajib diisi"),
 })
 
 export const RegistrationSchema = z.object({

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/server/auth"
-import { revalidatePath } from "next/cache"
 import Link from "next/link"
+import { deleteFinancialReport } from "@/lib/admin-actions"
 import { Plus, ExternalLink, Trash2, ChevronLeft, ChevronRight, Wallet, TrendingUp, TrendingDown } from "lucide-react"
 
 const PER_PAGE = 20
@@ -44,20 +44,6 @@ async function getSummary() {
     }
   } catch {
     return null
-  }
-}
-
-async function deleteAction(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-  const id = formData.get("id") as string
-  if (!id) return
-  try {
-    await prisma.financialReport.delete({ where: { id } })
-    revalidatePath("/admin/keuangan")
-  } catch (err) {
-    console.error("Delete financial report failed:", err)
   }
 }
 
@@ -176,7 +162,7 @@ export default async function AdminKeuangan(props: { searchParams?: Promise<{ pa
                         >
                           <ExternalLink className="h-3 w-3" />
                         </Link>
-                        <form action={deleteAction}>
+                        <form action={deleteFinancialReport}>
                           <input type="hidden" name="id" value={r.id} />
                           <button
                             type="submit"

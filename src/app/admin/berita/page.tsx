@@ -1,8 +1,7 @@
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/server/auth"
 import Link from "next/link"
-import { revalidatePath } from "next/cache"
+import { deleteNews } from "@/lib/admin-actions"
 import { Plus, ExternalLink, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 
 const PER_PAGE = 20
@@ -21,20 +20,6 @@ async function getNews(page: number) {
     return { news, total }
   } catch {
     return null
-  }
-}
-
-async function deleteAction(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-  const id = formData.get("id") as string
-  if (!id) return
-  try {
-    await prisma.news.delete({ where: { id } })
-    revalidatePath("/admin/berita")
-  } catch (err) {
-    console.error("Delete news failed:", err)
   }
 }
 
@@ -117,7 +102,7 @@ export default async function AdminBerita(props: { searchParams?: Promise<{ page
                       <Link href={`/admin/berita/${item.id}`} className="inline-flex items-center gap-1 text-primary hover:underline text-xs">
                         Edit <ExternalLink className="h-3 w-3" />
                       </Link>
-                      <form action={deleteAction}>
+                      <form action={deleteNews}>
                         <input type="hidden" name="id" value={item.id} />
                         <button type="submit" className="inline-flex items-center gap-1 text-red-500 hover:text-red-400 text-xs transition-colors">
                           <Trash2 className="h-3 w-3" />

@@ -1,55 +1,12 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
-import { requireAdmin } from "@/lib/server/auth"
 import { notFound, redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import Link from "next/link"
+import { approveRegistration, rejectRegistration, deleteRegistration } from "@/lib/admin-actions"
 import { ArrowLeft, Check, X, Trash2, User } from "lucide-react"
 
 interface Props {
   params: Promise<{ id: string }>
-}
-
-async function approveAction(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-  const id = formData.get("id") as string
-  if (!id) return
-  try {
-    await prisma.registration.update({ where: { id }, data: { status: "APPROVED" } })
-    revalidatePath("/admin/kegiatan/[id]/registrations")
-  } catch (err) {
-    console.error("Approve registration failed:", err)
-  }
-}
-
-async function rejectAction(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-  const id = formData.get("id") as string
-  if (!id) return
-  try {
-    await prisma.registration.update({ where: { id }, data: { status: "REJECTED" } })
-    revalidatePath("/admin/kegiatan/[id]/registrations")
-  } catch (err) {
-    console.error("Reject registration failed:", err)
-  }
-}
-
-async function deleteAction(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-  const id = formData.get("id") as string
-  if (!id) return
-  try {
-    await prisma.registration.delete({ where: { id } })
-    revalidatePath("/admin/kegiatan/[id]/registrations")
-  } catch (err) {
-    console.error("Delete registration failed:", err)
-  }
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -135,7 +92,7 @@ export default async function EventRegistrationsPage({ params }: Props) {
                     <div className="flex items-center justify-end gap-1">
                       {reg.status === "PENDING" && (
                         <>
-                          <form action={approveAction}>
+                          <form action={approveRegistration}>
                             <input type="hidden" name="id" value={reg.id} />
                             <button
                               type="submit"
@@ -145,7 +102,7 @@ export default async function EventRegistrationsPage({ params }: Props) {
                               <Check className="h-3 w-3" />
                             </button>
                           </form>
-                          <form action={rejectAction}>
+                          <form action={rejectRegistration}>
                             <input type="hidden" name="id" value={reg.id} />
                             <button
                               type="submit"
@@ -157,7 +114,7 @@ export default async function EventRegistrationsPage({ params }: Props) {
                           </form>
                         </>
                       )}
-                      <form action={deleteAction}>
+                      <form action={deleteRegistration}>
                         <input type="hidden" name="id" value={reg.id} />
                         <button
                           type="submit"

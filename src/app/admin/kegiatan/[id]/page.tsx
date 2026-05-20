@@ -1,42 +1,12 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
-import { requireAdmin } from "@/lib/server/auth"
 import { notFound, redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import Link from "next/link"
+import { updateEvent } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
 interface Props {
   params: Promise<{ id: string }>
-}
-
-async function update(formData: FormData) {
-  "use server"
-  const { session, error: authErr } = await requireAdmin()
-  if (authErr || !session) return
-
-  const eventId = formData.get("id") as string
-  const title = formData.get("title") as string
-  const slug = formData.get("slug") as string
-  const description = formData.get("description") as string
-  const location = formData.get("location") as string
-  const date = formData.get("date") as string
-  const capacity = parseInt(formData.get("capacity") as string) || 0
-
-  if (!title || !slug || !description || !date || !location) return
-
-  try {
-    await prisma.event.update({
-      where: { id: eventId },
-      data: { title, slug, description, location, date: new Date(date), capacity },
-    })
-  } catch (err) {
-    console.error("Update event failed:", err)
-    return
-  }
-
-  revalidatePath("/admin/kegiatan")
-  redirect("/admin/kegiatan")
 }
 
 export default async function EditKegiatanPage({ params }: Props) {
@@ -73,7 +43,7 @@ export default async function EditKegiatanPage({ params }: Props) {
       </div>
 
       <div className="max-w-2xl">
-        <form action={update} className="space-y-6">
+        <form action={updateEvent} className="space-y-6">
           <input type="hidden" name="id" value={event.id} />
 
           <div>

@@ -17,6 +17,9 @@ export async function createDonation(formData: FormData) {
     amount: Number(formData.get("amount")),
     message: formData.get("message"),
     type: formData.get("type"),
+    donorName: formData.get("donorName"),
+    donorEmail: formData.get("donorEmail"),
+    donorPhone: formData.get("donorPhone"),
   })
 
   if (!parsed.success) {
@@ -31,6 +34,9 @@ export async function createDonation(formData: FormData) {
         type: parsed.data.type,
         status: "PENDING",
         userId: session.user.id,
+        donorName: parsed.data.donorName || null,
+        donorEmail: parsed.data.donorEmail || null,
+        donorPhone: parsed.data.donorPhone || null,
       },
     })
     revalidatePath("/donasi")
@@ -67,7 +73,7 @@ export async function registerUser(formData: FormData) {
 
   const parsed = RegisterSchema.safeParse({ name, email, password })
   if (!parsed.success) {
-    return { error: "validation" }
+    return { error: parsed.error.issues[0].message }
   }
 
   const existing = await prisma.user.findUnique({

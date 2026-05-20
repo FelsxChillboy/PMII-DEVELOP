@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import Image from "next/image"
-import { animate, createTimeline } from "animejs"
+import { animate, createTimeline, cubicBezier } from "animejs"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 interface AnimatedLogoProps {
@@ -53,21 +53,21 @@ export default function AnimatedLogo({
       translateX: [0, 6],
       opacity: [0, 1],
       duration: 700,
-      ease: "cubicBezier(0.16, 1, 0.3, 1)",
+      ease: cubicBezier(0.16, 1, 0.3, 1),
     }, "-=500")
 
     tl.add(dot2, {
       translateX: [0, -6],
       opacity: [0, 1],
       duration: 700,
-      ease: "cubicBezier(0.16, 1, 0.3, 1)",
+      ease: cubicBezier(0.16, 1, 0.3, 1),
     }, "-=400")
 
     tl.add(glow, {
       opacity: [0, 0.5, 0],
       scale: [0.8, 1.3, 0.8],
       duration: 2500,
-      ease: "cubicBezier(0.16, 1, 0.3, 1)",
+      ease: cubicBezier(0.16, 1, 0.3, 1),
       loop: true,
     }, "-=600")
 
@@ -86,7 +86,7 @@ export default function AnimatedLogo({
       ],
       duration: 6000,
       loop: true,
-      ease: "cubicBezier(0.16, 1, 0.3, 1)",
+      ease: cubicBezier(0.16, 1, 0.3, 1),
     }, "-=400")
 
     tl.add(dot2, {
@@ -102,7 +102,7 @@ export default function AnimatedLogo({
       ],
       duration: 6000,
       loop: true,
-      ease: "cubicBezier(0.16, 1, 0.3, 1)",
+      ease: cubicBezier(0.16, 1, 0.3, 1),
     }, "-=400")
 
     return () => {
