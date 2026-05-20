@@ -3,6 +3,7 @@ import { success, error, notFound, serverError } from "@/lib/api-response"
 import { requireAdmin } from "@/lib/server/auth"
 import { FinancialReportSchema } from "@/lib/schemas"
 import { revalidatePath } from "next/cache"
+import { Prisma } from "@prisma/client"
 
 export async function PATCH(
   request: Request,
@@ -37,7 +38,7 @@ export async function PATCH(
       date: report.date.toISOString().split("T")[0],
     })
   } catch (err) {
-    if ((err as any)?.code === "P2025") return notFound("Laporan tidak ditemukan")
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") return notFound("Laporan tidak ditemukan")
     console.error("Update financial report failed:", err)
     return serverError("Gagal mengupdate laporan keuangan")
   }
@@ -60,7 +61,7 @@ export async function DELETE(
 
     return success({ message: "Laporan berhasil dihapus" })
   } catch (err) {
-    if ((err as any)?.code === "P2025") return notFound("Laporan tidak ditemukan")
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") return notFound("Laporan tidak ditemukan")
     console.error("Delete financial report failed:", err)
     return serverError("Gagal menghapus laporan keuangan")
   }

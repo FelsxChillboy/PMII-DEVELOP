@@ -37,17 +37,14 @@ export default async function KegiatanPage({ searchParams }: Props) {
   const sp = await searchParams
   const page = Math.max(1, Number(sp?.page) || 1)
 
-  const totalPages = Math.ceil(
-    (await prisma.event.count()) / PER_PAGE
-  )
-
-  const [events, userRegistrations] = await Promise.all([
+  const [events, total, userRegistrations] = await Promise.all([
     prisma.event.findMany({
       orderBy: { date: "desc" },
       include: { _count: { select: { registrations: true } } },
       take: PER_PAGE,
       skip: (page - 1) * PER_PAGE,
     }),
+    prisma.event.count(),
     userId
       ? prisma.registration.findMany({
           where: { userId },
@@ -59,6 +56,8 @@ export default async function KegiatanPage({ searchParams }: Props) {
         })
       : Promise.resolve(new Map<string, { status: string }>()),
   ])
+
+  const totalPages = Math.ceil(total / PER_PAGE)
 
   return (
     <div className="divide-y divide-border">

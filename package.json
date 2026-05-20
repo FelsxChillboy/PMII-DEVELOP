@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
+    "@barba/core": "^2.10.3",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@react-three/drei": "^10.7.7",
@@ -27,6 +28,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
     "framer-motion": "^12.38.0",
+    "lenis": "^1.3.23",
     "lottie-react": "^2.4.1",
     "lucide-react": "^1.16.0",
     "mariadb": "^3.5.2",

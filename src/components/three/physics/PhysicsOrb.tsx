@@ -80,6 +80,8 @@ export default function PhysicsOrb({
     } else {
       meshRef.current.scale.setScalar(1)
     }
+
+    state.invalidate()
   })
 
   return (

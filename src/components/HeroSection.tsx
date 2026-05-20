@@ -23,7 +23,6 @@ const STATS = [
 export default function HeroSection() {
   const reducedMotion = useReducedMotion()
   const sectionRef = useRef<HTMLDivElement>(null)
-  const mouse = useRef({ x: 0, y: 0 })
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -118,7 +117,7 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-[1]" />
 
       <motion.div style={{ y: particleY }} className="absolute inset-0">
-        <HeroCanvas mouse={mouse} />
+        <HeroCanvas />
       </motion.div>
 
       <motion.div

@@ -6,13 +6,14 @@ import { Float, Environment } from "@react-three/drei"
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from "@react-three/postprocessing"
 import { Vector2, InstancedMesh, Object3D } from "three"
 import Logo3D from "@/components/Logo3D"
+import { sharedMouse } from "@/lib/mouse"
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000
   return x - Math.floor(x)
 }
 
-function Particles({ count = 250, mouse }: { count?: number; mouse?: React.MutableRefObject<{ x: number; y: number }> }) {
+function Particles({ count = 250 }: { count?: number }) {
   const meshRef = useRef<InstancedMesh>(null!)
   const dummy = useRef(new Object3D())
 
@@ -33,8 +34,8 @@ function Particles({ count = 250, mouse }: { count?: number; mouse?: React.Mutab
   useFrame((state) => {
     if (!meshRef.current) return
     const t = state.clock.elapsedTime
-    const mx = mouse?.current ? mouse.current.x * 0.3 : 0
-    const my = mouse?.current ? mouse.current.y * 0.3 : 0
+    const mx = sharedMouse.current.x * 0.3
+    const my = sharedMouse.current.y * 0.3
     for (let i = 0; i < count; i++) {
       const i3 = i * 3
       dummy.current.position.set(
@@ -49,6 +50,7 @@ function Particles({ count = 250, mouse }: { count?: number; mouse?: React.Mutab
       meshRef.current.setMatrixAt(i, dummy.current.matrix)
     }
     meshRef.current.instanceMatrix.needsUpdate = true
+    state.invalidate()
   })
 
   return (
@@ -59,16 +61,17 @@ function Particles({ count = 250, mouse }: { count?: number; mouse?: React.Mutab
   )
 }
 
-function MouseTracker({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
+function MouseTracker() {
   const { pointer } = useThree()
-  useFrame(() => {
-    mouse.current.x += (pointer.x - mouse.current.x) * 0.05
-    mouse.current.y += (pointer.y - mouse.current.y) * 0.05
+  useFrame((state) => {
+    sharedMouse.current.x += (pointer.x - sharedMouse.current.x) * 0.08
+    sharedMouse.current.y += (pointer.y - sharedMouse.current.y) * 0.08
+    state.invalidate()
   })
   return null
 }
 
-export default function HeroCanvas({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
+export default function HeroCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [inView, setInView] = useState(true)
 
@@ -103,7 +106,7 @@ export default function HeroCanvas({ mouse }: { mouse: React.MutableRefObject<{ 
           <spotLight position={[-5, 5, 5]} angle={0.5} penumbra={0.5} intensity={1.5} color="#38BDF8" />
           <spotLight position={[5, -5, 5]} angle={0.5} penumbra={0.5} intensity={1} color="#A78BFA" />
           <Environment preset="night" environmentIntensity={1.2} />
-          <MouseTracker mouse={mouse} />
+          <MouseTracker />
           <EffectComposer multisampling={2}>
             <Bloom
               luminanceThreshold={0.1}
@@ -121,9 +124,9 @@ export default function HeroCanvas({ mouse }: { mouse: React.MutableRefObject<{ 
             />
           </EffectComposer>
           <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.3}>
-            <Particles count={250} mouse={mouse} />
+            <Particles count={250} />
           </Float>
-          <Logo3D mouse={mouse} />
+          <Logo3D />
         </Canvas>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, memo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
@@ -19,7 +19,7 @@ const NAV_LINKS = [
   { label: "Transparansi", path: "/transparansi" },
 ]
 
-export default function Navbar() {
+export default memo(function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
   const lastScrollY = useRef(0)
@@ -28,6 +28,8 @@ export default function Navbar() {
   const router = useRouter()
 
   const handleLogout = () => signOut({ callbackUrl: "/" })
+  const role = (session?.user as { role?: string })?.role
+  const dashboardHref = role === "ADMIN" ? "/admin" : "/dashboard"
 
   const { scrollY, scrollYProgress } = useScroll()
   const progressScale = useSpring(scrollYProgress, { stiffness: 200, damping: 30 })
@@ -113,7 +115,7 @@ export default function Navbar() {
           {session?.user ? (
             <div className="hidden sm:flex items-center gap-2">
               <Link
-                href="/admin"
+                href={dashboardHref}
                 className="inline-flex h-9 px-3 items-center gap-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
               >
                 <LayoutDashboard className="h-4 w-4" />
@@ -203,7 +205,7 @@ export default function Navbar() {
                 {session?.user ? (
                   <>
                     <Link
-                      href="/admin"
+                      href={dashboardHref}
                       onClick={() => setMobileOpen(false)}
                       className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
                     >
@@ -250,4 +252,4 @@ export default function Navbar() {
       </AnimatePresence>
     </motion.header>
   )
-}
+})

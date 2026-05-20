@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, Check, X } from "lucide-react"
 
@@ -14,7 +14,7 @@ interface Props {
   registrationStatus?: string | null
 }
 
-export default function RegisterEventButton({
+export default memo(function RegisterEventButton({
   eventId,
   eventTitle,
   capacity,
@@ -119,4 +119,4 @@ export default function RegisterEventButton({
       {loading ? "Mendaftar..." : "Daftar"}
     </button>
   )
-}
+})

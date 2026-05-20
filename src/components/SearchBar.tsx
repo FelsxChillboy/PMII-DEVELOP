@@ -14,16 +14,16 @@ export default function SearchBar() {
   } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
-    if (open) inputRef.current?.focus()
-  }, [open])
-
-  useEffect(() => {
-    if (!open) {
+    if (open) {
+      inputRef.current?.focus()
+    } else {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setQuery("")
       setResults(null)
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [open])
 

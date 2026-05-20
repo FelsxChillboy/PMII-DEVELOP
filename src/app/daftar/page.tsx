@@ -10,11 +10,51 @@ export const metadata: Metadata = {
   description: "Daftar akun baru PR PMII Rayon Teknik UNUSIA Jakarta Pusat.",
 }
 
+async function registerAction(formData: FormData) {
+  "use server"
+  const result = await registerUser(formData)
+  if (result.error) {
+    redirect(`/daftar?error=${result.error}`)
+  }
+  redirect("/login?registered=1")
+}
+
+async function githubRegisterAction() {
+  "use server"
+  try {
+    const { signIn } = await import("@/lib/auth")
+    await signIn("github")
+  } catch (error) {
+    const digest = (error as { digest?: string })?.digest
+    if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+      throw error
+    }
+    redirect("/daftar?error=OAuthSignin")
+  }
+}
+
+async function googleRegisterAction() {
+  "use server"
+  try {
+    const { signIn } = await import("@/lib/auth")
+    await signIn("google")
+  } catch (error) {
+    const digest = (error as { digest?: string })?.digest
+    if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+      throw error
+    }
+    redirect("/daftar?error=OAuthSignin")
+  }
+}
+
 export default async function DaftarPage(props: {
   searchParams?: Promise<{ error?: string }>
 }) {
   const session = await auth()
-  if (session?.user) redirect("/admin")
+  if (session?.user) {
+    const role = (session.user as { role?: string }).role
+    redirect(role === "ADMIN" ? "/admin" : "/dashboard")
+  }
 
   const searchParams = await props.searchParams
   const error = searchParams?.error
@@ -50,14 +90,7 @@ export default async function DaftarPage(props: {
         )}
 
         <form
-          action={async (formData: FormData) => {
-            "use server"
-            const result = await registerUser(formData)
-            if (result.error) {
-              redirect(`/daftar?error=${result.error}`)
-            }
-            redirect("/login?registered=1")
-          }}
+          action={registerAction}
           className="space-y-4"
         >
           <div>
@@ -148,19 +181,7 @@ export default async function DaftarPage(props: {
             <div className="space-y-3">
               {githubEnabled && (
                 <form
-                  action={async () => {
-                    "use server"
-                    try {
-                      const { signIn } = await import("@/lib/auth")
-                      await signIn("github", { redirectTo: "/admin" })
-                    } catch (error) {
-                      const digest = (error as { digest?: string })?.digest
-                      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-                        throw error
-                      }
-                      redirect("/daftar?error=OAuthSignin")
-                    }
-                  }}
+                  action={githubRegisterAction}
                 >
                   <button
                     type="submit"
@@ -176,19 +197,7 @@ export default async function DaftarPage(props: {
 
               {googleEnabled && (
                 <form
-                  action={async () => {
-                    "use server"
-                    try {
-                      const { signIn } = await import("@/lib/auth")
-                      await signIn("google", { redirectTo: "/admin" })
-                    } catch (error) {
-                      const digest = (error as { digest?: string })?.digest
-                      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-                        throw error
-                      }
-                      redirect("/daftar?error=OAuthSignin")
-                    }
-                  }}
+                  action={googleRegisterAction}
                 >
                   <button
                     type="submit"

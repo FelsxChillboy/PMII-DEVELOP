@@ -1,0 +1,13 @@
+
+> pro-org-platform@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.12.1:3000
+- Environments: .env.local
+✓ Ready in 903ms
+
+○ Compiling /admin ...
+ POST /admin 500 in 8.3s (next.js: 7.6s, proxy.ts: 501ms, application-code: 191ms)
+[?25h

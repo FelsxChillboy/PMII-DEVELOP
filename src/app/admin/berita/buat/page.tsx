@@ -6,44 +6,44 @@ import { revalidatePath } from "next/cache"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+async function create(formData: FormData) {
+  "use server"
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
+
+  const title = formData.get("title") as string
+  const slug = formData.get("slug") as string
+  const content = formData.get("content") as string
+  const imageUrl = formData.get("imageUrl") as string
+  const published = formData.get("published") === "on"
+
+  if (!title || !slug || !content) return
+
+  try {
+    await prisma.news.create({
+      data: {
+        title,
+        slug,
+        content,
+        imageUrl: imageUrl || null,
+        published,
+        authorId: session.user.id!,
+      },
+    })
+  } catch (err) {
+    console.error("Create news failed:", err)
+    return
+  }
+
+  revalidatePath("/admin/berita")
+  redirect("/admin/berita")
+}
+
 export default async function BuatBeritaPage() {
   const session = await auth()
   if (!session?.user) redirect("/login")
   const isAdmin = (session.user as { role?: string }).role === "ADMIN"
   if (!isAdmin) redirect("/admin")
-
-  async function create(formData: FormData) {
-    "use server"
-    const { session, error: authErr } = await requireAdmin()
-    if (authErr || !session) return
-
-    const title = formData.get("title") as string
-    const slug = formData.get("slug") as string
-    const content = formData.get("content") as string
-    const imageUrl = formData.get("imageUrl") as string
-    const published = formData.get("published") === "on"
-
-    if (!title || !slug || !content) return
-
-    try {
-      await prisma.news.create({
-        data: {
-          title,
-          slug,
-          content,
-          imageUrl: imageUrl || null,
-          published,
-          authorId: session.user.id!,
-        },
-      })
-    } catch (err) {
-      console.error("Create news failed:", err)
-      return
-    }
-
-    revalidatePath("/admin/berita")
-    redirect("/admin/berita")
-  }
 
   return (
     <div>

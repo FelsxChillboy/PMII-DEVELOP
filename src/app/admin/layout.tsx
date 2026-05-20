@@ -13,6 +13,11 @@ import {
   Users,
 } from "lucide-react"
 
+async function logoutAction() {
+  "use server"
+  await signOut({ redirectTo: "/" })
+}
+
 const SIDEBAR = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Berita", href: "/admin/berita", icon: Newspaper },
@@ -32,6 +37,7 @@ export default async function AdminLayout({
   if (!session?.user) redirect("/login")
 
   const isAdmin = (session.user as { role?: string }).role === "ADMIN"
+  if (!isAdmin) redirect("/dashboard")
 
   return (
     <div className="flex min-h-screen bg-[#0B1120]">
@@ -66,12 +72,7 @@ export default async function AdminLayout({
               Akses terbatas — hubungi admin
             </div>
           )}
-          <form
-            action={async () => {
-              "use server"
-              await signOut({ redirectTo: "/" })
-            }}
-          >
+          <form action={logoutAction}>
             <button
               type="submit"
               className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"

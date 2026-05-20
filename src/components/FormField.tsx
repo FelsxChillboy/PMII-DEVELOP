@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useId } from "react"
+import { useState, useId, memo } from "react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
@@ -12,7 +12,7 @@ interface FormFieldProps {
   required?: boolean
 }
 
-export default function FormField({
+export default memo(function FormField({
   label,
   name,
   type = "text",
@@ -81,4 +81,4 @@ export default function FormField({
       />
     </div>
   )
-}
+})

@@ -38,7 +38,9 @@ export default function Toast({
 
   useEffect(() => {
     if (show && !visible) {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setVisible(true)
+      /* eslint-enable react-hooks/set-state-in-effect */
       timerRef.current = setTimeout(() => {
         setVisible(false)
         setTimeout(onClose, 300)

@@ -9,11 +9,57 @@ export const metadata: Metadata = {
   description: "Masuk ke panel admin PR PMII Rayon Teknik UNUSIA Jakarta Pusat.",
 }
 
+async function credentialsLoginAction(formData: FormData) {
+  "use server"
+  try {
+    await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirectTo: "/admin",
+    })
+  } catch (error) {
+    const digest = (error as { digest?: string })?.digest
+    if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+      throw error
+    }
+    redirect("/login?error=CredentialsSignin")
+  }
+}
+
+async function githubLoginAction() {
+  "use server"
+  try {
+    await signIn("github", { redirectTo: "/admin" })
+  } catch (error) {
+    const digest = (error as { digest?: string })?.digest
+    if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+      throw error
+    }
+    redirect("/login?error=OAuthSignin")
+  }
+}
+
+async function googleLoginAction() {
+  "use server"
+  try {
+    await signIn("google", { redirectTo: "/admin" })
+  } catch (error) {
+    const digest = (error as { digest?: string })?.digest
+    if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+      throw error
+    }
+    redirect("/login?error=OAuthSignin")
+  }
+}
+
 export default async function LoginPage(props: {
   searchParams?: Promise<{ error?: string; registered?: string }>
 }) {
   const session = await auth()
-  if (session?.user) redirect("/admin")
+  if (session?.user) {
+    const role = (session.user as { role?: string }).role
+    redirect(role === "ADMIN" ? "/admin" : "/dashboard")
+  }
 
   const searchParams = await props.searchParams
   const error = searchParams?.error
@@ -64,22 +110,7 @@ export default async function LoginPage(props: {
         )}
 
         <form
-          action={async (formData: FormData) => {
-            "use server"
-            try {
-              await signIn("credentials", {
-                email: formData.get("email"),
-                password: formData.get("password"),
-                redirectTo: "/admin",
-              })
-            } catch (error) {
-              const digest = (error as { digest?: string })?.digest
-              if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-                throw error
-              }
-              redirect("/login?error=CredentialsSignin")
-            }
-          }}
+          action={credentialsLoginAction}
           className="space-y-4"
         >
           <div>
@@ -137,18 +168,7 @@ export default async function LoginPage(props: {
             <div className="space-y-3">
               {githubEnabled && (
                 <form
-                  action={async () => {
-                    "use server"
-                    try {
-                      await signIn("github", { redirectTo: "/admin" })
-                    } catch (error) {
-                      const digest = (error as { digest?: string })?.digest
-                      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-                        throw error
-                      }
-                      redirect("/login?error=OAuthSignin")
-                    }
-                  }}
+                  action={githubLoginAction}
                 >
                   <button
                     type="submit"
@@ -164,18 +184,7 @@ export default async function LoginPage(props: {
 
               {googleEnabled && (
                 <form
-                  action={async () => {
-                    "use server"
-                    try {
-                      await signIn("google", { redirectTo: "/admin" })
-                    } catch (error) {
-                      const digest = (error as { digest?: string })?.digest
-                      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-                        throw error
-                      }
-                      redirect("/login?error=OAuthSignin")
-                    }
-                  }}
+                  action={googleLoginAction}
                 >
                   <button
                     type="submit"

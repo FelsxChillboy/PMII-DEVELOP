@@ -1,7 +1,7 @@
 "use client"
 
 import { Canvas } from "@react-three/fiber"
-import { Suspense, useState, useEffect } from "react"
+import { Suspense, useState, useEffect, useRef } from "react"
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import dynamic from "next/dynamic"
 import AnimatedSection from "@/components/AnimatedSection"
@@ -38,13 +38,13 @@ function Effects() {
 
 const SIZES = [0.75, 0.85, 0.7, 0.9, 0.8]
 
-function PhysicsScene({ inView }: { inView: boolean }) {
+function PhysicsScene() {
   return (
     <Canvas
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       camera={{ position: [0, 0, 10], fov: 50 }}
       dpr={[1, 1.5]}
-      frameloop={inView ? "always" : "demand"}
+      frameloop="always"
       style={{
         width: "100%",
         height: "100%",
@@ -78,17 +78,15 @@ function PhysicsScene({ inView }: { inView: boolean }) {
 }
 
 export default function Interactive3DSection() {
-  const [mounted, setMounted] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
   const [inView, setInView] = useState(false)
-  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
     const el = sectionRef.current
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
-      { rootMargin: "200px" }
+      { rootMargin: "300px" }
     )
     observer.observe(el)
     return () => observer.disconnect()
@@ -105,7 +103,7 @@ export default function Interactive3DSection() {
             Sentuh &amp; <span className="text-primary">Interaksikan</span>
           </h2>
           <p className="text-base text-muted-foreground max-w-xl mx-auto mt-4">
-            Klik setiap objk 3D untuk melihat reaksi fisik yang realistis.
+            Klik setiap objek 3D untuk melihat reaksi fisik yang realistis.
           </p>
         </AnimatedSection>
       </div>
@@ -115,7 +113,7 @@ export default function Interactive3DSection() {
         style={{ height: "500px" }}
       >
         <div className="relative w-full h-full rounded-2xl border border-border bg-card/50 overflow-hidden">
-          {mounted && <PhysicsScene inView={inView} />}
+          {inView && <PhysicsScene />}
         </div>
       </div>
     </section>

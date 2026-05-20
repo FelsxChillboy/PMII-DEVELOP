@@ -2,6 +2,7 @@ import { success, error, unauthorized, serverError } from "@/lib/api-response"
 import { auth } from "@/lib/auth"
 import { writeFile, mkdir } from "node:fs/promises"
 import path from "node:path"
+import crypto from "node:crypto"
 
 export async function POST(request: Request) {
   const session = await auth()
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`
+    const filename = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`
     const dir = path.join(process.cwd(), "public", "uploads", "news")
     await mkdir(dir, { recursive: true })
     const filepath = path.join(dir, filename)

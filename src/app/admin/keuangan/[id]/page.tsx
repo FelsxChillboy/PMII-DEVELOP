@@ -9,6 +9,34 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
+async function update(formData: FormData) {
+  "use server"
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
+
+  const id = formData.get("id") as string
+  const title = formData.get("title") as string
+  const type = formData.get("type") as string
+  const amount = parseInt(formData.get("amount") as string) || 0
+  const category = formData.get("category") as string
+  const date = formData.get("date") as string
+
+  if (!title || !type || !amount || !category || !date) return
+
+  try {
+    await prisma.financialReport.update({
+      where: { id },
+      data: { title, type: type as "INCOME" | "EXPENSE", amount, category, date: new Date(date) },
+    })
+  } catch (err) {
+    console.error("Update financial report failed:", err)
+    return
+  }
+
+  revalidatePath("/admin/keuangan")
+  redirect("/admin/keuangan")
+}
+
 export default async function EditLaporanPage({ params }: Props) {
   const { session, error: authErr } = await requireAdmin()
   if (authErr || !session) redirect("/admin/keuangan")

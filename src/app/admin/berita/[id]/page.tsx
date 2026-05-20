@@ -10,6 +10,35 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
+async function update(formData: FormData) {
+  "use server"
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
+
+  const title = formData.get("title") as string
+  const slug = formData.get("slug") as string
+  const content = formData.get("content") as string
+  const imageUrl = formData.get("imageUrl") as string
+  const published = formData.get("published") === "on"
+  const newsId = formData.get("id") as string
+
+  if (!title || !slug || !content) return
+
+  try {
+    await prisma.news.update({
+      where: { id: newsId },
+      data: { title, slug, content, imageUrl: imageUrl || null, published },
+    })
+  } catch (err) {
+    console.error("Update news failed:", err)
+    return
+  }
+
+  revalidatePath("/admin/berita")
+  revalidatePath(`/berita/${slug}`)
+  redirect("/admin/berita")
+}
+
 export default async function EditBeritaPage({ params }: Props) {
   const session = await auth()
   if (!session?.user) redirect("/login")
@@ -19,35 +48,6 @@ export default async function EditBeritaPage({ params }: Props) {
   const { id } = await params
   const news = await prisma.news.findUnique({ where: { id } })
   if (!news) notFound()
-
-  async function update(formData: FormData) {
-    "use server"
-    const { session, error: authErr } = await requireAdmin()
-    if (authErr || !session) return
-
-    const title = formData.get("title") as string
-    const slug = formData.get("slug") as string
-    const content = formData.get("content") as string
-    const imageUrl = formData.get("imageUrl") as string
-    const published = formData.get("published") === "on"
-    const newsId = formData.get("id") as string
-
-    if (!title || !slug || !content) return
-
-    try {
-      await prisma.news.update({
-        where: { id: newsId },
-        data: { title, slug, content, imageUrl: imageUrl || null, published },
-      })
-    } catch (err) {
-      console.error("Update news failed:", err)
-      return
-    }
-
-    revalidatePath("/admin/berita")
-    revalidatePath(`/berita/${slug}`)
-    redirect("/admin/berita")
-  }
 
   return (
     <div>

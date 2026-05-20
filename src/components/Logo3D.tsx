@@ -5,7 +5,8 @@ import { useLoader, useFrame } from "@react-three/fiber"
 import { SVGLoader, SVGResultPaths } from "three/examples/jsm/loaders/SVGLoader.js"
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js"
 import { MeshTransmissionMaterial, useCursor } from "@react-three/drei"
-import { Color, Vector2, Vector3, Mesh, BufferGeometry, ExtrudeGeometry, Float32BufferAttribute } from "three"
+import { Color, Vector3, Mesh, BufferGeometry, ExtrudeGeometry, Float32BufferAttribute } from "three"
+import { sharedMouse } from "@/lib/mouse"
 
 function getColor(path: SVGResultPaths): Color {
   if (path.color) return path.color
@@ -20,7 +21,7 @@ function getColor(path: SVGResultPaths): Color {
   return new Color("#38BDF8")
 }
 
-function Logo3D({ mouse }: { mouse?: React.MutableRefObject<Vector2> }) {
+function Logo3D() {
   const meshRef = useRef<Mesh>(null!)
   const [hovered, setHovered] = useState(false)
   const targetPos = useRef(new Vector3(0, 0, -3))
@@ -101,16 +102,16 @@ function Logo3D({ mouse }: { mouse?: React.MutableRefObject<Vector2> }) {
     if (!meshRef.current) return
     const t = state.clock.elapsedTime
 
-    meshRef.current.rotation.x = Math.sin(t * 0.15) * 0.15
-    meshRef.current.rotation.y = t * 0.12
+    meshRef.current.rotation.x = Math.sin(t * 0.12) * 0.2
+    meshRef.current.rotation.y = t * 0.18
+    meshRef.current.rotation.z = Math.sin(t * 0.08) * 0.03
 
-    if (mouse?.current) {
-      targetPos.current.x = mouse.current.x * 1.2
-      targetPos.current.y = mouse.current.y * 1.2
-    }
-    targetPos.current.y += Math.sin(t * 0.25) * 0.15
+    targetPos.current.x = sharedMouse.current.x * 1.5
+    targetPos.current.y = sharedMouse.current.y * 1.5
+    targetPos.current.y += Math.sin(t * 0.2) * 0.2
 
-    meshRef.current.position.lerp(targetPos.current, 0.04)
+    meshRef.current.position.lerp(targetPos.current, 0.06)
+    state.invalidate()
   })
 
   if (!geometry) return null
