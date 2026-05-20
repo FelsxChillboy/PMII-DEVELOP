@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { ArrowRight, Users, Calendar, Award } from "lucide-react"
@@ -28,8 +28,7 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   })
 
-  const parallaxRaw = useTransform(scrollYProgress, [0, 1], [0, 200])
-  const parallaxY = useSpring(parallaxRaw, { stiffness: 80, damping: 25 })
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 200])
 
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 100])
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])

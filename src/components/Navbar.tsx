@@ -37,13 +37,23 @@ export default memo(function Navbar() {
   const progressScale = useSpring(scrollYProgress, { stiffness: 200, damping: 30 })
 
   useEffect(() => {
+    let ticking = false
+    const THRESHOLD = 15
     const unsubscribe = scrollY.on("change", (current) => {
-      if (current > lastScrollY.current && current > 80) {
-        setHidden(true)
-      } else {
-        setHidden(false)
-      }
-      lastScrollY.current = current
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const delta = current - lastScrollY.current
+        if (Math.abs(delta) > THRESHOLD || current <= 80) {
+          if (current > lastScrollY.current && current > 80) {
+            setHidden(true)
+          } else {
+            setHidden(false)
+          }
+          lastScrollY.current = current
+        }
+        ticking = false
+      })
     })
     return () => unsubscribe()
   }, [scrollY])

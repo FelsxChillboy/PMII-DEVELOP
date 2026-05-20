@@ -17,8 +17,8 @@ interface UseLenisOptions {
 }
 
 export function useLenis({
-  duration = 1.2,
-  lerp = 0.1,
+  duration = 0.8,
+  lerp = 0.15,
   smoothWheel = true,
   syncTouch = true,
   wheelMultiplier = 1,

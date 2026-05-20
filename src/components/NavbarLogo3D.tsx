@@ -77,7 +77,6 @@ function LogoMesh() {
     meshRef.current.rotation.x = Math.sin(t * 0.12) * 0.15
     meshRef.current.rotation.y = t * 0.3
     meshRef.current.rotation.z = Math.sin(t * 0.08) * 0.02
-    state.invalidate()
   })
 
   if (!geometry) return null
@@ -96,7 +95,7 @@ export default function NavbarLogo3D({ className }: { className?: string }) {
         gl={{ antialias: true, alpha: true }}
         camera={{ position: [0, 0, 3.5], fov: 25, near: 0.1, far: 10 }}
         dpr={[1, 1.5]}
-        frameloop="demand"
+        frameloop="always"
         style={{ width: "100%", height: "100%" }}
       >
         <ambientLight intensity={0.6} />
