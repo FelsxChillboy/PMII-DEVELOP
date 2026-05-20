@@ -27,7 +27,7 @@ export default function DonationCTA() {
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          transition={{ type: "spring" as const, stiffness: 200, damping: 15 }}
           className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-accent/10 mb-6"
         >
           <motion.div

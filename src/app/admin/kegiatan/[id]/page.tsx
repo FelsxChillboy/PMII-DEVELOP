@@ -10,6 +10,35 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
+async function update(formData: FormData) {
+  "use server"
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session) return
+
+  const eventId = formData.get("id") as string
+  const title = formData.get("title") as string
+  const slug = formData.get("slug") as string
+  const description = formData.get("description") as string
+  const location = formData.get("location") as string
+  const date = formData.get("date") as string
+  const capacity = parseInt(formData.get("capacity") as string) || 0
+
+  if (!title || !slug || !description || !date || !location) return
+
+  try {
+    await prisma.event.update({
+      where: { id: eventId },
+      data: { title, slug, description, location, date: new Date(date), capacity },
+    })
+  } catch (err) {
+    console.error("Update event failed:", err)
+    return
+  }
+
+  revalidatePath("/admin/kegiatan")
+  redirect("/admin/kegiatan")
+}
+
 export default async function EditKegiatanPage({ params }: Props) {
   const session = await auth()
   if (!session?.user) redirect("/login")
@@ -19,35 +48,6 @@ export default async function EditKegiatanPage({ params }: Props) {
   const { id } = await params
   const event = await prisma.event.findUnique({ where: { id } })
   if (!event) notFound()
-
-  async function update(formData: FormData) {
-    "use server"
-    const { session, error: authErr } = await requireAdmin()
-    if (authErr || !session) return
-
-    const eventId = formData.get("id") as string
-    const title = formData.get("title") as string
-    const slug = formData.get("slug") as string
-    const description = formData.get("description") as string
-    const location = formData.get("location") as string
-    const date = formData.get("date") as string
-    const capacity = parseInt(formData.get("capacity") as string) || 0
-
-    if (!title || !slug || !description || !date || !location) return
-
-    try {
-      await prisma.event.update({
-        where: { id: eventId },
-        data: { title, slug, description, location, date: new Date(date), capacity },
-      })
-    } catch (err) {
-      console.error("Update event failed:", err)
-      return
-    }
-
-    revalidatePath("/admin/kegiatan")
-    redirect("/admin/kegiatan")
-  }
 
   const formatDate = (d: Date) => {
     const pad = (n: number) => n.toString().padStart(2, "0")

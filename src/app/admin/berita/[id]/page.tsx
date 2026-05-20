@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/server/auth"
@@ -116,7 +117,7 @@ export default async function EditBeritaPage({ params }: Props) {
             </p>
             {news.imageUrl && (
               <div className="mt-2">
-                <img src={news.imageUrl} alt="" className="h-20 w-auto rounded-lg object-cover border border-border" />
+                <Image src={news.imageUrl} alt="" width={160} height={80} className="h-20 w-auto rounded-lg object-cover border border-border" unoptimized />
               </div>
             )}
           </div>

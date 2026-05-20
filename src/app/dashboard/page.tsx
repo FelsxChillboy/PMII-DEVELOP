@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { auth, signOut } from "@/lib/auth"
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-4 mb-8">
           <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center">
             {user.image ? (
-              <img src={user.image} alt="" className="h-14 w-14 rounded-full object-cover" />
+              <Image src={user.image} alt="" width={56} height={56} className="h-14 w-14 rounded-full object-cover" unoptimized />
             ) : (
               <User className="h-6 w-6 text-muted-foreground" />
             )}

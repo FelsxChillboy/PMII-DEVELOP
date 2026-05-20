@@ -1,7 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Mail, MapPin } from "lucide-react"
 import BackToTop from "@/components/BackToTop"
+import AnimatedLogo from "@/components/AnimatedLogo"
 
 const FOOTER_LINKS = [
   { label: "Tentang Kami", path: "/tentang" },
@@ -20,12 +20,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16">
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3">
-              <Image
+              <AnimatedLogo
                 src="https://media.base44.com/images/public/6a0614bbe8ea40108cd58983/6842b6f37_Logo_RayonTeknik2022.svg"
                 alt="Logo PR PMII Rayon Teknik"
                 width={40}
                 height={40}
-                className="h-10 w-10 brightness-0 invert"
+                className="h-10 w-10"
+                invert
               />
               <div>
                 <p className="font-heading font-semibold text-sm text-foreground">

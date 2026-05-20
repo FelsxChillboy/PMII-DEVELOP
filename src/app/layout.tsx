@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google"
 import "./globals.css"
 import Providers from "@/components/Providers"
 import ServiceWorker from "@/components/ServiceWorker"
+import LenisProvider from "@/components/LenisProvider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,7 +13,7 @@ const inter = Inter({
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["500", "700"],
 })
 
 const siteTitle = "PR PMII Rayon Teknik UNUSIA Jakarta Pusat"
@@ -114,8 +115,10 @@ export default function RootLayout({
           Langsung ke konten utama
         </a>
         <Providers>
-          <ServiceWorker />
-          <div className="contents">{children}</div>
+          <LenisProvider>
+            <ServiceWorker />
+            <div className="contents">{children}</div>
+          </LenisProvider>
         </Providers>
       </body>
     </html>

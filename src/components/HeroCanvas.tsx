@@ -2,9 +2,9 @@
 
 import { useRef, useMemo, useState, useEffect } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { Float, Environment } from "@react-three/drei"
-import { EffectComposer, Bloom, ChromaticAberration, Vignette } from "@react-three/postprocessing"
-import { Vector2, InstancedMesh, Object3D } from "three"
+import { Environment } from "@react-three/drei"
+import { EffectComposer, Bloom } from "@react-three/postprocessing"
+import { InstancedMesh, Object3D } from "three"
 import Logo3D from "@/components/Logo3D"
 import { sharedMouse } from "@/lib/mouse"
 
@@ -13,7 +13,7 @@ function seededRandom(seed: number) {
   return x - Math.floor(x)
 }
 
-function Particles({ count = 250 }: { count?: number }) {
+function Particles({ count = 40 }: { count?: number }) {
   const meshRef = useRef<InstancedMesh>(null!)
   const dummy = useRef(new Object3D())
 
@@ -50,7 +50,6 @@ function Particles({ count = 250 }: { count?: number }) {
       meshRef.current.setMatrixAt(i, dummy.current.matrix)
     }
     meshRef.current.instanceMatrix.needsUpdate = true
-    state.invalidate()
   })
 
   return (
@@ -62,11 +61,10 @@ function Particles({ count = 250 }: { count?: number }) {
 }
 
 function MouseTracker() {
-  const { pointer } = useThree()
-  useFrame((state) => {
+  const { pointer, invalidate } = useThree()
+  useFrame(() => {
     sharedMouse.current.x += (pointer.x - sharedMouse.current.x) * 0.08
     sharedMouse.current.y += (pointer.y - sharedMouse.current.y) * 0.08
-    state.invalidate()
   })
   return null
 }
@@ -107,25 +105,15 @@ export default function HeroCanvas() {
           <spotLight position={[5, -5, 5]} angle={0.5} penumbra={0.5} intensity={1} color="#A78BFA" />
           <Environment preset="night" environmentIntensity={1.2} />
           <MouseTracker />
-          <EffectComposer multisampling={2}>
+          <EffectComposer multisampling={0}>
             <Bloom
               luminanceThreshold={0.1}
               luminanceSmoothing={0.1}
-              intensity={0.6}
+              intensity={0.4}
               mipmapBlur
             />
-            <ChromaticAberration
-              offset={new Vector2(0.002, 0.002)}
-              opacity={0.3}
-            />
-            <Vignette
-              offset={0.3}
-              darkness={0.6}
-            />
           </EffectComposer>
-          <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.3}>
-            <Particles count={250} />
-          </Float>
+          <Particles />
           <Logo3D />
         </Canvas>
       )}

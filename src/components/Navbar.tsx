@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useRef, memo } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import dynamic from "next/dynamic"
 import { usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion"
 import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Menu, X, LayoutDashboard, LogOut } from "lucide-react"
 import SearchBar from "@/components/SearchBar"
+
+const NavbarLogo3D = dynamic(() => import("@/components/NavbarLogo3D"), { ssr: false })
 
 const NAV_LINKS = [
   { label: "Beranda", path: "/" },
@@ -59,14 +61,7 @@ export default memo(function Navbar() {
       />
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="https://media.base44.com/images/public/6a0614bbe8ea40108cd58983/6842b6f37_Logo_RayonTeknik2022.svg"
-            alt="Logo PR PMII Rayon Teknik"
-            width={36}
-            height={36}
-            className="h-9 w-9"
-            priority
-          />
+          <NavbarLogo3D className="h-9 w-9 shrink-0" />
           <span className="hidden sm:inline font-heading text-sm font-semibold tracking-tight text-foreground">
             PR PMII<span className="text-primary"> Rayon Teknik</span>
           </span>
@@ -93,7 +88,7 @@ export default memo(function Navbar() {
                   <motion.span
                     layoutId="activeNav"
                     className="absolute inset-0 rounded-lg bg-primary/10"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    transition={{ type: "spring" as const, stiffness: 380, damping: 30 }}
                     aria-hidden="true"
                   />
                 )}
@@ -170,7 +165,7 @@ export default memo(function Navbar() {
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              transition={{ type: "spring" as const, damping: 25, stiffness: 200 }}
               className="fixed top-16 right-0 bottom-0 z-50 w-72 bg-background border-l border-border lg:hidden"
             >
               <nav className="flex flex-col p-4 gap-1">

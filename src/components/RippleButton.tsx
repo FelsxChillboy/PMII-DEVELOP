@@ -12,7 +12,7 @@ export default function RippleButton({ children, className, ...props }: RippleBu
     <motion.button
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+      transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}
       className={cn("relative overflow-hidden", className)}
       {...props}
     >

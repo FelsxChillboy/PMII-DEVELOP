@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import PageTransition from "@/components/PageTransition"
+import BarbaTransition from "@/components/BarbaTransition"
 
 export default function RootLayout({
   children,
@@ -11,7 +11,7 @@ export default function RootLayout({
     <>
       <Navbar />
       <main id="main-content" role="main" className="min-h-screen pt-16 outline-none">
-        <PageTransition>{children}</PageTransition>
+        <BarbaTransition>{children}</BarbaTransition>
       </main>
       <Footer />
     </>

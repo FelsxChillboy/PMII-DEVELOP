@@ -37,16 +37,16 @@ export default function Toast({
   }, [onClose, clearTimer])
 
   useEffect(() => {
-    if (show && !visible) {
-      /* eslint-disable react-hooks/set-state-in-effect */
+    if (show) {
       setVisible(true)
-      /* eslint-enable react-hooks/set-state-in-effect */
+      clearTimer()
       timerRef.current = setTimeout(() => {
         setVisible(false)
         setTimeout(onClose, 300)
       }, duration)
     }
-  }, [show, visible, duration, onClose])
+    return () => clearTimer()
+  }, [show, duration, onClose, clearTimer])
 
   useEffect(() => {
     return () => {
@@ -61,7 +61,7 @@ export default function Toast({
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          transition={{ type: "spring" as const, stiffness: 300, damping: 25 }}
           className={cn(
             "fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-4 rounded-xl border shadow-lg max-w-sm",
             type === "success"

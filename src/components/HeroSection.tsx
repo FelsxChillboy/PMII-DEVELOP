@@ -9,9 +9,8 @@ import { useReducedMotion } from "@/hooks/useReducedMotion"
 import AnimatedCounter from "@/components/AnimatedCounter"
 import { duration, easing } from "@/lib/animation"
 
-const HeroCanvas = dynamic(() => import("@/components/HeroCanvas"), {
+const BackgroundMorph = dynamic(() => import("@/components/BackgroundMorph"), {
   ssr: false,
-  loading: () => null,
 })
 
 const STATS = [
@@ -29,17 +28,11 @@ export default function HeroSection() {
     offset: ["start start", "end start"],
   })
 
-  const rawY = useTransform(scrollYProgress, [0, 1], [0, 200])
-  const bgY = useSpring(rawY, { stiffness: 100, damping: 30 })
+  const parallaxRaw = useTransform(scrollYProgress, [0, 1], [0, 200])
+  const parallaxY = useSpring(parallaxRaw, { stiffness: 80, damping: 25 })
 
-  const rawContentY = useTransform(scrollYProgress, [0, 1], [0, 100])
-  const contentY = useSpring(rawContentY, { stiffness: 100, damping: 30 })
-
-  const rawOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-  const opacity = useSpring(rawOpacity, { stiffness: 100, damping: 30 })
-
-  const rawParticleY = useTransform(scrollYProgress, [0, 1], [0, -80])
-  const particleY = useSpring(rawParticleY, { stiffness: 100, damping: 30 })
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 100])
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
 
   const titleWords = ["PR PMII", "Rayon Teknik", "UNUSIA Jakpus"]
   const subtitleWords = "Membangun Peradaban Digital".split(" ")
@@ -107,18 +100,16 @@ export default function HeroSection() {
       <motion.div
         className="absolute inset-0 opacity-[0.04]"
         style={{
-          y: bgY,
+          y: parallaxY,
           backgroundImage:
             "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
         }}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-[1]" />
+      <BackgroundMorph />
 
-      <motion.div style={{ y: particleY }} className="absolute inset-0">
-        <HeroCanvas />
-      </motion.div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-[1]" />
 
       <motion.div
         style={{ y: contentY }}
@@ -155,7 +146,7 @@ export default function HeroSection() {
                       y: 0,
                       opacity: 1,
                       rotateX: 0,
-                      transition: { type: "spring", stiffness: 120, damping: 18 },
+                      transition: { type: "spring" as const, stiffness: 120, damping: 18 },
                     },
                   }}
                 >
@@ -184,7 +175,7 @@ export default function HeroSection() {
                         y: 0,
                         opacity: 1,
                         rotateX: 0,
-                        transition: { type: "spring", stiffness: 120, damping: 18 },
+                        transition: { type: "spring" as const, stiffness: 120, damping: 18 },
                       },
                     }}
                   >
@@ -211,7 +202,7 @@ export default function HeroSection() {
             transition={{ duration: duration.normal, delay: 1, ease: easing.standard }}
             className="flex flex-col sm:flex-row items-start gap-4"
           >
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}>
               <Link
                 href="/tentang"
                 className="group relative inline-flex h-12 px-8 items-center justify-center rounded-xl bg-primary text-primary-foreground font-semibold text-sm overflow-hidden"
@@ -223,7 +214,7 @@ export default function HeroSection() {
                 </span>
               </Link>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}>
               <Link
                 href="/kegiatan"
                 className="inline-flex h-12 px-8 items-center justify-center rounded-xl border border-white/20 text-white font-medium text-sm hover:bg-white/10 transition-all"
@@ -246,7 +237,7 @@ export default function HeroSection() {
               key={stat.label}
               className="group"
               whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              transition={{ type: "spring" as const, stiffness: 300, damping: 20 }}
             >
               <stat.icon className="h-5 w-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
               <p className="font-heading text-2xl sm:text-3xl font-bold text-white">

@@ -41,7 +41,7 @@ function Logo3D() {
       const shapes = path.toShapes(true)
 
       shapes.forEach((shape) => {
-        const points = shape.getPoints(50)
+        const points = shape.getPoints(20)
         points.forEach((p) => {
           if (p.x < minX) minX = p.x
           if (p.x > maxX) maxX = p.x
@@ -50,11 +50,11 @@ function Logo3D() {
         })
 
         const geom = new ExtrudeGeometry(shape, {
-          depth: 0.15,
+          depth: 0.1,
           bevelEnabled: true,
-          bevelThickness: 0.03,
-          bevelSize: 0.015,
-          bevelSegments: 3,
+          bevelThickness: 0.02,
+          bevelSize: 0.01,
+          bevelSegments: 1,
         })
 
         const pos = geom.getAttribute("position")
@@ -127,16 +127,13 @@ function Logo3D() {
     >
       <MeshTransmissionMaterial
         vertexColors
-        transmission={0.65}
-        thickness={0.2}
-        roughness={0.15}
+        transmission={0.5}
+        thickness={0.1}
+        roughness={0.2}
         metalness={0.05}
-        ior={1.4}
-        chromaticAberration={0.05}
-        backside
-        backsideThickness={0.15}
-        samples={4}
-        resolution={256}
+        ior={1.3}
+        samples={2}
+        resolution={128}
         emissive={hovered ? "#FBBF24" : "#000000"}
         emissiveIntensity={hovered ? 0.3 : 0}
       />

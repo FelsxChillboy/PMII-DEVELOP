@@ -44,7 +44,7 @@ function PhysicsScene() {
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       camera={{ position: [0, 0, 10], fov: 50 }}
       dpr={[1, 1.5]}
-      frameloop="always"
+      frameloop="demand"
       style={{
         width: "100%",
         height: "100%",
@@ -86,7 +86,7 @@ export default function Interactive3DSection() {
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
-      { rootMargin: "300px" }
+      { rootMargin: "100px" }
     )
     observer.observe(el)
     return () => observer.disconnect()

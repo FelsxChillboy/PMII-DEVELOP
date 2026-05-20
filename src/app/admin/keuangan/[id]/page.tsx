@@ -45,33 +45,6 @@ export default async function EditLaporanPage({ params }: Props) {
   const report = await prisma.financialReport.findUnique({ where: { id } })
   if (!report) notFound()
 
-  async function update(formData: FormData) {
-    "use server"
-    const { session, error: authErr } = await requireAdmin()
-    if (authErr || !session) return
-
-    const title = formData.get("title") as string
-    const type = formData.get("type") as string
-    const amount = parseInt(formData.get("amount") as string) || 0
-    const category = formData.get("category") as string
-    const date = formData.get("date") as string
-
-    if (!title || !type || !amount || !category || !date) return
-
-    try {
-      await prisma.financialReport.update({
-        where: { id },
-        data: { title, type: type as "INCOME" | "EXPENSE", amount, category, date: new Date(date) },
-      })
-    } catch (err) {
-      console.error("Update financial report failed:", err)
-      return
-    }
-
-    revalidatePath("/admin/keuangan")
-    redirect("/admin/keuangan")
-  }
-
   const dateStr = report.date.toISOString().split("T")[0]
 
   return (
@@ -94,6 +67,7 @@ export default async function EditLaporanPage({ params }: Props) {
 
       <div className="max-w-2xl">
         <form action={update} className="space-y-6">
+          <input type="hidden" name="id" value={report.id} />
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-1.5">
               Judul Laporan

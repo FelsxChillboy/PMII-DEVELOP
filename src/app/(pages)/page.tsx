@@ -1,30 +1,16 @@
 import type { Metadata } from "next"
-import dynamic from "next/dynamic"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import FeatureCard from "@/components/FeatureCard"
 import LazyLottie from "@/components/LazyLottie"
+import { HeroSection as ClientHero, Interactive3DSection as ClientInteractive, DonationCTA as ClientDonation } from "./ClientSections"
 import { Brain, Cog, ShieldCheck } from "lucide-react"
-
-const DonationCTA = dynamic(() => import("@/components/DonationCTA"), {
-  loading: () => null,
-})
 
 export const metadata: Metadata = {
   title: "Beranda",
   description:
     "PR PMII Rayon Teknik UNUSIA Jakarta Pusat — Organisasi pergerakan mahasiswa di Fakultas Teknik UNUSIA. Kaderisasi intelektual berbasis Ahlussunnah wal Jama'ah.",
 }
-
-const HeroSection = dynamic(() => import("@/components/HeroSection"), {
-  ssr: true,
-  loading: () => <div className="min-h-screen bg-[#0F172A]" />,
-})
-
-const Interactive3DSection = dynamic(
-  () => import("@/components/Interactive3DSection"),
-  { loading: () => null }
-)
 
 const FEATURES = [
   {
@@ -50,7 +36,7 @@ const FEATURES = [
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
+      <ClientHero />
 
       <AnimatedSection className="py-20 lg:py-28 border-t border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -81,9 +67,8 @@ export default function HomePage() {
         </div>
       </AnimatedSection>
 
-      <Interactive3DSection />
-
-      <DonationCTA />
+      <ClientInteractive />
+      <ClientDonation />
     </>
   )
 }

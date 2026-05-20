@@ -117,6 +117,17 @@ body {
   }
 }
 
+/* === Lenis Smooth Scroll === */
+html.lenis {
+  scroll-behavior: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
 /* === Reduced Motion === */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -152,6 +163,127 @@ body {
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-accelerate: cubic-bezier(0.7, 0, 1, 0.5);
   --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* === Barba.js Page Transitions === */
+.barba-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.barba-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: hsl(var(--primary));
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+.barba-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: hsl(var(--background));
+  pointer-events: none;
+}
+
+@keyframes leave-forward {
+  from { opacity: 1; transform: scale(1) translateX(0); }
+  to   { opacity: 0; transform: scale(0.96) translateX(-40px); }
+}
+
+@keyframes leave-back {
+  from { opacity: 1; transform: scale(1) translateX(0); }
+  to   { opacity: 0; transform: scale(0.96) translateX(40px); }
+}
+
+@keyframes enter-forward {
+  from { opacity: 0; transform: scale(0.97) translateX(50px); }
+  to   { opacity: 1; transform: scale(1) translateX(0); }
+}
+
+@keyframes enter-back {
+  from { opacity: 0; transform: scale(0.97) translateX(-50px); }
+  to   { opacity: 1; transform: scale(1) translateX(0); }
+}
+
+.barba-container {
+  will-change: transform, opacity;
+}
+
+.barba-container.is-leaving {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.barba-container.is-leaving-forward {
+  animation: leave-forward 0.32s cubic-bezier(0.7, 0, 1, 0.5) forwards;
+}
+
+.barba-container.is-leaving-back {
+  animation: leave-back 0.32s cubic-bezier(0.7, 0, 1, 0.5) forwards;
+}
+
+.barba-container.is-entering-forward {
+  animation: enter-forward 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.barba-container.is-entering-back {
+  animation: enter-back 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.barba-overlay.is-active {
+  opacity: 1;
+}
+
+.barba-overlay.is-closing {
+  opacity: 0;
+  transition: opacity 0.4s ease 0.15s;
+}
+
+@keyframes barba-leave {
+  from {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.85) rotate(-4deg) translateY(-40px);
+  }
+}
+
+@keyframes barba-enter {
+  from {
+    opacity: 0;
+    transform: scale(1.15) translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.barba-container {
+  will-change: transform, opacity;
+  transform-origin: center top;
+}
+
+.barba-container.is-leaving {
+  pointer-events: none;
+  animation: barba-leave 0.4s cubic-bezier(0.7, 0, 1, 0.5) forwards;
+  position: absolute;
+  inset: 0;
+}
+
+.barba-container.is-entering {
+  animation: barba-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* === Skip-to-content === */

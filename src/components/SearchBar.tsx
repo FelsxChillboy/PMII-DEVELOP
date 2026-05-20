@@ -20,10 +20,8 @@ export default function SearchBar() {
     if (open) {
       inputRef.current?.focus()
     } else {
-      /* eslint-disable react-hooks/set-state-in-effect */
       setQuery("")
       setResults(null)
-      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [open])
 

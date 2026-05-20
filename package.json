@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
-    "@barba/core": "^2.10.3",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@react-three/drei": "^10.7.7",
@@ -24,6 +23,7 @@
     "@tanstack/react-query": "^5.100.10",
     "@types/three": "^0.184.1",
     "@vercel/analytics": "^2.0.1",
+    "animejs": "^4.4.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",

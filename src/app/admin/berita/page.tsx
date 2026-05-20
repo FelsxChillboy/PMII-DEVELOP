@@ -102,7 +102,7 @@ export default async function AdminBerita(props: { searchParams?: Promise<{ page
                     <p className="font-medium truncate max-w-xs">{item.title}</p>
                   </td>
                   <td className="p-4 text-muted-foreground hidden md:table-cell">
-                    {item.author.name || "-"}
+                    {item.author?.name || "-"}
                   </td>
                   <td className="p-4 hidden sm:table-cell">
                     <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${item.published ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"}`}>

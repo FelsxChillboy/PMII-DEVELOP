@@ -110,7 +110,7 @@ export default function TransparansiPage() {
                     hidden: { opacity: 0, y: 20 },
                     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easing.standard } },
                   }}
-                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+                  whileHover={{ y: -4, transition: { type: "spring" as const, stiffness: 300, damping: 20 } }}
                   className="p-6 rounded-xl border border-border bg-card cursor-default"
                 >
                   <div className={`h-10 w-10 rounded-lg ${card.bg} flex items-center justify-center mb-3`}>

@@ -79,7 +79,7 @@ export default function DonasiPage() {
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  transition={{ type: "spring" as const, stiffness: 200, damping: 15 }}
                   className="h-16 w-16 rounded-full bg-accent/20 flex items-center justify-center mb-6"
                 >
                   <CheckCircle className="h-8 w-8 text-accent" />
@@ -231,7 +231,7 @@ export default function DonasiPage() {
                           ? { borderColor: "rgb(56, 189, 248)", scale: 1.04 }
                           : { borderColor: "rgb(51, 65, 85)", scale: 1 }
                       }
-                      transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                      transition={{ type: "spring" as const, stiffness: 300, damping: 15 }}
                       className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-sm transition-colors ${
                         selected
                           ? "bg-primary/10 text-primary"
@@ -262,7 +262,7 @@ export default function DonasiPage() {
             <motion.label
               className="flex items-center gap-3 cursor-pointer group"
               whileHover={{ x: 4 }}
-              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              transition={{ type: "spring" as const, stiffness: 200, damping: 20 }}
             >
               <div
                 className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
