@@ -76,7 +76,7 @@ const jsonLd = {
   description: siteDescription,
   contactPoint: {
     "@type": "ContactPoint",
-    email: "pmii.rayonteknik@unusia.ac.id",
+    email: "rayonteknik@gmail.com",
     contactType: "customer service",
   },
   sameAs: [],

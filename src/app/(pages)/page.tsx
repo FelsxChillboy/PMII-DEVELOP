@@ -52,7 +52,7 @@ export default function HomePage() {
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 PR PMII Rayon Teknik UNUSIA Jakarta Pusat adalah wadah perjuangan
-                kader pergerakan di lingkungan Fakultas Teknik Universitas Nahdlatul
+                kader pergerakan di lingkungan Fakultas Teknik dan Ilmu Komputer Universitas Nahdlatul
                 Ulama Indonesia. Berkomitmen melahirkan kader intelektual yang
                 menguasai ilmu pengetahuan dan teknologi serta berakhlakul karimah.
               </p>

@@ -71,16 +71,16 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span className="text-sm text-muted-foreground">
-                  Kampus UNUSIA, Jl. Taman Amir Hamzah No. 5, Jakarta Pusat 10430
+                  1, Jl. Matraman Dalam III No.RT 13, RT.10/RW.7, Pegangsaan, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10320
                 </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
                 <a
-                  href="mailto:pmii.rayonteknik@unusia.ac.id"
+                  href="mailto:rayonteknikunusia@gmail.com"
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  pmii.rayonteknik@unusia.ac.id
+                  rayonteknikunusia@gmail.com
                 </a>
               </li>
             </ul>
@@ -92,7 +92,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
-            &copy; {year} PR PMII RAYON TEKNIK UNUSIA JAKPUS.
+            &copy; {year} PR PMII RAYON TEKNIK UNUSIA JAKARTA PUSAT.
           </p>
           <p className="text-xs text-muted-foreground/60">
             Dibangun dengan <span className="text-primary">&#9829;</span> untuk pergerakan

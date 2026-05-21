@@ -33,7 +33,7 @@ export default function HeroSection() {
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 100])
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
 
-  const titleWords = ["PR PMII", "Rayon Teknik", "UNUSIA Jakpus"]
+  const titleWords = ["PR PMII", "Rayon Teknik", "UNUSIA Jakarta Pusat"]
 
   if (reducedMotion) {
     return (
@@ -49,7 +49,7 @@ export default function HeroSection() {
               PERGERAKAN MAHASISWA ISLAM INDONESIA
             </div>
             <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.05] mb-6">
-              PR PMII Rayon Teknik UNUSIA Jakpus
+              PR PMII Rayon Teknik UNUSIA Jakarta Pusat
               <br />
               <span className="text-gradient">Membangun Peradaban Digital</span>
             </h1>
@@ -97,13 +97,13 @@ export default function HeroSection() {
       className="relative min-h-screen flex items-center overflow-hidden bg-background"
     >
       <div className="absolute inset-0 section-grid opacity-[0.06]" />
-      <div className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[120px]" />
-      <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[100px]" />
+      <div className="absolute -top-40 -right-40 h-150 w-150 rounded-full bg-primary/5 blur-[120px]" />
+      <div className="absolute -bottom-40 -left-40 h-125 w-125 rounded-full bg-accent/5 blur-[100px]" />
 
-      <Spotlight className="z-[2]" fill="hsl(var(--primary))" size={600} />
+      <Spotlight className="z-2" fill="hsl(var(--primary))" size={600} />
       <BackgroundMorph />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-[1]" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-background z-1" />
 
       <motion.div
         style={{ y: contentY }}

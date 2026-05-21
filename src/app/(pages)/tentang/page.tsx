@@ -78,7 +78,7 @@ export default function TentangPage() {
                 Visi <span className="text-gradient">Kami</span>
               </h2>
               <div className="relative">
-                <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-primary via-accent to-primary/20" />
+                <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-primary via-accent to-primary/20" />
                 <p className="text-base sm:text-lg text-muted-foreground leading-relaxed pl-6 italic">
                   &ldquo;Menjadikan PR PMII Rayon Teknik UNUSIA sebagai pusat
                   kaderisasi intelektual yang melahirkan pemimpin berkarakter,
@@ -95,7 +95,7 @@ export default function TentangPage() {
               <ol className="space-y-4">
                 {MISI.map((item, i) => (
                   <li key={i} className="flex items-start gap-4">
-                    <span className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-primary to-accent text-white text-sm font-bold mt-0.5">
+                    <span className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-full bg-linear-to-br from-primary to-accent text-white text-sm font-bold mt-0.5">
                       {i + 1}
                     </span>
                     <span className="text-base text-muted-foreground leading-relaxed">
@@ -115,7 +115,7 @@ export default function TentangPage() {
             {NILAI.map((nilai) => (
               <Card key={nilai.title} className="p-6 border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
                 <CardContent className="p-0">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center mb-4">
+                  <div className="h-12 w-12 rounded-xl bg-linear-to-br from-accent/10 to-primary/10 flex items-center justify-center mb-4">
                     <div className="text-accent">{nilai.icon}</div>
                   </div>
                   <CardTitle className="font-heading font-semibold text-lg text-foreground mb-2">
@@ -137,13 +137,13 @@ export default function TentangPage() {
           <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-2">
             Struktur <span className="text-gradient">Organisasi</span>
           </h2>
-          <p className="text-sm text-muted-foreground mb-10">Periode 2024/2025</p>
+          <p className="text-sm text-muted-foreground mb-10">Periode 2025/2026</p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {STRUKTUR.map((pos) => (
               <Card key={pos.jabatan} className="p-5 text-center border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300">
                 <CardContent className="p-0">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto mb-2">
+                  <div className="h-8 w-8 rounded-full bg-linear-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto mb-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                   <p className="text-xs tracking-widest uppercase text-primary font-medium mb-1">
