@@ -40,7 +40,16 @@ export default async function BeritaDetailPage({ params }: Props) {
 
   const news = await prisma.news.findUnique({
     where: { slug },
-    include: { author: { select: { name: true } } },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      content: true,
+      imageUrl: true,
+      published: true,
+      createdAt: true,
+      author: { select: { name: true } },
+    },
   })
 
   if (!news || !news.published) notFound()

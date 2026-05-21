@@ -3,7 +3,7 @@ import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import FeatureCard from "@/components/FeatureCard"
 import LazyLottie from "@/components/LazyLottie"
-import { HeroSection as ClientHero, Interactive3DSection as ClientInteractive, DonationCTA as ClientDonation } from "./ClientSections"
+import { HeroSection as ClientHero, Interactive3DSection as ClientInteractive } from "./ClientSections"
 import { Brain, Cog, ShieldCheck } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -68,7 +68,6 @@ export default function HomePage() {
       </AnimatedSection>
 
       <ClientInteractive />
-      <ClientDonation />
     </>
   )
 }

@@ -7,8 +7,6 @@ const FOOTER_LINKS = [
   { label: "Tentang Kami", path: "/tentang" },
   { label: "Berita", path: "/berita" },
   { label: "Kegiatan", path: "/kegiatan" },
-  { label: "Donasi", path: "/donasi" },
-  { label: "Transparansi", path: "/transparansi" },
 ]
 
 export default function Footer() {

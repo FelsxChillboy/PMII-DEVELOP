@@ -17,7 +17,17 @@ export default async function EditBeritaPage({ params }: Props) {
   if (!isAdmin) redirect("/admin")
 
   const { id } = await params
-  const news = await prisma.news.findUnique({ where: { id } })
+  const news = await prisma.news.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      imageUrl: true,
+      content: true,
+      published: true,
+    },
+  })
   if (!news) notFound()
 
   return (

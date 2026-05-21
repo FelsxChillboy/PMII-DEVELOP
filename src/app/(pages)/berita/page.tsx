@@ -22,7 +22,16 @@ export default async function BeritaPage({ searchParams }: Props) {
     prisma.news.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
-      include: { author: { select: { name: true } } },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        content: true,
+        imageUrl: true,
+        published: true,
+        createdAt: true,
+        author: { select: { name: true } },
+      },
       take: PER_PAGE,
       skip: (page - 1) * PER_PAGE,
     }),

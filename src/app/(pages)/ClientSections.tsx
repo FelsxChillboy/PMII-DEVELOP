@@ -11,8 +11,3 @@ export const Interactive3DSection = dynamic(
   () => import("@/components/Interactive3DSection"),
   { ssr: false, loading: () => null }
 )
-
-export const DonationCTA = dynamic(() => import("@/components/DonationCTA"), {
-  ssr: false,
-  loading: () => null,
-})

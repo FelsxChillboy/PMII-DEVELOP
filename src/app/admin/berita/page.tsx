@@ -11,7 +11,15 @@ async function getNews(page: number) {
     const [news, total] = await Promise.all([
       prisma.news.findMany({
         orderBy: { createdAt: "desc" },
-        include: { author: { select: { name: true } } },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          imageUrl: true,
+          published: true,
+          createdAt: true,
+          author: { select: { name: true } },
+        },
         take: PER_PAGE,
         skip: (page - 1) * PER_PAGE,
       }),

@@ -7,8 +7,6 @@ const ROUTES = [
   { path: "/tentang", priority: 0.8, changeFreq: "monthly" as const },
   { path: "/berita", priority: 0.9, changeFreq: "weekly" as const },
   { path: "/kegiatan", priority: 0.8, changeFreq: "monthly" as const },
-  { path: "/donasi", priority: 0.7, changeFreq: "monthly" as const },
-  { path: "/transparansi", priority: 0.6, changeFreq: "monthly" as const },
   { path: "/kontak", priority: 0.7, changeFreq: "monthly" as const },
 ]
 

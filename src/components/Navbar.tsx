@@ -3,11 +3,10 @@
 import { useState, useEffect, useRef, memo } from "react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion"
-import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { Menu, X, LayoutDashboard, LogOut } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import SearchBar from "@/components/SearchBar"
 
 const NavbarLogo3D = dynamic(() => import("@/components/NavbarLogo3D"), { ssr: false })
@@ -15,26 +14,25 @@ const NavbarLogo3D = dynamic(() => import("@/components/NavbarLogo3D"), { ssr: f
 const NAV_LINKS = [
   { label: "Beranda", path: "/" },
   { label: "Tentang", path: "/tentang" },
-  { label: "Berita", path: "/berita" },
   { label: "Kegiatan", path: "/kegiatan" },
-  { label: "Donasi", path: "/donasi" },
-  { label: "Transparansi", path: "/transparansi" },
+  { label: "Kontak", path: "/kontak" },
+]
+
+const UPDATE_LINKS = [
+  { label: "Berita", path: "/berita" },
+  { label: "Opini", path: "/opini" },
 ]
 
 export default memo(function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
+  const [updateOpen, setUpdateOpen] = useState(false)
   const lastScrollY = useRef(0)
   const pathname = usePathname()
-  const { data: session } = useSession()
-  const router = useRouter()
-
-  const handleLogout = () => signOut({ callbackUrl: "/" })
-  const role = (session?.user as { role?: string })?.role
-  const dashboardHref = role === "ADMIN" ? "/admin" : "/dashboard"
 
   const { scrollY, scrollYProgress } = useScroll()
   const progressScale = useSpring(scrollYProgress, { stiffness: 200, damping: 30 })
+  const isUpdateActive = pathname.startsWith("/berita") || pathname.startsWith("/opini")
 
   useEffect(() => {
     let ticking = false
@@ -106,6 +104,61 @@ export default memo(function Navbar() {
               </Link>
             )
           })}
+
+          <div
+            className="relative"
+            onMouseEnter={() => setUpdateOpen(true)}
+            onMouseLeave={() => setUpdateOpen(false)}
+          >
+            <button
+              type="button"
+              className={cn(
+                "relative px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                isUpdateActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              )}
+            >
+              {isUpdateActive && (
+                <motion.span
+                  layoutId="activeNav"
+                  className="absolute inset-0 rounded-lg bg-primary/10"
+                  transition={{ type: "spring" as const, stiffness: 380, damping: 30 }}
+                  aria-hidden="true"
+                />
+              )}
+              <span className="relative z-10">Update</span>
+            </button>
+
+            <AnimatePresence>
+              {updateOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="absolute right-0 mt-2 w-44 rounded-3xl border border-border bg-background/95 p-2 shadow-xl backdrop-blur-xl"
+                >
+                  {UPDATE_LINKS.map((item) => {
+                    const isActiveItem = pathname.startsWith(item.path)
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        className={cn(
+                          "block rounded-2xl px-3 py-2 text-sm font-medium transition-colors",
+                          isActiveItem
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </nav>
 
         <div className="flex items-center gap-1">
@@ -116,40 +169,6 @@ export default memo(function Navbar() {
           >
             Hubungi Kami
           </Link>
-
-          {session?.user ? (
-            <div className="hidden sm:flex items-center gap-2">
-              <Link
-                href={dashboardHref}
-                className="inline-flex h-9 px-3 items-center gap-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Dashboard
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                title="Keluar"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="hidden sm:flex items-center gap-2">
-              <Link
-                href="/daftar"
-                className="inline-flex h-9 px-4 items-center justify-center rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                Daftar
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex h-9 px-4 items-center justify-center rounded-lg border border-primary/30 text-primary text-sm font-medium hover:bg-primary/10 transition-colors"
-              >
-                Masuk
-              </Link>
-            </div>
-          )}
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -206,43 +225,22 @@ export default memo(function Navbar() {
                     </motion.div>
                   )
                 })}
+                <div className="rounded-2xl border border-border bg-background/80 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                    Update
+                  </p>
+                  {UPDATE_LINKS.map((item) => (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      onClick={() => setMobileOpen(false)}
+                      className="block rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
                 <div className="border-t border-border my-2" />
-                {session?.user ? (
-                  <>
-                    <Link
-                      href={dashboardHref}
-                      onClick={() => setMobileOpen(false)}
-                      className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Link>
-                    <button
-                      onClick={() => { handleLogout(); setMobileOpen(false) }}
-                      className="px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-2 text-left"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Keluar
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/daftar"
-                      onClick={() => setMobileOpen(false)}
-                      className="px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors block text-center"
-                    >
-                      Daftar
-                    </Link>
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileOpen(false)}
-                      className="px-4 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors block text-center"
-                    >
-                      Masuk
-                    </Link>
-                  </>
-                )}
                 <Link
                   href="/kontak"
                   onClick={() => setMobileOpen(false)}

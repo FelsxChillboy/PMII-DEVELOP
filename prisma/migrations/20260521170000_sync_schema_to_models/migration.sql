@@ -1,0 +1,20 @@
+-- This migration adds missing columns to the existing database schema
+-- so that it matches the current Prisma model definitions.
+
+ALTER TABLE `Event`
+  ADD COLUMN `type` VARCHAR(191) NOT NULL DEFAULT 'kegiatan',
+  ADD COLUMN `status` ENUM('DRAFT', 'TERBUKA', 'PENUH', 'BERLANGSUNG', 'SELESAI', 'DIBATALKAN') NOT NULL DEFAULT 'DRAFT',
+  ADD COLUMN `dateEnd` DATETIME(3) NULL,
+  ADD COLUMN `time` VARCHAR(191) NULL,
+  ADD COLUMN `image` VARCHAR(191) NULL,
+  ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
+
+ALTER TABLE `News`
+  ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
+
+ALTER TABLE `FinancialReport`
+  ADD COLUMN `description` VARCHAR(191) NULL,
+  ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
+
+ALTER TABLE `Media`
+  ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
