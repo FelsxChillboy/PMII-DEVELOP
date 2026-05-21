@@ -34,7 +34,7 @@ export default function Footer() {
                 <p className="font-heading font-semibold text-sm text-foreground">
                   PR PMII RAYON TEKNIK
                 </p>
-                <p className="text-xs text-muted-foreground">UNUSIA JAKPUS</p>
+                <p className="text-xs text-muted-foreground">UNUSIA JAKARTA PUSAT</p>
               </div>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
@@ -70,7 +70,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground"> 
                   1, Jl. Matraman Dalam III No.RT 13, RT.10/RW.7, Pegangsaan, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10320
                 </span>
               </li>

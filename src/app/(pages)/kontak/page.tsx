@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { toast } from "sonner"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
-import { MapPin, Mail, Phone, Send, AlertCircle } from "lucide-react"
+import { MapPin, Mail, Phone, Send, AlertCircle, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -17,19 +17,27 @@ const CONTACT_INFO = [
   {
     icon: MapPin,
     label: "Alamat",
-    value: "Kampus UNUSIA, Jl. Taman Amir Hamzah No. 5, Jakarta Pusat 10430",
+    href : "https://maps.app.goo.gl/ccuMbSL6C9bqyQ9U6",
+    value: "1, Jl. Matraman Dalam III No.RT 13, RT.10/RW.7, Pegangsaan, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10320",
+    
   },
   {
     icon: Mail,
     label: "Email",
-    value: "pmii.rayonteknik@unusia.ac.id",
-    href: "mailto:pmii.rayonteknik@unusia.ac.id",
+    value: "rayonteknikunusia@gmail.com",
+    href: "mailto:rayonteknikunusia@gmail.com",
   },
   {
     icon: Phone,
     label: "Telepon",
-    value: "+62 821-1234-5678",
-    href: "tel:+6282112345678",
+    value: "+6281292675810",
+    href: "https://wa.me/+6281292675810",
+  },
+  {
+    icon: Globe,
+    label: "Instagram",
+    value: "rayonteknikunusia",
+    href: "https://www.instagram.com/rayonteknikunusia",
   },
 ]
 
