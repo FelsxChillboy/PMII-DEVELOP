@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { auth, signOut } from "@/lib/auth"
-import { User, LogOut, Newspaper, Calendar, DollarSign, Mail, CheckCircle, Clock } from "lucide-react"
+import { User, LogOut, Newspaper, Calendar, Mail, Clock } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Dashboard Anggota",
@@ -17,29 +17,12 @@ export default async function DashboardPage() {
 
   const user = session.user as { name?: string; email?: string; role?: string; image?: string; id?: string }
 
-  const [donations, registrations] = await Promise.all([
-    prisma.donation.findMany({
-      where: { userId: session.user?.id },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { id: true, amount: true, status: true, createdAt: true, type: true },
-    }),
-    prisma.registration.findMany({
-      where: { userId: session.user?.id },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { event: { select: { id: true, title: true, date: true, slug: true } } },
-    }),
-  ])
-
-  const donationTotal = donations.reduce((sum, d) => sum + d.amount, 0)
-
-  const STATUS_LABELS: Record<string, string> = { PENDING: "Menunggu", SUCCESS: "Berhasil", FAILED: "Gagal" }
-  const STATUS_COLORS: Record<string, string> = {
-    PENDING: "bg-yellow-500/10 text-yellow-500",
-    SUCCESS: "bg-green-500/10 text-green-500",
-    FAILED: "bg-red-500/10 text-red-500",
-  }
+  const registrations = await prisma.registration.findMany({
+    where: { userId: session.user?.id },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: { event: { select: { id: true, title: true, date: true, slug: true } } },
+  })
 
   return (
     <div className="min-h-screen bg-[#0B1120]">
@@ -98,11 +81,6 @@ export default async function DashboardPage() {
             <p className="font-medium text-sm">Kegiatan</p>
             <p className="text-xs text-muted-foreground mt-1">Lihat jadwal kegiatan</p>
           </Link>
-          <Link href="/donasi" className="p-5 rounded-xl border border-border bg-card hover:hover:bg-secondary/50 transition-colors">
-            <DollarSign className="h-5 w-5 text-green-500 mb-3" />
-            <p className="font-medium text-sm">Donasi</p>
-            <p className="text-xs text-muted-foreground mt-1">Rp{(donationTotal / 1000).toFixed(0)}rb total donasi</p>
-          </Link>
           <Link href="/kontak" className="p-5 rounded-xl border border-border bg-card hover:hover:bg-secondary/50 transition-colors">
             <Mail className="h-5 w-5 text-amber-500 mb-3" />
             <p className="font-medium text-sm">Kontak</p>
@@ -132,29 +110,6 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="font-heading text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-500" />
-              Riwayat Donasi
-            </h2>
-            {donations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Belum ada donasi.</p>
-            ) : (
-              <div className="space-y-3">
-                {donations.map((d) => (
-                  <div key={d.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
-                    <div>
-                      <p className="text-sm font-medium">Rp{d.amount.toLocaleString("id-ID")}</p>
-                      <p className="text-xs text-muted-foreground">{d.createdAt.toLocaleDateString("id-ID")}</p>
-                    </div>
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[d.status] || ""}`}>
-                      {STATUS_LABELS[d.status] || d.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6">

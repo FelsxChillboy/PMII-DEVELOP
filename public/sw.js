@@ -6,8 +6,6 @@ const STATIC_ASSETS = [
   "/tentang",
   "/berita",
   "/kegiatan",
-  "/donasi",
-  "/transparansi",
   "/kontak",
 ]
 

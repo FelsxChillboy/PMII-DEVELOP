@@ -4,18 +4,14 @@ import { auth, signOut } from "@/lib/auth"
 import {
   LayoutDashboard,
   Newspaper,
-  DollarSign,
   Calendar,
   Mail,
   LogOut,
   ChevronRight,
-  Wallet,
   Users,
   ImageIcon,
   ClipboardList,
 } from "lucide-react"
-import { NotificationBadge } from "@/components/admin/NotificationBadge"
-
 async function logoutAction() {
   "use server"
   await signOut({ redirectTo: "/" })
@@ -24,9 +20,7 @@ async function logoutAction() {
 const SIDEBAR = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Berita", href: "/admin/berita", icon: Newspaper },
-  { label: "Donasi", href: "/admin/donasi", icon: DollarSign },
   { label: "Kegiatan", href: "/admin/kegiatan", icon: Calendar },
-  { label: "Keuangan", href: "/admin/keuangan", icon: Wallet },
   { label: "Media", href: "/admin/media", icon: ImageIcon },
   { label: "Audit Log", href: "/admin/audit", icon: ClipboardList },
   { label: "Kontak", href: "/admin/kontak", icon: Mail },
@@ -63,7 +57,6 @@ export default async function AdminLayout({
             >
               <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
-              {item.href === "/admin" && <NotificationBadge />}
               <ChevronRight className="h-3 w-3 ml-auto opacity-30" />
             </Link>
           ))}

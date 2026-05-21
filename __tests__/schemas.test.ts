@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { NewsSchema, EventSchema, AdminFinancialReportSchema, DonationSchema } from "@/lib/schemas"
+import { NewsSchema, EventSchema } from "@/lib/schemas"
 
 describe("NewsSchema", () => {
   it("accepts valid news data", () => {
@@ -68,42 +68,4 @@ describe("EventSchema", () => {
   })
 })
 
-describe("DonationSchema", () => {
-  it("accepts valid donation", () => {
-    const result = DonationSchema.safeParse({
-      amount: 50000,
-      donorName: "Test",
-      donorEmail: "test@example.com",
-    })
-    expect(result.success).toBe(true)
-  })
 
-  it("rejects too small amount", () => {
-    const result = DonationSchema.safeParse({ amount: 500 })
-    expect(result.success).toBe(false)
-  })
-})
-
-describe("AdminFinancialReportSchema", () => {
-  it("accepts valid report", () => {
-    const result = AdminFinancialReportSchema.safeParse({
-      title: "Laporan Kegiatan",
-      type: "INCOME",
-      amount: 100000,
-      category: "Kegiatan",
-      date: "2024-12-01",
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it("rejects invalid type", () => {
-    const result = AdminFinancialReportSchema.safeParse({
-      title: "Test",
-      type: "INVALID",
-      amount: 1000,
-      category: "Test",
-      date: "2024-12-01",
-    })
-    expect(result.success).toBe(false)
-  })
-})

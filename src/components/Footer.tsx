@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Mail, MapPin, Heart } from "lucide-react"
+import { Mail, MapPin } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import BackToTop from "@/components/BackToTop"
 import AnimatedLogo from "@/components/AnimatedLogo"
@@ -8,7 +8,6 @@ const FOOTER_LINKS = [
   { label: "Tentang Kami", path: "/tentang" },
   { label: "Berita", path: "/berita" },
   { label: "Kegiatan", path: "/kegiatan" },
-  { label: "Donasi", path: "/donasi" },
 ]
 
 export default function Footer() {
@@ -43,15 +42,7 @@ export default function Footer() {
               UNUSIA Jakarta Pusat. Berkomitmen melahirkan kader intelektual
               yang berintegritas.
             </p>
-            <div className="flex items-center gap-4 pt-2">
-              <Link
-                href="/donasi"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Heart className="h-3.5 w-3.5" />
-                Dukung Kami
-              </Link>
-            </div>
+
           </div>
 
           <div className="md:col-span-3 space-y-4">

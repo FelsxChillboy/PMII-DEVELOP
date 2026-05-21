@@ -1,39 +1,15 @@
 import { prisma } from "@/lib/prisma"
-import { Newspaper, DollarSign, Calendar, Users } from "lucide-react"
-import AdminCharts from "@/components/admin/AdminCharts"
+import { Newspaper, Calendar, Users } from "lucide-react"
 
 async function getStats() {
   try {
-    const [newsCount, donationAgg, eventCount, userCount, donations] = await Promise.all([
+    const [newsCount, eventCount, userCount] = await Promise.all([
       prisma.news.count({ where: { published: true } }),
-      prisma.donation.aggregate({
-        _sum: { amount: true },
-        where: { status: "SUCCESS" },
-      }),
       prisma.event.count(),
       prisma.user.count(),
-      prisma.donation.findMany({
-        where: { status: "SUCCESS" },
-        select: { amount: true, createdAt: true },
-        orderBy: { createdAt: "asc" },
-      }),
     ])
 
-    const monthlyMap: Record<string, number> = {}
-    for (const d of donations) {
-      const key = new Intl.DateTimeFormat("id-ID", { month: "short", year: "2-digit" }).format(d.createdAt)
-      monthlyMap[key] = (monthlyMap[key] || 0) + d.amount
-    }
-
-    const chartData = Object.entries(monthlyMap).map(([name, value]) => ({ name, value }))
-
-    return {
-      newsCount,
-      donationTotal: donationAgg._sum.amount || 0,
-      eventCount,
-      userCount,
-      chartData,
-    }
+    return { newsCount, eventCount, userCount }
   } catch {
     return null
   }
@@ -44,7 +20,6 @@ export default async function AdminDashboard() {
 
   const cards = [
     { label: "Berita Terbit", value: stats?.newsCount ?? 0, icon: Newspaper, color: "text-blue-500" },
-    { label: "Total Donasi", value: stats ? `Rp${(stats.donationTotal / 1000).toFixed(0)}rb` : "0", icon: DollarSign, color: "text-green-500" },
     { label: "Kegiatan", value: stats?.eventCount ?? 0, icon: Calendar, color: "text-purple-500" },
     { label: "Pengguna", value: stats?.userCount ?? 0, icon: Users, color: "text-amber-500" },
   ]
@@ -74,13 +49,6 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
-
-      {stats && (
-        <AdminCharts
-          data={stats.chartData}
-          totalDonations={stats.donationTotal}
-        />
-      )}
     </div>
   )
 }

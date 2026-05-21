@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth"
 import type { Prisma } from "@prisma/client"
 
 type AuditAction = "CREATE" | "UPDATE" | "DELETE"
-type AuditEntity = "NEWS" | "EVENT" | "FINANCIAL_REPORT" | "DONATION" | "USER" | "REGISTRATION" | "CONTACT" | "MEDIA"
+type AuditEntity = "NEWS" | "EVENT" | "USER" | "REGISTRATION" | "CONTACT" | "MEDIA"
 
 export async function logAudit(
   action: AuditAction,

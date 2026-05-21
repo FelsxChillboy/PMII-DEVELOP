@@ -7,7 +7,6 @@ import { redirect } from "next/navigation"
 import {
   NewsSchema,
   EventSchema,
-  AdminFinancialReportSchema,
   UpdateUserRoleSchema,
 } from "@/lib/schemas"
 import { sanitizeContent } from "@/lib/sanitize"
@@ -225,90 +224,6 @@ export async function deleteEvent(formData: FormData): Promise<void> {
     revalidatePath("/admin/kegiatan")
   } catch (err) {
     console.error("Delete event failed:", handlePrismaError(err, ""))
-  }
-}
-
-export async function createFinancialReport(formData: FormData): Promise<void> {
-  const { error: authErr } = await requireAdmin()
-  if (authErr) return
-
-  const parsed = AdminFinancialReportSchema.safeParse({
-    title: safeString(formData.get("title")),
-    type: safeString(formData.get("type")) as "INCOME" | "EXPENSE",
-    amount: parseInt(safeString(formData.get("amount"))) || 0,
-    category: safeString(formData.get("category")),
-    description: safeString(formData.get("description")) || undefined,
-    date: safeString(formData.get("date")),
-  })
-
-  if (!parsed.success) {
-    redirect("/admin/keuangan/buat?error=" + encodeURIComponent(parsed.error.issues[0].message))
-  }
-
-  try {
-    await prisma.financialReport.create({
-      data: {
-        ...parsed.data,
-        date: new Date(parsed.data.date),
-      },
-    })
-    revalidatePath("/admin/keuangan")
-    redirect("/admin/keuangan")
-  } catch (err) {
-    const result = handlePrismaError(err, "Gagal membuat laporan keuangan")
-    if (result) redirect("/admin/keuangan/buat?error=" + encodeURIComponent(result))
-  }
-}
-
-export async function updateFinancialReport(formData: FormData): Promise<void> {
-  const { error: authErr } = await requireAdmin()
-  if (authErr) return
-
-  const id = safeString(formData.get("id"))
-  if (!id) return
-
-  const parsed = AdminFinancialReportSchema.safeParse({
-    title: safeString(formData.get("title")),
-    type: safeString(formData.get("type")) as "INCOME" | "EXPENSE",
-    amount: parseInt(safeString(formData.get("amount"))) || 0,
-    category: safeString(formData.get("category")),
-    description: safeString(formData.get("description")) || undefined,
-    date: safeString(formData.get("date")),
-  })
-
-  if (!parsed.success) {
-    redirect("/admin/keuangan/" + id + "?error=" + encodeURIComponent(parsed.error.issues[0].message))
-  }
-
-  try {
-    await prisma.financialReport.update({
-      where: { id },
-      data: {
-        ...parsed.data,
-        date: new Date(parsed.data.date),
-      },
-    })
-    revalidatePath("/admin/keuangan")
-    redirect("/admin/keuangan")
-  } catch (err) {
-    const result = handlePrismaError(err, "Gagal memperbarui laporan keuangan")
-    if (result) redirect("/admin/keuangan/" + id + "?error=" + encodeURIComponent(result))
-  }
-}
-
-export async function deleteFinancialReport(formData: FormData): Promise<void> {
-  const { error: authErr } = await requireAdmin()
-  if (authErr) return
-
-  const id = safeString(formData.get("id"))
-  if (!id) return
-
-  try {
-    await prisma.financialReport.delete({ where: { id } })
-    await logAudit("DELETE", "FINANCIAL_REPORT", id)
-    revalidatePath("/admin/keuangan")
-  } catch (err) {
-    console.error("Delete financial report failed:", handlePrismaError(err, ""))
   }
 }
 

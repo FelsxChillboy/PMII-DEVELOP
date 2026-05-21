@@ -43,7 +43,7 @@ export default async function AdminPengguna({ searchParams }: Props) {
         email: true,
         role: true,
         createdAt: true,
-        _count: { select: { donations: true, registrations: true, news: true } },
+        _count: { select: { registrations: true, news: true } },
       },
     }),
     prisma.user.count(),
@@ -118,7 +118,7 @@ export default async function AdminPengguna({ searchParams }: Props) {
                   </td>
                   <td className="p-4 text-muted-foreground hidden lg:table-cell">
                     <span className="text-xs">
-                      {user._count.donations} donasi &middot; {user._count.registrations} daftar &middot; {user._count.news} berita
+                      {user._count.registrations} daftar &middot; {user._count.news} berita
                     </span>
                   </td>
                   <td className="p-4 text-muted-foreground hidden md:table-cell">

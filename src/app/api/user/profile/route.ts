@@ -22,7 +22,7 @@ export async function GET() {
         image: true,
         role: true,
         createdAt: true,
-        _count: { select: { donations: true, registrations: true, news: true } },
+        _count: { select: { registrations: true, news: true } },
       },
     })
     if (!user) return error("User not found", 404)

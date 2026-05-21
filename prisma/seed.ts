@@ -121,18 +121,6 @@ async function main() {
   }
   console.log(`${events.length} events created`)
 
-  const donations = [
-    { amount: 500000, status: "SUCCESS" as const, type: "ONE_TIME" as const, userId: member.id, message: "Semangat kaderisasi!" },
-    { amount: 100000, status: "SUCCESS" as const, type: "ONE_TIME" as const, userId: null, message: "Dari donatur anonim" },
-    { amount: 250000, status: "SUCCESS" as const, type: "ONE_TIME" as const, userId: member.id, message: null },
-    { amount: 750000, status: "SUCCESS" as const, type: "ONE_TIME" as const, userId: null, message: "Lancar terus kegiatannya" },
-    { amount: 150000, status: "PENDING" as const, type: "ONE_TIME" as const, userId: null, message: null },
-  ]
-  for (const d of donations) {
-    await prisma.donation.create({ data: d })
-  }
-  console.log(`${donations.length} donations created`)
-
   const contacts = [
     { name: "Rudi Hermawan", email: "rudi@example.com", subject: "Kerjasama Kegiatan", message: "Saya tertarik untuk bekerjasama dalam kegiatan seminar yang akan datang. Mohon info lebih lanjut." },
     { name: "Ani Wijaya", email: "ani@example.com", subject: "Pertanyaan Pendaftaran", message: "Bagaimana cara mendaftar sebagai calon kader baru? Apakah ada persyaratan khusus?" },
@@ -142,21 +130,6 @@ async function main() {
     await prisma.contact.create({ data: c })
   }
   console.log(`${contacts.length} contacts created`)
-
-  const financialReports = [
-    { title: "Donasi Kaderisasi", type: "INCOME" as const, amount: 500000, category: "Kaderisasi", date: new Date("2025-03-01") },
-    { title: "Donasi Kegiatan", type: "INCOME" as const, amount: 750000, category: "Kegiatan", date: new Date("2025-03-05") },
-    { title: "Sewa Aula Raker", type: "EXPENSE" as const, amount: 200000, category: "Operasional", date: new Date("2025-03-10") },
-    { title: "Konsumsi Raker", type: "EXPENSE" as const, amount: 350000, category: "Kegiatan", date: new Date("2025-03-10") },
-    { title: "Donasi Umum", type: "INCOME" as const, amount: 250000, category: "Sosial", date: new Date("2025-03-15") },
-    { title: "ATK dan Cetak", type: "EXPENSE" as const, amount: 150000, category: "Operasional", date: new Date("2025-03-20") },
-    { title: "Dana Sosial", type: "EXPENSE" as const, amount: 100000, category: "Sosial", date: new Date("2025-03-25") },
-    { title: "Donasi Alumni", type: "INCOME" as const, amount: 1000000, category: "Kaderisasi", date: new Date("2025-04-01") },
-  ]
-  for (const r of financialReports) {
-    await prisma.financialReport.create({ data: r })
-  }
-  console.log(`${financialReports.length} financial reports created`)
 
   console.log("Seeding selesai!")
 }

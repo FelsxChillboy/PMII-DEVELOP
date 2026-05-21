@@ -29,7 +29,7 @@ export async function GET(request: Request) {
           email: true,
           role: true,
           createdAt: true,
-          _count: { select: { donations: true, registrations: true, news: true } },
+          _count: { select: { registrations: true, news: true } },
         },
         orderBy: { createdAt: "desc" },
         take,
