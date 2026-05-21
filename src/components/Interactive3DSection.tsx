@@ -93,7 +93,7 @@ export default function Interactive3DSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-background via-background to-background/50">
+    <section ref={sectionRef} className="relative py-20 lg:py-28 overflow-hidden bg-linear-to-b from-background via-background to-background/50">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <AnimatedSection className="text-center mb-12">
           <p className="text-xs tracking-[0.2em] uppercase text-primary font-medium mb-3">

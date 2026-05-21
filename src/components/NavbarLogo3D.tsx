@@ -90,7 +90,7 @@ function LogoMesh() {
 
 export default function NavbarLogo3D({ className }: { className?: string }) {
   return (
-    <div className={className} style={{ width: 36, height: 36 }}>
+    <div className={`relative ${className ?? ""}`} style={{ width: 36, height: 36 }}>
       <Canvas
         gl={{ antialias: true, alpha: true }}
         camera={{ position: [0, 0, 3.5], fov: 25, near: 0.1, far: 10 }}
