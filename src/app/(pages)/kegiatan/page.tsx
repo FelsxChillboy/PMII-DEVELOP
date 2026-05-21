@@ -40,7 +40,14 @@ export default async function KegiatanPage({ searchParams }: Props) {
   const [events, total, userRegistrations] = await Promise.all([
     prisma.event.findMany({
       orderBy: { date: "desc" },
-      include: { _count: { select: { registrations: true } } },
+      select: {
+        id: true,
+        title: true,
+        date: true,
+        location: true,
+        capacity: true,
+        _count: { select: { registrations: true } },
+      },
       take: PER_PAGE,
       skip: (page - 1) * PER_PAGE,
     }),

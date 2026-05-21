@@ -64,7 +64,7 @@ export default memo(function Navbar() {
       className="fixed top-0 inset-x-0 z-50 h-16 bg-background/80 backdrop-blur-md border-b border-border"
     >
       <motion.div
-        className="absolute bottom-0 left-0 h-[2px] bg-primary origin-left"
+        className="absolute bottom-0 left-0 h-0.5 bg-primary origin-left"
         style={{ scaleX: progressScale }}
       />
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
