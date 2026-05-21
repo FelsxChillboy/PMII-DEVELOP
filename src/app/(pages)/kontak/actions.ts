@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { headers } from "next/headers"
 import { z } from "zod"
 import { checkRateLimit } from "@/lib/rate-limit"
+import { sendContactNotification } from "@/lib/email"
 
 const ContactSchema = z.object({
   name: z.string().min(2, "Nama harus diisi minimal 2 karakter"),
@@ -14,13 +15,14 @@ const ContactSchema = z.object({
 
 type State = { error?: string; success?: boolean } | null
 
-export async function submitContact(_prevState: State, formData: FormData) {
+export async function submitContact(_prevState: State, formData: FormData): Promise<State> {
   const headersList = await headers()
   const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown"
-  const limitCheck = checkRateLimit(`contact:${ip}`, 3, 60_000)
+  const limitCheck = await checkRateLimit(`contact:${ip}`, 3, 60_000)
   if (!limitCheck.allowed) {
     return { error: `Terlalu banyak permintaan. Coba lagi dalam ${limitCheck.retryAfter} detik.` }
   }
+
   const raw = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,
@@ -38,6 +40,8 @@ export async function submitContact(_prevState: State, formData: FormData) {
     await prisma.contact.create({
       data: parsed.data,
     })
+
+    await sendContactNotification(parsed.data.name, parsed.data.email, parsed.data.subject, parsed.data.message)
   } catch (err) {
     console.error("Submit contact failed:", err)
     return { error: "Gagal mengirim pesan. Silakan coba lagi." }

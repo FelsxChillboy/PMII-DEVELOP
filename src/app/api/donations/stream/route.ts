@@ -4,6 +4,8 @@ export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export async function GET(request: Request) {
+  donationBroadcaster.init()
+
   let controllerRef: ReadableStreamDefaultController | null = null
 
   const stream = new ReadableStream({

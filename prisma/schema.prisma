@@ -35,20 +35,25 @@ enum RegistrationStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  donations     Donation[]
-  registrations Registration[]
-  news          News[]
-  accounts      Account[]
-  sessions      Session[]
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  password        String?
+  role            UserRole  @default(USER)
+  permissions     String    @default("")
+  resetToken      String?   @unique
+  resetTokenExpiry DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  donations       Donation[]
+  registrations  Registration[]
+  news           News[]
+  media          Media[]
+  audits         AuditLog[]
+  accounts       Account[]
+  sessions       Session[]
 }
 
 model Donation {
@@ -180,4 +185,36 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  filename  String
+  mimeType  String
+  size      Int
+  folder    String   @default("general")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([folder])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json     @default("{}")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
 }

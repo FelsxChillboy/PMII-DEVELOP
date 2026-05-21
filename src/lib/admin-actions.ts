@@ -10,6 +10,8 @@ import {
   AdminFinancialReportSchema,
   UpdateUserRoleSchema,
 } from "@/lib/schemas"
+import { sanitizeContent } from "@/lib/sanitize"
+import { logAudit } from "@/lib/audit"
 
 function handlePrismaError(err: unknown, fallback: string): string | null {
   if (err && typeof err === "object" && "code" in err) {
@@ -52,13 +54,15 @@ export async function createNews(formData: FormData): Promise<void> {
   }
 
   try {
-    await prisma.news.create({
+    const news = await prisma.news.create({
       data: {
         ...parsed.data,
+        content: sanitizeContent(parsed.data.content),
         imageUrl: parsed.data.imageUrl || null,
         authorId: session.user.id,
       },
     })
+    await logAudit("CREATE", "NEWS", news.id, { title: parsed.data.title })
     revalidatePath("/admin/berita")
     redirect("/admin/berita")
   } catch (err) {
@@ -91,9 +95,11 @@ export async function updateNews(formData: FormData): Promise<void> {
       where: { id: newsId },
       data: {
         ...parsed.data,
+        content: sanitizeContent(parsed.data.content),
         imageUrl: parsed.data.imageUrl || null,
       },
     })
+    await logAudit("UPDATE", "NEWS", newsId, { title: parsed.data.title })
     revalidatePath("/admin/berita")
     revalidatePath(`/berita/${parsed.data.slug}`)
     redirect("/admin/berita")
@@ -112,6 +118,7 @@ export async function deleteNews(formData: FormData): Promise<void> {
 
   try {
     await prisma.news.delete({ where: { id } })
+    await logAudit("DELETE", "NEWS", id)
     revalidatePath("/admin/berita")
   } catch (err) {
     console.error("Delete news failed:", handlePrismaError(err, ""))
@@ -140,9 +147,10 @@ export async function createEvent(formData: FormData): Promise<void> {
   }
 
   try {
-    await prisma.event.create({
+    const ev = await prisma.event.create({
       data: {
         ...parsed.data,
+        description: sanitizeContent(parsed.data.description),
         date: new Date(parsed.data.date),
         dateEnd: parsed.data.dateEnd ? new Date(parsed.data.dateEnd) : null,
         image: parsed.data.image || null,
@@ -150,6 +158,7 @@ export async function createEvent(formData: FormData): Promise<void> {
         status: "DRAFT",
       },
     })
+    await logAudit("CREATE", "EVENT", ev.id, { title: parsed.data.title })
     revalidatePath("/admin/kegiatan")
     redirect("/admin/kegiatan")
   } catch (err) {
@@ -187,12 +196,14 @@ export async function updateEvent(formData: FormData): Promise<void> {
       where: { id: eventId },
       data: {
         ...parsed.data,
+        description: sanitizeContent(parsed.data.description),
         date: new Date(parsed.data.date),
         dateEnd: parsed.data.dateEnd ? new Date(parsed.data.dateEnd) : null,
         image: parsed.data.image || null,
         time: parsed.data.time || null,
       },
     })
+    await logAudit("UPDATE", "EVENT", eventId, { title: parsed.data.title })
     revalidatePath("/admin/kegiatan")
     redirect("/admin/kegiatan")
   } catch (err) {
@@ -210,6 +221,7 @@ export async function deleteEvent(formData: FormData): Promise<void> {
 
   try {
     await prisma.event.delete({ where: { id } })
+    await logAudit("DELETE", "EVENT", id)
     revalidatePath("/admin/kegiatan")
   } catch (err) {
     console.error("Delete event failed:", handlePrismaError(err, ""))
@@ -293,6 +305,7 @@ export async function deleteFinancialReport(formData: FormData): Promise<void> {
 
   try {
     await prisma.financialReport.delete({ where: { id } })
+    await logAudit("DELETE", "FINANCIAL_REPORT", id)
     revalidatePath("/admin/keuangan")
   } catch (err) {
     console.error("Delete financial report failed:", handlePrismaError(err, ""))
@@ -316,6 +329,7 @@ export async function updateUserRole(formData: FormData): Promise<void> {
       where: { id: userId },
       data: { role: parsed.data.role },
     })
+    await logAudit("UPDATE", "USER", userId, { role: parsed.data.role })
     revalidatePath("/admin/pengguna")
   } catch (err) {
     console.error("Update role failed:", handlePrismaError(err, ""))
@@ -335,6 +349,7 @@ export async function deleteUser(formData: FormData): Promise<void> {
     const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user || user.role === "ADMIN") return
     await prisma.user.delete({ where: { id: userId } })
+    await logAudit("DELETE", "USER", userId, { name: user.name })
     revalidatePath("/admin/pengguna")
   } catch (err) {
     console.error("Delete user failed:", handlePrismaError(err, ""))
@@ -350,6 +365,7 @@ export async function approveRegistration(formData: FormData): Promise<void> {
 
   try {
     await prisma.registration.update({ where: { id }, data: { status: "APPROVED" } })
+    await logAudit("UPDATE", "REGISTRATION", id, { status: "APPROVED" })
     revalidatePath("/admin/kegiatan/[id]/registrations")
   } catch (err) {
     console.error("Approve registration failed:", handlePrismaError(err, ""))

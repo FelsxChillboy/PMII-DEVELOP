@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { success, error, serverError } from "@/lib/api-response"
 import { verifyWebhookNotification, getTransactionStatus } from "@/lib/payment"
+import { notifyDonationUpdate } from "@/lib/sse-broadcaster"
 
 export async function POST(request: Request) {
   try {
@@ -23,6 +24,8 @@ export async function POST(request: Request) {
       where: { transactionId: orderId },
       data: { status: dbStatus },
     })
+
+    notifyDonationUpdate()
 
     return success({ message: "OK" })
   } catch (err) {

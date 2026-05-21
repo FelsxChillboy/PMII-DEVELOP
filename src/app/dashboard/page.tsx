@@ -2,8 +2,9 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { prisma } from "@/lib/prisma"
 import { auth, signOut } from "@/lib/auth"
-import { User, LogOut, Newspaper, Calendar, DollarSign, Mail } from "lucide-react"
+import { User, LogOut, Newspaper, Calendar, DollarSign, Mail, CheckCircle, Clock } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Dashboard Anggota",
@@ -14,7 +15,31 @@ export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user) redirect("/login")
 
-  const user = session.user as { name?: string; email?: string; role?: string; image?: string }
+  const user = session.user as { name?: string; email?: string; role?: string; image?: string; id?: string }
+
+  const [donations, registrations] = await Promise.all([
+    prisma.donation.findMany({
+      where: { userId: session.user?.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, amount: true, status: true, createdAt: true, type: true },
+    }),
+    prisma.registration.findMany({
+      where: { userId: session.user?.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: { event: { select: { id: true, title: true, date: true, slug: true } } },
+    }),
+  ])
+
+  const donationTotal = donations.reduce((sum, d) => sum + d.amount, 0)
+
+  const STATUS_LABELS: Record<string, string> = { PENDING: "Menunggu", SUCCESS: "Berhasil", FAILED: "Gagal" }
+  const STATUS_COLORS: Record<string, string> = {
+    PENDING: "bg-yellow-500/10 text-yellow-500",
+    SUCCESS: "bg-green-500/10 text-green-500",
+    FAILED: "bg-red-500/10 text-red-500",
+  }
 
   return (
     <div className="min-h-screen bg-[#0B1120]">
@@ -57,44 +82,79 @@ export default async function DashboardPage() {
             </h1>
             <p className="text-sm text-muted-foreground">{user.email}</p>
             <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-medium">
-              {user.role === "MEMBER" ? "Member" : "Anggota"}
+              {user.role === "MEMBER" ? "Member" : user.role === "ADMIN" ? "Admin" : "Anggota"}
             </span>
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Link
-            href="/berita"
-            className="p-5 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors"
-          >
+          <Link href="/berita" className="p-5 rounded-xl border border-border bg-card hover:hover:bg-secondary/50 transition-colors">
             <Newspaper className="h-5 w-5 text-blue-500 mb-3" />
             <p className="font-medium text-sm">Berita</p>
             <p className="text-xs text-muted-foreground mt-1">Baca berita terbaru</p>
           </Link>
-          <Link
-            href="/kegiatan"
-            className="p-5 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors"
-          >
+          <Link href="/kegiatan" className="p-5 rounded-xl border border-border bg-card hover:hover:bg-secondary/50 transition-colors">
             <Calendar className="h-5 w-5 text-purple-500 mb-3" />
             <p className="font-medium text-sm">Kegiatan</p>
             <p className="text-xs text-muted-foreground mt-1">Lihat jadwal kegiatan</p>
           </Link>
-          <Link
-            href="/donasi"
-            className="p-5 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors"
-          >
+          <Link href="/donasi" className="p-5 rounded-xl border border-border bg-card hover:hover:bg-secondary/50 transition-colors">
             <DollarSign className="h-5 w-5 text-green-500 mb-3" />
             <p className="font-medium text-sm">Donasi</p>
-            <p className="text-xs text-muted-foreground mt-1">Berikan donasi</p>
+            <p className="text-xs text-muted-foreground mt-1">Rp{(donationTotal / 1000).toFixed(0)}rb total donasi</p>
           </Link>
-          <Link
-            href="/kontak"
-            className="p-5 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors"
-          >
+          <Link href="/kontak" className="p-5 rounded-xl border border-border bg-card hover:hover:bg-secondary/50 transition-colors">
             <Mail className="h-5 w-5 text-amber-500 mb-3" />
             <p className="font-medium text-sm">Kontak</p>
             <p className="text-xs text-muted-foreground mt-1">Hubungi kami</p>
           </Link>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h2 className="font-heading text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-purple-500" />
+              Kegiatan Saya
+            </h2>
+            {registrations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Belum mendaftar kegiatan apapun.</p>
+            ) : (
+              <div className="space-y-3">
+                {registrations.map((r) => (
+                  <Link key={r.id} href={`/kegiatan`} className="block p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                    <p className="text-sm font-medium">{r.event.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(r.event.date).toLocaleDateString("id-ID")}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h2 className="font-heading text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-green-500" />
+              Riwayat Donasi
+            </h2>
+            {donations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Belum ada donasi.</p>
+            ) : (
+              <div className="space-y-3">
+                {donations.map((d) => (
+                  <div key={d.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                    <div>
+                      <p className="text-sm font-medium">Rp{d.amount.toLocaleString("id-ID")}</p>
+                      <p className="text-xs text-muted-foreground">{d.createdAt.toLocaleDateString("id-ID")}</p>
+                    </div>
+                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[d.status] || ""}`}>
+                      {STATUS_LABELS[d.status] || d.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6">

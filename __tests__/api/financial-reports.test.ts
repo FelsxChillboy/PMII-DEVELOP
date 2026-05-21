@@ -26,10 +26,10 @@ describe("FinancialReportQuerySchema", () => {
     }
   })
 
-  it("accepts valid ISO datetime", () => {
+  it("accepts valid startDate and endDate range", () => {
     const result = FinancialReportQuerySchema.safeParse({
-      startDate: "2024-01-01T00:00:00.000Z",
-      endDate: "2024-12-31T23:59:59.000Z",
+      startDate: "2024-01-01",
+      endDate: "2024-12-31",
     })
     expect(result.success).toBe(true)
   })

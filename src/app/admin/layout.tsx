@@ -11,7 +11,10 @@ import {
   ChevronRight,
   Wallet,
   Users,
+  ImageIcon,
+  ClipboardList,
 } from "lucide-react"
+import { NotificationBadge } from "@/components/admin/NotificationBadge"
 
 async function logoutAction() {
   "use server"
@@ -24,6 +27,8 @@ const SIDEBAR = [
   { label: "Donasi", href: "/admin/donasi", icon: DollarSign },
   { label: "Kegiatan", href: "/admin/kegiatan", icon: Calendar },
   { label: "Keuangan", href: "/admin/keuangan", icon: Wallet },
+  { label: "Media", href: "/admin/media", icon: ImageIcon },
+  { label: "Audit Log", href: "/admin/audit", icon: ClipboardList },
   { label: "Kontak", href: "/admin/kontak", icon: Mail },
   { label: "Pengguna", href: "/admin/pengguna", icon: Users },
 ]
@@ -56,8 +61,9 @@ export default async function AdminLayout({
               href={item.href}
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
+              {item.href === "/admin" && <NotificationBadge />}
               <ChevronRight className="h-3 w-3 ml-auto opacity-30" />
             </Link>
           ))}

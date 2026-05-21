@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/server/auth"
 import Link from "next/link"
 import { deleteFinancialReport } from "@/lib/admin-actions"
-import { Plus, ExternalLink, Trash2, ChevronLeft, ChevronRight, Wallet, TrendingUp, TrendingDown } from "lucide-react"
+import { Download, Plus, ExternalLink, Trash2, ChevronLeft, ChevronRight, Wallet, TrendingUp, TrendingDown } from "lucide-react"
 
 const PER_PAGE = 20
 
@@ -70,15 +70,24 @@ export default async function AdminKeuangan(props: { searchParams?: Promise<{ pa
             Kelola pemasukan dan pengeluaran
           </p>
         </div>
-        {isAdmin && (
-          <Link
-            href="/admin/keuangan/buat"
-            className="inline-flex h-9 px-4 items-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+        <div className="flex items-center gap-2">
+          <a
+            href="/api/admin/keuangan/export"
+            className="inline-flex h-9 px-4 items-center gap-2 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors"
           >
-            <Plus className="h-4 w-4" />
-            Tambah Laporan
-          </Link>
-        )}
+            <Download className="h-4 w-4" />
+            Export CSV
+          </a>
+          {isAdmin && (
+            <Link
+              href="/admin/keuangan/buat"
+              className="inline-flex h-9 px-4 items-center gap-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Tambah Laporan
+            </Link>
+          )}
+        </div>
       </div>
 
       {!data && (

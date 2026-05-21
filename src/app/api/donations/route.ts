@@ -4,6 +4,7 @@ import { success, error, unauthorized, serverError, parseSearchParams } from "@/
 import { DonationSchema } from "@/lib/schemas"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 import { createSnapTransaction } from "@/lib/payment"
+import { notifyDonationUpdate } from "@/lib/sse-broadcaster"
 import type { DonationStatus } from "@prisma/client"
 
 export async function GET(request: Request) {
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request)
-  const limitCheck = checkRateLimit(`donation:${session.user.id || ip}`, 5, 60_000)
+  const limitCheck = await checkRateLimit(`donation:${session.user.id || ip}`, 5, 60_000)
   if (!limitCheck.allowed) {
     return error(`Terlalu banyak permintaan. Coba lagi dalam ${limitCheck.retryAfter} detik.`, 429)
   }
@@ -108,6 +109,8 @@ export async function POST(request: Request) {
     } catch (paymentErr) {
       console.error("Payment transaction failed:", paymentErr)
     }
+
+    notifyDonationUpdate()
 
     return success({ donation: { ...donation, paymentUrl }, paymentUrl }, 201)
   } catch (err) {

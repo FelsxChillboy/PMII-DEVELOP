@@ -1,17 +1,31 @@
 import { prisma } from "@/lib/prisma"
+import { ensureRedis, subscribe, publish } from "@/lib/redis"
 
 type StreamController = ReadableStreamDefaultController
 
 const MAX_CLIENTS = 50
-const POLL_INTERVAL = 10_000
 const HEARTBEAT_INTERVAL = 15_000
+const SSE_CHANNEL = "sse:donation"
 
 class DonationBroadcaster {
   private controllers = new Set<StreamController>()
-  private interval: ReturnType<typeof setInterval> | null = null
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null
   private encoder = new TextEncoder()
   private lastTotal: number | null = null
+  private subscribed = false
+
+  async init() {
+    const available = await ensureRedis()
+    if (available) {
+      this.subscribed = await subscribe(SSE_CHANNEL, () => this.broadcast())
+      if (this.subscribed) {
+        console.log("SSE: Redis pub/sub active for donation updates")
+      }
+    }
+    if (!this.subscribed) {
+      console.log("SSE: Redis unavailable, falling back to polling")
+    }
+  }
 
   addClient(controller: StreamController) {
     if (this.controllers.size >= MAX_CLIENTS) {
@@ -29,22 +43,18 @@ class DonationBroadcaster {
   }
 
   private start() {
-    if (this.interval) return
-    this.broadcast()
-    this.interval = setInterval(() => this.broadcast(), POLL_INTERVAL)
+    if (this.heartbeatInterval) return
+    if (!this.subscribed) {
+      this.broadcast()
+    }
     this.heartbeatInterval = setInterval(() => this.heartbeat(), HEARTBEAT_INTERVAL)
   }
 
   private stop() {
-    if (this.interval) {
-      clearInterval(this.interval)
-      this.interval = null
-    }
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval)
       this.heartbeatInterval = null
     }
-    this.lastTotal = null
   }
 
   private heartbeat() {
@@ -96,3 +106,11 @@ class DonationBroadcaster {
 }
 
 export const donationBroadcaster = new DonationBroadcaster()
+
+export async function notifyDonationUpdate() {
+  if (donationBroadcaster["subscribed"]) {
+    await publish(SSE_CHANNEL, "update")
+  } else {
+    await donationBroadcaster["broadcast"]()
+  }
+}

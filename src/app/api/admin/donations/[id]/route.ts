@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { success, error, unauthorized, notFound, serverError } from "@/lib/api-response"
+import { notifyDonationUpdate } from "@/lib/sse-broadcaster"
 import { z } from "zod"
 
 const UpdateDonationSchema = z.object({
@@ -40,6 +41,8 @@ export async function PATCH(
         updatedAt: true,
       },
     })
+
+    notifyDonationUpdate()
 
     return success(updated)
   } catch (err) {

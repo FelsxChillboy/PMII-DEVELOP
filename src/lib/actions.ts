@@ -6,6 +6,7 @@ import { DonationSchema } from "@/lib/schemas"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
 import { revalidatePath } from "next/cache"
+import { notifyDonationUpdate } from "@/lib/sse-broadcaster"
 
 export async function createDonation(formData: FormData) {
   const session = await auth()
@@ -40,6 +41,7 @@ export async function createDonation(formData: FormData) {
       },
     })
     revalidatePath("/donasi")
+    notifyDonationUpdate()
     return { success: true }
   } catch (err) {
     console.error("Create donation failed:", err)

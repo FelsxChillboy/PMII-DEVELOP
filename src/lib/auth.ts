@@ -6,6 +6,9 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { env } from "@/lib/env"
+import { checkRateLimit } from "@/lib/rate-limit"
+
+const rateLimitStore = new Map<string, { count: number; reset: number }>()
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -32,6 +35,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
+
+        const ip = "global"
+        const limit = await checkRateLimit(`auth:${credentials.email as string}:${ip}`, 5, 300_000)
+        if (!limit.allowed) return null
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email as string },

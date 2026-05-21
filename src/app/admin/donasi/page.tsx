@@ -1,82 +1,122 @@
 import { prisma } from "@/lib/prisma"
-import { DollarSign, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react"
+import { requireAdmin } from "@/lib/server/auth"
+import { revalidatePath } from "next/cache"
+import { notifyDonationUpdate } from "@/lib/sse-broadcaster"
+import { Download, ChevronLeft, ChevronRight, Wallet, TrendingUp } from "lucide-react"
 import Link from "next/link"
+import type { DonationStatus } from "@prisma/client"
 
 const PER_PAGE = 20
 
-async function getDonations(page: number) {
+interface Props {
+  searchParams?: Promise<{ page?: string; status?: string }>
+}
+
+async function updateStatus(formData: FormData) {
+  "use server"
+  const { error: authErr } = await requireAdmin()
+  if (authErr) return
+
+  const id = formData.get("id") as string
+  const status = formData.get("status") as string
+  if (!id || !status) return
+
   try {
-    const [donations, total, count] = await Promise.all([
-      prisma.donation.findMany({
-        orderBy: { createdAt: "desc" },
-        take: PER_PAGE,
-        skip: (page - 1) * PER_PAGE,
-        include: { user: { select: { name: true } } },
-      }),
-      prisma.donation.aggregate({
-        _sum: { amount: true },
-        _count: true,
-        where: { status: "SUCCESS" },
-      }),
-      prisma.donation.count(),
-    ])
-    return { donations, total: total._sum.amount || 0, count: total._count, totalCount: total._count }
-  } catch {
-    return null
+    await prisma.donation.update({
+      where: { id },
+      data: { status: status as DonationStatus },
+    })
+    revalidatePath("/admin/donasi")
+    notifyDonationUpdate()
+  } catch (err) {
+    console.error("Update donation status failed:", err)
   }
 }
 
+const STATUS_LABELS: Record<string, string> = { PENDING: "Menunggu", SUCCESS: "Berhasil", FAILED: "Gagal" }
 const STATUS_COLORS: Record<string, string> = {
-  SUCCESS: "bg-green-500/10 text-green-500",
   PENDING: "bg-yellow-500/10 text-yellow-500",
+  SUCCESS: "bg-green-500/10 text-green-500",
   FAILED: "bg-red-500/10 text-red-500",
 }
 
-export default async function AdminDonasi(props: { searchParams?: Promise<{ page?: string }> }) {
-  const sp = await props.searchParams
+export default async function AdminDonasi({ searchParams }: Props) {
+  const sp = await searchParams
   const page = Math.max(1, Number(sp?.page) || 1)
-  const data = await getDonations(page)
-  const totalPages = data ? Math.ceil(data.totalCount / PER_PAGE) : 0
+  const filterStatus = sp?.status
+
+  const where = filterStatus && ["PENDING", "SUCCESS", "FAILED"].includes(filterStatus)
+    ? { status: filterStatus as DonationStatus }
+    : {}
+
+  const [donations, total, stats] = await Promise.all([
+    prisma.donation.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: PER_PAGE,
+      skip: (page - 1) * PER_PAGE,
+      include: { user: { select: { name: true, email: true } } },
+    }),
+    prisma.donation.count({ where }),
+    prisma.donation.groupBy({
+      by: ["status"],
+      _sum: { amount: true },
+      _count: true,
+    }),
+  ])
+
+  const totalPages = Math.ceil(total / PER_PAGE)
+  const totalAmount = stats.reduce((sum, s) => sum + (s._sum.amount || 0), 0)
+  const successAmount = stats.find((s) => s.status === "SUCCESS")?._sum.amount || 0
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl font-bold tracking-tight mb-1">
-          Donasi
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Riwayat dan statistik donasi
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight mb-1">Donasi</h1>
+          <p className="text-sm text-muted-foreground">Kelola donasi masuk</p>
+        </div>
+        <a
+          href="/api/admin/donations/export"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <Download className="h-4 w-4" />
+          Export CSV
+        </a>
       </div>
 
-      {!data && (
-        <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-sm text-yellow-500 mb-6">
-          Database tidak terhubung.
+      <div className="grid sm:grid-cols-3 gap-4 mb-8">
+        <div className="p-5 rounded-xl border border-border bg-card">
+          <Wallet className="h-5 w-5 text-primary mb-3" />
+          <p className="text-2xl font-bold tracking-tight">Rp{(totalAmount / 1000).toFixed(0)}rb</p>
+          <p className="text-xs text-muted-foreground mt-1">Total Semua Donasi</p>
         </div>
-      )}
+        <div className="p-5 rounded-xl border border-border bg-card">
+          <TrendingUp className="h-5 w-5 text-green-500 mb-3" />
+          <p className="text-2xl font-bold tracking-tight text-green-500">Rp{(successAmount / 1000).toFixed(0)}rb</p>
+          <p className="text-xs text-muted-foreground mt-1">Donasi Berhasil</p>
+        </div>
+        <div className="p-5 rounded-xl border border-border bg-card">
+          <p className="text-2xl font-bold tracking-tight mb-1">{stats.find((s) => s.status === "PENDING")?._count || 0}</p>
+          <p className="text-xs text-muted-foreground">Menunggu Pembayaran</p>
+        </div>
+      </div>
 
-      {data && (
-        <div className="grid sm:grid-cols-2 gap-4 mb-8">
-          <div className="p-5 rounded-xl border border-border bg-card">
-            <DollarSign className="h-5 w-5 text-green-500 mb-3" />
-            <p className="text-2xl font-bold tracking-tight">
-              Rp{(data.total / 1000).toFixed(0)}rb
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Total Terkumpul</p>
-          </div>
-          <div className="p-5 rounded-xl border border-border bg-card">
-            <TrendingUp className="h-5 w-5 text-blue-500 mb-3" />
-            <p className="text-2xl font-bold tracking-tight">{data.count}</p>
-            <p className="text-xs text-muted-foreground mt-1">Donasi Sukses</p>
-          </div>
-        </div>
-      )}
+      <div className="flex items-center gap-2 mb-4">
+        {["", "PENDING", "SUCCESS", "FAILED"].map((s) => (
+          <Link
+            key={s}
+            href={s ? `/admin/donasi?status=${s}` : "/admin/donasi"}
+            className={`inline-flex px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              (filterStatus || "") === s ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {s ? STATUS_LABELS[s] || s : "Semua"}
+          </Link>
+        ))}
+      </div>
 
-      {data && (
-        <div className="mb-4 text-xs text-muted-foreground">
-          Total {data.totalCount} donasi &middot; Halaman {page} dari {totalPages}
-        </div>
-      )}
+      <div className="text-xs text-muted-foreground mb-4">{total} donasi</div>
 
       <div className="rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
@@ -85,35 +125,51 @@ export default async function AdminDonasi(props: { searchParams?: Promise<{ page
               <tr className="bg-secondary/50 border-b border-border">
                 <th className="text-left p-4 font-medium text-muted-foreground">Donatur</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Jumlah</th>
-                <th className="text-left p-4 font-medium text-muted-foreground hidden sm:table-cell">Status</th>
-                <th className="text-left p-4 font-medium text-muted-foreground hidden lg:table-cell">Tipe</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
                 <th className="text-left p-4 font-medium text-muted-foreground hidden md:table-cell">Tanggal</th>
+                <th className="text-right p-4 font-medium text-muted-foreground">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {data?.donations.length === 0 && (
+              {donations.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                    Belum ada donasi.
-                  </td>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">Belum ada donasi.</td>
                 </tr>
               )}
-              {data?.donations.map((d) => (
+              {donations.map((d) => (
                 <tr key={d.id} className="hover:bg-secondary/30 transition-colors">
-                  <td className="p-4">{d.user?.name || "Anonim"}</td>
-                  <td className="p-4 font-medium">
-                    Rp{d.amount.toLocaleString("id-ID")}
+                  <td className="p-4">
+                    <p className="font-medium">{d.donorName || d.user?.name || "Anonim"}</p>
+                    <p className="text-xs text-muted-foreground">{d.donorEmail || d.user?.email || ""}</p>
                   </td>
-                  <td className="p-4 hidden sm:table-cell">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[d.status] || "bg-gray-500/10 text-gray-500"}`}>
-                      {d.status}
+                  <td className="p-4 font-medium">Rp{d.amount.toLocaleString("id-ID")}</td>
+                  <td className="p-4">
+                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[d.status] || ""}`}>
+                      {STATUS_LABELS[d.status] || d.status}
                     </span>
-                  </td>
-                  <td className="p-4 text-muted-foreground hidden lg:table-cell">
-                    {d.type === "RECURRING" ? "Bulanan" : "Sekali"}
                   </td>
                   <td className="p-4 text-muted-foreground hidden md:table-cell">
                     {d.createdAt.toLocaleDateString("id-ID")}
+                  </td>
+                  <td className="p-4 text-right">
+                    {d.status === "PENDING" && (
+                      <div className="flex items-center justify-end gap-1">
+                        <form action={updateStatus}>
+                          <input type="hidden" name="id" value={d.id} />
+                          <input type="hidden" name="status" value="SUCCESS" />
+                          <button className="inline-flex px-2 py-1 rounded text-xs bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors">
+                            Konfirmasi
+                          </button>
+                        </form>
+                        <form action={updateStatus}>
+                          <input type="hidden" name="id" value={d.id} />
+                          <input type="hidden" name="status" value="FAILED" />
+                          <button className="inline-flex px-2 py-1 rounded text-xs bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors">
+                            Tolak
+                          </button>
+                        </form>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -122,28 +178,26 @@ export default async function AdminDonasi(props: { searchParams?: Promise<{ page
         </div>
       </div>
 
-      {data && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
           <Link
-            href={`/admin/donasi?page=${page - 1}`}
+            href={`/admin/donasi?page=${page - 1}${filterStatus ? `&status=${filterStatus}` : ""}`}
             className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page <= 1 ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
-            aria-disabled={page <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Link>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
-              href={`/admin/donasi?page=${p}`}
+              href={`/admin/donasi?page=${p}${filterStatus ? `&status=${filterStatus}` : ""}`}
               className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-secondary"}`}
             >
               {p}
             </Link>
           ))}
           <Link
-            href={`/admin/donasi?page=${page + 1}`}
+            href={`/admin/donasi?page=${page + 1}${filterStatus ? `&status=${filterStatus}` : ""}`}
             className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page >= totalPages ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
-            aria-disabled={page >= totalPages}
           >
             <ChevronRight className="h-4 w-4" />
           </Link>

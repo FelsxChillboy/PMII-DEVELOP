@@ -1,5 +1,6 @@
 import { success, error, unauthorized, serverError } from "@/lib/api-response"
 import { auth } from "@/lib/auth"
+import { uploadImage } from "@/lib/upload"
 import { writeFile, mkdir } from "node:fs/promises"
 import path from "node:path"
 import crypto from "node:crypto"
@@ -22,16 +23,18 @@ export async function POST(request: Request) {
 
     if (file.size > 5 * 1024 * 1024) return error("Ukuran file maksimal 5MB")
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const url = await uploadImage(file, "pmii-news")
 
-    const filename = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`
-    const dir = path.join(process.cwd(), "public", "uploads", "news")
-    await mkdir(dir, { recursive: true })
-    const filepath = path.join(dir, filename)
-    await writeFile(filepath, buffer)
-
-    const url = `/uploads/news/${filename}`
+    if (!url.startsWith("http")) {
+      const bytes = await file.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+      const filename = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`
+      const dir = path.join(process.cwd(), "public", "uploads", "news")
+      await mkdir(dir, { recursive: true })
+      const filepath = path.join(dir, filename)
+      await writeFile(filepath, buffer)
+      return success({ url: `/uploads/news/${filename}` }, 201)
+    }
 
     return success({ url }, 201)
   } catch (err) {
