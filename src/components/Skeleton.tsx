@@ -8,17 +8,6 @@ export function Skeleton({ className }: { className?: string }) {
   )
 }
 
-export function CardSkeleton() {
-  return (
-    <div className="p-6 rounded-xl border border-border space-y-4">
-      <Skeleton className="h-10 w-10 rounded-lg" />
-      <Skeleton className="h-5 w-3/4" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-2/3" />
-    </div>
-  )
-}
-
 export function HeroSkeleton() {
   return (
     <section className="relative min-h-screen flex items-center bg-[#0F172A]">

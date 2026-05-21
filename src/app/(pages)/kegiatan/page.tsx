@@ -6,6 +6,7 @@ import Card3D from "@/components/Card3D"
 import RegisterEventButton from "@/components/RegisterEventButton"
 import { MapPin, Clock, Users, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
 
 const PER_PAGE = 9
 
@@ -17,9 +18,9 @@ interface Props {
 
 function getStatus(date: Date, capacity: number, registrations: number) {
   const now = new Date()
-  if (date < now) return { label: "Selesai", className: "bg-muted text-muted-foreground" }
-  if (registrations >= capacity) return { label: "Penuh", className: "bg-destructive/10 text-destructive" }
-  return { label: "Terbuka", className: "bg-primary/10 text-primary" }
+  if (date < now) return { label: "Selesai", variant: "secondary" as const }
+  if (registrations >= capacity) return { label: "Penuh", variant: "destructive" as const }
+  return { label: "Terbuka", variant: "default" as const }
 }
 
 const formatDate = (d: Date) => {
@@ -68,12 +69,14 @@ export default async function KegiatanPage({ searchParams }: Props) {
 
   return (
     <div className="divide-y divide-border">
-      <AnimatedSection className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <AnimatedSection className="relative py-20 lg:py-28 overflow-hidden">
+        <div className="absolute inset-0 section-grid-light opacity-[0.05]" />
+        <div className="absolute -top-40 -right-40 h-100 w-100 rounded-full bg-accent/3 blur-[100px]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
             <SectionTag className="mb-4">KALENDER KEGIATAN</SectionTag>
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6">
-              Agenda <span className="text-primary">Kegiatan</span>
+              Agenda <span className="text-gradient">Kegiatan</span>
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
               RTL, Makrab, Diskusi, dan berbagai kegiatan kaderisasi lainnya.
@@ -119,11 +122,9 @@ export default async function KegiatanPage({ searchParams }: Props) {
                               {day}
                             </p>
                           </div>
-                          <span
-                            className={`px-2.5 py-0.5 rounded-md text-xs font-medium ${statusInfo.className}`}
-                          >
+                          <Badge variant={statusInfo.variant}>
                             {statusInfo.label}
-                          </span>
+                          </Badge>
                         </div>
 
                         <h3 className="font-heading font-semibold text-foreground mb-3">

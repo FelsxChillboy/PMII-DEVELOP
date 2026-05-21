@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
 import { SessionProvider } from "next-auth/react"
+import { ThemeProvider } from "next-themes"
 import { Analytics } from "@vercel/analytics/react"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -21,7 +22,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
         <Analytics />
       </QueryClientProvider>
     </SessionProvider>

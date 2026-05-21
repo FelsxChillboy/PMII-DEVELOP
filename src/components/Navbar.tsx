@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useRef, memo } from "react"
 import Link from "next/link"
-import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Menu, X } from "lucide-react"
 import SearchBar from "@/components/SearchBar"
-
-const NavbarLogo3D = dynamic(() => import("@/components/NavbarLogo3D"), { ssr: false })
+import ThemeToggle from "@/components/ThemeToggle"
 
 const NAV_LINKS = [
   { label: "Beranda", path: "/" },
@@ -61,15 +59,16 @@ export default memo(function Navbar() {
       initial={false}
       animate={hidden ? { y: "-100%" } : { y: 0 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed top-0 inset-x-0 z-50 h-16 bg-background/80 backdrop-blur-md border-b border-border"
+      className="fixed top-0 inset-x-0 z-50 h-16 bg-background/70 backdrop-blur-xl border-b border-border/50 shadow-sm shadow-primary/2"
     >
+      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent bg-size-[200%_100%] animate-[shimmer_3s_ease-in-out_infinite]" />
       <motion.div
-        className="absolute bottom-0 left-0 h-0.5 bg-primary origin-left"
+        className="absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-primary/50 via-primary to-primary/50 origin-left shadow-sm shadow-primary/30"
         style={{ scaleX: progressScale }}
       />
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <NavbarLogo3D className="h-9 w-9 shrink-0" />
+          <img src="/Logo-rayon.svg" alt="PR PMII" className="h-9 w-9 shrink-0" />
           <span className="hidden sm:inline font-heading text-sm font-semibold tracking-tight text-foreground">
             PR PMII<span className="text-primary"> Rayon Teknik</span>
           </span>
@@ -162,6 +161,7 @@ export default memo(function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <ThemeToggle />
           <SearchBar />
           <Link
             href="/kontak"
@@ -195,7 +195,7 @@ export default memo(function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring" as const, damping: 25, stiffness: 200 }}
-              className="fixed top-16 right-0 bottom-0 z-50 w-72 bg-background border-l border-border lg:hidden"
+              className="fixed top-16 right-0 bottom-0 z-50 w-72 bg-background/95 backdrop-blur-2xl border-l border-border/50 shadow-2xl lg:hidden rounded-l-2xl"
             >
               <nav className="flex flex-col p-4 gap-1">
                 {NAV_LINKS.map((link, i) => {

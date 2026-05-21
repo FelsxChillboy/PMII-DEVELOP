@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -29,9 +33,60 @@
   --font-body: var(--font-inter);
   --font-mono: 'JetBrains Mono', monospace;
   --radius: 0.625rem;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
+  --background: 0 0% 100%;
+  --foreground: 222 84% 5%;
+  --card: 0 0% 97%;
+  --card-foreground: 222 84% 5%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 84% 5%;
+  --primary: 199 89% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 94%;
+  --secondary-foreground: 222 84% 5%;
+  --muted: 210 40% 94%;
+  --muted-foreground: 215 20% 45%;
+  --accent: 45 97% 47%;
+  --accent-foreground: 222 84% 5%;
+  --destructive: 0 70% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 199 89% 48%;
+  --chart-1: 199 89% 48%;
+  --chart-2: 45 97% 47%;
+  --chart-3: 222 84% 5%;
+  --chart-4: 215 20% 45%;
+  --chart-5: 210 40% 85%;
+  --radius: 0.625rem;
+  --sidebar: 0 0% 97%;
+  --sidebar-foreground: 222 84% 5%;
+  --sidebar-primary: 199 89% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 45 97% 47%;
+  --sidebar-accent-foreground: 222 84% 5%;
+  --sidebar-border: 214 32% 91%;
+  --sidebar-ring: 199 89% 48%;
+}
+
+.dark {
   --background: 222 84% 5%;
   --foreground: 210 40% 98%;
   --card: 222 84% 8%;
@@ -56,17 +111,15 @@
   --chart-3: 210 40% 98%;
   --chart-4: 215 20% 65%;
   --chart-5: 222 70% 30%;
-}
-
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: var(--font-body);
-  overflow-x: hidden;
+  --radius: 0.625rem;
+  --sidebar: 222 84% 8%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 199 89% 60%;
+  --sidebar-primary-foreground: 222 84% 5%;
+  --sidebar-accent: 45 97% 47%;
+  --sidebar-accent-foreground: 222 84% 5%;
+  --sidebar-border: 222 70% 18%;
+  --sidebar-ring: 199 89% 60%;
 }
 
 ::-webkit-scrollbar {
@@ -84,6 +137,16 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { mask-position: -200% 0; }
+  100% { mask-position: 200% 0; }
 }
 
 @keyframes enter {
@@ -165,125 +228,56 @@ html.lenis {
   --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* === Barba.js Page Transitions === */
-.barba-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  z-index: 99999;
-  pointer-events: none;
+/* === Glassmorphism & Premium UI Utilities === */
+.glass-panel {
+  background: hsl(var(--background) / 0.45) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid hsl(var(--border) / 0.5) !important;
+  box-shadow: 0 8px 32px 0 hsl(var(--foreground) / 0.08) !important;
 }
 
-.barba-progress-fill {
-  height: 100%;
-  width: 100%;
-  background: hsl(var(--primary));
-  transform-origin: left center;
-  transform: scaleX(0);
-  will-change: transform;
+.glass-panel-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.barba-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  background: hsl(var(--background));
-  pointer-events: none;
+.glass-panel-hover:hover {
+  background: hsl(var(--background) / 0.6) !important;
+  border-color: hsl(var(--primary) / 0.2) !important;
+  box-shadow: 
+    0 12px 40px 0 hsl(var(--primary) / 0.03), 
+    inset 0 0 12px hsl(var(--primary) / 0.05) !important;
+  transform: translateY(-2px) translateZ(10px) !important;
 }
 
-@keyframes leave-forward {
-  from { opacity: 1; transform: scale(1) translateX(0); }
-  to   { opacity: 0; transform: scale(0.96) translateX(-40px); }
+/* === Modern Design Utilities === */
+.text-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-@keyframes leave-back {
-  from { opacity: 1; transform: scale(1) translateX(0); }
-  to   { opacity: 0; transform: scale(0.96) translateX(40px); }
+.glow {
+  box-shadow: 0 0 40px hsl(var(--primary) / 0.15), 0 0 80px hsl(var(--primary) / 0.05);
 }
 
-@keyframes enter-forward {
-  from { opacity: 0; transform: scale(0.97) translateX(50px); }
-  to   { opacity: 1; transform: scale(1) translateX(0); }
+.glow-sm {
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.1);
 }
 
-@keyframes enter-back {
-  from { opacity: 0; transform: scale(0.97) translateX(-50px); }
-  to   { opacity: 1; transform: scale(1) translateX(0); }
+.section-grid {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
-.barba-container {
-  will-change: transform, opacity;
-}
-
-.barba-container.is-leaving {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-}
-
-.barba-container.is-leaving-forward {
-  animation: leave-forward 0.32s cubic-bezier(0.7, 0, 1, 0.5) forwards;
-}
-
-.barba-container.is-leaving-back {
-  animation: leave-back 0.32s cubic-bezier(0.7, 0, 1, 0.5) forwards;
-}
-
-.barba-container.is-entering-forward {
-  animation: enter-forward 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.barba-container.is-entering-back {
-  animation: enter-back 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.barba-overlay.is-active {
-  opacity: 1;
-}
-
-.barba-overlay.is-closing {
-  opacity: 0;
-  transition: opacity 0.4s ease 0.15s;
-}
-
-@keyframes barba-leave {
-  from {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.85) rotate(-4deg) translateY(-40px);
-  }
-}
-
-@keyframes barba-enter {
-  from {
-    opacity: 0;
-    transform: scale(1.15) translateY(60px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.barba-container {
-  will-change: transform, opacity;
-  transform-origin: center top;
-}
-
-.barba-container.is-leaving {
-  pointer-events: none;
-  animation: barba-leave 0.4s cubic-bezier(0.7, 0, 1, 0.5) forwards;
-  position: absolute;
-  inset: 0;
-}
-
-.barba-container.is-entering {
-  animation: barba-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.section-grid-light {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.2) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
 /* === Skip-to-content === */
@@ -303,4 +297,14 @@ html.lenis {
 .skip-to-content:focus {
   left: 0;
   top: 0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
 }

@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, Space_Grotesk } from "next/font/google"
+import { Inter, Space_Grotesk, Geist } from "next/font/google"
 import "./globals.css"
 import Providers from "@/components/Providers"
 import ServiceWorker from "@/components/ServiceWorker"
 import LenisProvider from "@/components/LenisProvider"
+import { Toaster } from "@/components/ui/sonner"
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -79,7 +83,6 @@ const jsonLd = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#0F172A",
   width: "device-width",
   initialScale: 1,
 }
@@ -90,7 +93,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="id" className="dark" suppressHydrationWarning>
+    <html lang="id" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}
       >
@@ -118,6 +121,7 @@ export default function RootLayout({
           <LenisProvider>
             <ServiceWorker />
             <div className="contents">{children}</div>
+            <Toaster richColors closeButton />
           </LenisProvider>
         </Providers>
       </body>

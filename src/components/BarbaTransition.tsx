@@ -1,154 +1,110 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { usePathname } from "next/navigation"
-
-type TransitionPhase = "idle" | "leaving" | "entering"
-type Direction = "forward" | "back"
+import { motion } from "framer-motion"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 interface BarbaTransitionProps {
   children: React.ReactNode
-  namespace?: string
 }
 
-const DURATION = {
-  leave: 320,
-  enter: 420,
-  overlay: 60,
-  total: 800,
-}
-
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3)
-}
-
-function TransitionProgress({ onEnd }: { onEnd: () => void }) {
-  const barRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const bar = barRef.current
-    if (!bar) return
-
-    let cancelled = false
-    const start = performance.now()
-
-    const frame = () => {
-      if (cancelled) return
-      const elapsed = performance.now() - start
-      const t = Math.min(elapsed / DURATION.total, 1)
-      bar.style.transform = `scaleX(${easeOutCubic(t)})`
-      if (t < 1) requestAnimationFrame(frame)
-      else onEnd()
-    }
-
-    requestAnimationFrame(frame)
-    return () => { cancelled = true }
-  }, [onEnd])
-
-  return (
-    <div className="barba-progress" aria-hidden>
-      <div ref={barRef} className="barba-progress-fill" />
-    </div>
-  )
-}
-
-export default function BarbaTransition({ children, namespace }: BarbaTransitionProps) {
+export default function BarbaTransition({ children }: BarbaTransitionProps) {
   const pathname = usePathname()
-  const containerRef = useRef<HTMLDivElement>(null)
   const [displayChildren, setDisplayChildren] = useState(children)
-  const [phase, setPhase] = useState<TransitionPhase>("idle")
-  const [dir, setDir] = useState<Direction>("forward")
-  const [showProgress, setShowProgress] = useState(false)
+  const [status, setStatus] = useState<"idle" | "leaving" | "entering">("idle")
   const prevPathname = useRef(pathname)
-  const navStack = useRef<string[]>([pathname])
-
-  const resolvedNamespace =
-    namespace ??
-    (pathname === "/"
-      ? "home"
-      : pathname.replace(/\//g, "-").replace(/^-/, "") || "default")
+  const reducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (pathname === prevPathname.current) {
-      prevPathname.current = pathname
+      setDisplayChildren(children)
       return
     }
 
-    const container = containerRef.current
-    if (!container) return
-
-    const stack = navStack.current
-    const prevIdx = stack.indexOf(pathname)
-    const isBack = prevIdx !== -1 && prevIdx === stack.length - 2
-
-    if (isBack) {
-      setDir("back")
-      stack.pop()
-    } else {
-      setDir("forward")
-      stack.push(pathname)
-    }
-
-    let cancelled = false
-
-    const runTransition = async () => {
-      setShowProgress(true)
-      setPhase("leaving")
-
-      await new Promise<void>((resolve) => {
-        const onEnd = () => resolve()
-        container.addEventListener("animationend", onEnd, { once: true })
-        setTimeout(resolve, DURATION.leave + 50)
-      })
-
-      if (cancelled) return
-
+    if (reducedMotion) {
       setDisplayChildren(children)
       prevPathname.current = pathname
+      window.scrollTo(0, 0)
+      return
+    }
 
-      await new Promise((r) => requestAnimationFrame(r))
-      await new Promise((r) => setTimeout(r, DURATION.overlay))
+    let isCancelled = false
 
-      if (cancelled) return
+    const runTransition = async () => {
+      // Step 1: Start exit fade out
+      setStatus("leaving")
 
-      setPhase("entering")
+      // Wait for exit transition to complete (150ms)
+      await new Promise((r) => setTimeout(r, 150))
+      if (isCancelled) return
 
-      await new Promise<void>((resolve) => {
-        const onEnd = () => resolve()
-        container.addEventListener("animationend", onEnd, { once: true })
-        setTimeout(resolve, DURATION.enter + 50)
-      })
+      // Step 2: Swap content and scroll to top
+      setDisplayChildren(children)
+      prevPathname.current = pathname
+      window.scrollTo({ top: 0, left: 0 })
 
-      setPhase("idle")
+      // Step 3: Start enter fade in & slide up
+      setStatus("entering")
+
+      // Wait for enter transition to complete (250ms)
+      await new Promise((r) => setTimeout(r, 250))
+      if (isCancelled) return
+
+      setStatus("idle")
     }
 
     runTransition()
 
     return () => {
-      cancelled = true
+      isCancelled = true
     }
-  }, [pathname, children])
+  }, [pathname, children, reducedMotion])
+
+  // Reduced motion: instant page switch
+  if (reducedMotion) {
+    return <div className="w-full">{children}</div>
+  }
 
   return (
-    <>
-      {showProgress && (
-        <TransitionProgress onEnd={() => setShowProgress(false)} />
+    <div className="relative w-full">
+      {/* Sleek Top Progress Bar (Vercel/GitHub Style) */}
+      {status !== "idle" && (
+        <motion.div
+          initial={{ scaleX: 0, opacity: 1 }}
+          animate={{
+            scaleX: status === "leaving" ? 0.75 : 1,
+            opacity: status === "entering" ? [1, 1, 0] : 1,
+          }}
+          transition={{
+            scaleX: { duration: status === "leaving" ? 0.3 : 0.2, ease: "easeOut" },
+            opacity: { duration: 0.4, times: [0, 0.7, 1] },
+          }}
+          className="fixed top-0 left-0 right-0 h-[2.5px] bg-primary z-[99999] shadow-[0_0_8px_rgba(56,189,248,0.4)] origin-left"
+        />
       )}
 
-      {phase !== "idle" && (
-        <div className="barba-overlay" />
-      )}
-
-      <div
-        ref={containerRef}
-        data-barba="container"
-        data-barba-namespace={resolvedNamespace}
-        data-barba-direction={dir}
-        className={`barba-container${phase === "leaving" ? ` is-leaving is-leaving-${dir}` : ""}${phase === "entering" ? ` is-entering is-entering-${dir}` : ""}`}
-        aria-hidden={phase === "leaving"}
+      {/* Main Page Container */}
+      <motion.div
+        key={pathname === prevPathname.current ? pathname : prevPathname.current}
+        animate={
+          status === "leaving"
+            ? { opacity: 0, y: -10, filter: "blur(2px)" }
+            : { opacity: 1, y: 0, filter: "blur(0px)" }
+        }
+        initial={
+          status === "entering"
+            ? { opacity: 0, y: 10, filter: "blur(2px)" }
+            : false
+        }
+        transition={{
+          duration: status === "leaving" ? 0.15 : 0.25,
+          ease: [0.16, 1, 0.3, 1], // easeOutExpo
+        }}
+        className="w-full"
       >
         {displayChildren}
-      </div>
-    </>
+      </motion.div>
+    </div>
   )
 }

@@ -3,6 +3,7 @@ import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import FeatureCard from "@/components/FeatureCard"
 import LazyLottie from "@/components/LazyLottie"
+import { Card, CardContent } from "@/components/ui/card"
 import { HeroSection as ClientHero, Interactive3DSection as ClientInteractive } from "./ClientSections"
 import { Brain, Cog, ShieldCheck } from "lucide-react"
 
@@ -38,14 +39,16 @@ export default function HomePage() {
     <>
       <ClientHero />
 
-      <AnimatedSection className="py-20 lg:py-28 border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <AnimatedSection className="relative py-20 lg:py-28 overflow-hidden">
+        <div className="absolute inset-0 section-grid-light opacity-[0.04]" />
+        <div className="absolute inset-0 bg-linear-to-r from-primary/1.5 via-transparent to-accent/1.5 bg-size-[200%_100%] animate-[gradient-shift_10s_ease_infinite]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
               <SectionTag className="mb-4">TENTANG KAMI</SectionTag>
               <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
                 Membangun Peradaban{" "}
-                <span className="text-primary">Digital</span> dari Kampus
+                <span className="text-gradient">Digital</span> dari Kampus
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 PR PMII Rayon Teknik UNUSIA Jakarta Pusat adalah wadah perjuangan

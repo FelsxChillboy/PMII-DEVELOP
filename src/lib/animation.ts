@@ -1,4 +1,4 @@
-import type { Variants, Transition } from "framer-motion"
+import type { Variants } from "framer-motion"
 
 export const easing = {
   standard: [0.16, 1, 0.3, 1] as const,
@@ -17,15 +17,6 @@ export const duration = {
 }
 
 const stdEase: [number, number, number, number] = [0.16, 1, 0.3, 1]
-
-export const transition: Record<string, Transition> = {
-  spring: { type: "spring", stiffness: 300, damping: 25 },
-  springGentle: { type: "spring", stiffness: 120, damping: 18 },
-  springSnappy: { type: "spring", stiffness: 400, damping: 25 },
-  smooth: { duration: duration.normal, ease: stdEase },
-  slow: { duration: duration.slow, ease: stdEase },
-  fast: { duration: duration.fast, ease: stdEase },
-}
 
 export const variants: Record<string, Variants> = {
   fadeUp: {
@@ -67,17 +58,4 @@ export const variants: Record<string, Variants> = {
       transition: { type: "spring" as const, stiffness: 120, damping: 20 },
     },
   },
-}
-
-export const textReveal: Variants = {
-  hidden: { opacity: 0, y: 80, rotateX: -60 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    transition: {
-      delay: i * 0.04,
-      ...transition.springGentle,
-    },
-  }),
 }

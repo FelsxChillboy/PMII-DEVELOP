@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { BookOpen, Lightbulb, Target } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -52,12 +53,14 @@ const STRUKTUR = [
 export default function TentangPage() {
   return (
     <div className="divide-y divide-border">
-      <AnimatedSection className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <AnimatedSection className="relative py-20 lg:py-28 overflow-hidden">
+        <div className="absolute inset-0 section-grid-light opacity-[0.05]" />
+        <div className="absolute -top-40 -right-40 h-100 w-100 rounded-full bg-primary/3 blur-[100px]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
             <SectionTag className="mb-4">PROFIL ORGANISASI</SectionTag>
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6">
-              Tentang <span className="text-primary">Kami</span>
+              Tentang <span className="text-gradient">Kami</span>
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
               Mengenal lebih dekat PR PMII Rayon Teknik UNUSIA Jakarta Pusat
@@ -69,58 +72,61 @@ export default function TentangPage() {
 
       <AnimatedSection className="py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-16">
-            <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground mb-4">
-              Visi
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed italic border-l-4 border-primary pl-6">
-              &ldquo;Menjadikan PR PMII Rayon Teknik UNUSIA sebagai pusat
-              kaderisasi intelektual yang melahirkan pemimpin berkarakter,
-              berwawasan teknologi, dan berkomitmen pada nilai-nilai Ahlussunnah
-              wal Jama&rsquo;ah an-Nahdliyyah.&rdquo;
-            </p>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+            <div>
+              <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground mb-6">
+                Visi <span className="text-gradient">Kami</span>
+              </h2>
+              <div className="relative">
+                <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-primary via-accent to-primary/20" />
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed pl-6 italic">
+                  &ldquo;Menjadikan PR PMII Rayon Teknik UNUSIA sebagai pusat
+                  kaderisasi intelektual yang melahirkan pemimpin berkarakter,
+                  berwawasan teknologi, dan berkomitmen pada nilai-nilai Ahlussunnah
+                  wal Jama&rsquo;ah an-Nahdliyyah.&rdquo;
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground mb-6">
+                Misi <span className="text-gradient">Kami</span>
+              </h2>
+              <ol className="space-y-4">
+                {MISI.map((item, i) => (
+                  <li key={i} className="flex items-start gap-4">
+                    <span className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-primary to-accent text-white text-sm font-bold mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="text-base text-muted-foreground leading-relaxed">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
 
-          <div className="max-w-3xl mb-16">
-            <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground mb-6">
-              Misi
-            </h2>
-            <ol className="space-y-4">
-              {MISI.map((item, i) => (
-                <li key={i} className="flex items-start gap-4">
-                  <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0 mt-0.5">
-                    {i + 1}
-                  </span>
-                  <span className="text-base text-muted-foreground leading-relaxed">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div>
-            <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground mb-8">
-              Nilai-Nilai <span className="text-accent">Fondasi</span>
-            </h2>
-            <div className="grid sm:grid-cols-3 gap-6">
-              {NILAI.map((nilai) => (
-                <div
-                  key={nilai.title}
-                  className="p-6 rounded-xl border border-border bg-card"
-                >
-                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+          <SectionTag className="mb-4 mt-16 lg:mt-20">NILAI-NILAI FONDASI</SectionTag>
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground mb-8">
+            Nilai <span className="text-gradient">Kami</span>
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {NILAI.map((nilai) => (
+              <Card key={nilai.title} className="p-6 border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
+                <CardContent className="p-0">
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-accent/10 to-primary/10 flex items-center justify-center mb-4">
                     <div className="text-accent">{nilai.icon}</div>
                   </div>
-                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
+                  <CardTitle className="font-heading font-semibold text-lg text-foreground mb-2">
                     {nilai.title}
-                  </h3>
+                  </CardTitle>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {nilai.description}
                   </p>
-                </div>
-              ))}
-            </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </AnimatedSection>
@@ -128,26 +134,26 @@ export default function TentangPage() {
       <AnimatedSection className="py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionTag className="mb-4">KEPENGURUSAN</SectionTag>
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-10">
-            Struktur <span className="text-primary">Organisasi</span>
-            <span className="block text-sm font-normal text-muted-foreground mt-2">
-              Periode 2024/2025
-            </span>
+          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-2">
+            Struktur <span className="text-gradient">Organisasi</span>
           </h2>
+          <p className="text-sm text-muted-foreground mb-10">Periode 2024/2025</p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {STRUKTUR.map((pos) => (
-              <div
-                key={pos.jabatan}
-                className="p-5 rounded-xl border border-border bg-card text-center hover:border-primary/30 transition-colors"
-              >
-                <p className="text-xs tracking-widest uppercase text-primary font-medium mb-1">
-                  {pos.jabatan}
-                </p>
-                <p className="font-heading font-semibold text-foreground">
-                  {pos.nama}
-                </p>
-              </div>
+              <Card key={pos.jabatan} className="p-5 text-center border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300">
+                <CardContent className="p-0">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto mb-2">
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  </div>
+                  <p className="text-xs tracking-widest uppercase text-primary font-medium mb-1">
+                    {pos.jabatan}
+                  </p>
+                  <p className="font-heading font-semibold text-foreground">
+                    {pos.nama}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

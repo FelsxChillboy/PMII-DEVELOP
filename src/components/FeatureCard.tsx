@@ -24,15 +24,15 @@ export default function FeatureCard({
       const rect = e.currentTarget.getBoundingClientRect()
       const x = (e.clientX - rect.left) / rect.width
       const y = (e.clientY - rect.top) / rect.height
-      const rotateX = -(y - 0.5) * 12
-      const rotateY = (x - 0.5) * 12
+      const rotateX = -(y - 0.5) * 8
+      const rotateY = (x - 0.5) * 8
       glareRef.current.x = x * 100
       glareRef.current.y = y * 100
       const el = ref.current
       if (el) {
         el.style.setProperty("--glare-x", `${glareRef.current.x}%`)
         el.style.setProperty("--glare-y", `${glareRef.current.y}%`)
-        el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03,1.03,1.03)`
+        el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`
       }
     },
     []
@@ -55,19 +55,19 @@ export default function FeatureCard({
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       className={cn(
-        "group relative p-6 sm:p-8 rounded-xl border border-border bg-card hover:border-primary/30 cursor-default overflow-hidden",
-        "[perspective:800px] transition-transform duration-200 ease-out will-change-transform",
+        "group relative p-6 sm:p-8 rounded-2xl border border-border/50 bg-card/50 hover:border-primary/20 cursor-default overflow-hidden",
+        "[perspective:800px] transition-all duration-300 ease-out will-change-transform hover:shadow-lg hover:shadow-primary/[0.02]",
         className
       )}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(56,189,248,0.08) 0%, transparent 60%)`,
+          background: `radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), hsl(var(--primary) / 0.06) 0%, transparent 60%)`,
         }}
       />
       <div
-        className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors relative"
+        className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-4 group-hover:from-primary/20 group-hover:to-accent/20 transition-all duration-300 relative"
         style={{ transform: "translateZ(30px)" }}
       >
         <div className="text-primary">{icon}</div>

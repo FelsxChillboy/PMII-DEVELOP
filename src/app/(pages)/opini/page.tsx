@@ -5,12 +5,13 @@ import AnimatedSection from "@/components/AnimatedSection"
 export default function OpiniPage() {
   return (
     <div className="divide-y divide-border">
-      <AnimatedSection className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <AnimatedSection className="relative py-20 lg:py-28 overflow-hidden">
+        <div className="absolute inset-0 section-grid-light opacity-[0.05]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
             <SectionTag className="mb-4">WACANA</SectionTag>
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-6">
-              Opini <span className="text-primary">Publik</span>
+              Opini <span className="text-gradient">Publik</span>
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
               Ruang opini untuk berbagi ide, kritik, dan perspektif tentang gerakan kaderisasi, kegiatan sosial, dan arah organisasi.

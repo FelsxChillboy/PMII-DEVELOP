@@ -49,8 +49,9 @@ export default function Card3D({ children, className, asLink, href }: Card3DProp
       transformStyle: "preserve-3d" as const,
     } as React.CSSProperties,
     className: cn(
-      "group relative rounded-xl border border-border bg-card overflow-hidden cursor-default [perspective:800px]",
+      "group relative rounded-xl glass-panel overflow-hidden cursor-default [perspective:800px]",
       asLink && "hover:border-primary/30 transition-colors duration-300",
+      "hover:shadow-[0_0_30px_-10px] hover:shadow-primary/20",
       className
     ),
   }
