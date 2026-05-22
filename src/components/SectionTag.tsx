@@ -13,7 +13,7 @@ export default function SectionTag({ children, className }: SectionTagProps) {
         className
       )}
     >
-      <span className="h-px w-8 bg-linear-to-r from-primary to-accent" />
+      <span className="h-px w-8 bg-linear-to-r from-primary to-accent animate-gradient" />
       <span className="relative">
         {children}
         <span className="absolute -right-1.5 -top-1 h-1.5 w-1.5 rounded-full bg-accent/60" />

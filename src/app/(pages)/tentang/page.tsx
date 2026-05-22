@@ -55,7 +55,7 @@ export default function TentangPage() {
     <div className="divide-y divide-border">
       <AnimatedSection className="relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 section-grid-light opacity-[0.05]" />
-        <div className="absolute -top-40 -right-40 h-100 w-100 rounded-full bg-primary/3 blur-[100px]" />
+        <div className="absolute -top-40 -right-40 h-100 w-100 rounded-full bg-primary/3 blur-[100px] animate-float" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
             <SectionTag className="mb-4">PROFIL ORGANISASI</SectionTag>
@@ -78,7 +78,7 @@ export default function TentangPage() {
                 Visi <span className="text-gradient">Kami</span>
               </h2>
               <div className="relative">
-                <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-primary via-accent to-primary/20" />
+                <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-primary via-accent to-primary/20 animate-gradient" />
                 <p className="text-base sm:text-lg text-muted-foreground leading-relaxed pl-6 italic">
                   &ldquo;Menjadikan PR PMII Rayon Teknik UNUSIA sebagai pusat
                   kaderisasi intelektual yang melahirkan pemimpin berkarakter,
@@ -95,7 +95,7 @@ export default function TentangPage() {
               <ol className="space-y-4">
                 {MISI.map((item, i) => (
                   <li key={i} className="flex items-start gap-4">
-                    <span className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-full bg-linear-to-br from-primary to-accent text-white text-sm font-bold mt-0.5">
+                    <span className="inline-flex items-center justify-center h-7 w-7 shrink-0 rounded-full bg-linear-to-br from-primary to-accent text-white text-sm font-bold mt-0.5 animate-gradient">
                       {i + 1}
                     </span>
                     <span className="text-base text-muted-foreground leading-relaxed">
@@ -113,9 +113,9 @@ export default function TentangPage() {
           </h2>
           <div className="grid sm:grid-cols-3 gap-6">
             {NILAI.map((nilai) => (
-              <Card key={nilai.title} className="p-6 border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
+              <Card key={nilai.title} className="p-6 border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                 <CardContent className="p-0">
-                  <div className="h-12 w-12 rounded-xl bg-linear-to-br from-accent/10 to-primary/10 flex items-center justify-center mb-4">
+                  <div className="h-12 w-12 rounded-xl bg-linear-to-br from-accent/10 to-primary/10 animate-gradient flex items-center justify-center mb-4">
                     <div className="text-accent">{nilai.icon}</div>
                   </div>
                   <CardTitle className="font-heading font-semibold text-lg text-foreground mb-2">
@@ -140,10 +140,11 @@ export default function TentangPage() {
           <p className="text-sm text-muted-foreground mb-10">Periode 2025/2026</p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {STRUKTUR.map((pos) => (
-              <Card key={pos.jabatan} className="p-5 text-center border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300">
+            {STRUKTUR.map((pos, i) => (
+              <div key={pos.jabatan} className="animate-scale-in" style={{ animationDelay: `${i * 0.05}s` }}>
+              <Card className="p-5 text-center border border-border/50 bg-card/50 hover:border-primary/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg glass-panel glass-panel-hover">
                 <CardContent className="p-0">
-                  <div className="h-8 w-8 rounded-full bg-linear-to-br from-primary/10 to-accent/10 flex items-center justify-center mx-auto mb-2">
+                  <div className="h-8 w-8 rounded-full bg-linear-to-br from-primary/10 to-accent/10 animate-gradient flex items-center justify-center mx-auto mb-2">
                     <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                   <p className="text-xs tracking-widest uppercase text-primary font-medium mb-1">
@@ -154,6 +155,7 @@ export default function TentangPage() {
                   </p>
                 </CardContent>
               </Card>
+              </div>
             ))}
           </div>
         </div>

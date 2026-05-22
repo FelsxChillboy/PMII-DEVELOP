@@ -67,7 +67,7 @@ export default function FeatureCard({
         }}
       />
       <div
-        className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-4 group-hover:from-primary/20 group-hover:to-accent/20 transition-all duration-300 relative"
+        className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 animate-gradient flex items-center justify-center mb-4 group-hover:from-primary/20 group-hover:to-accent/20 transition-all duration-300 relative"
         style={{ transform: "translateZ(30px)" }}
       >
         <div className="text-primary">{icon}</div>

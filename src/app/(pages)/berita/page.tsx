@@ -70,12 +70,15 @@ export default async function BeritaPage({ searchParams }: Props) {
       <AnimatedSection variant="staggerContainer" className="py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {news.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-6 w-6 text-muted-foreground" />
+            <div className="text-center py-20 animate-scale-in">
+              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
+                <Calendar className="h-7 w-7 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground text-base">
                 Belum ada berita yang dipublikasikan.
+              </p>
+              <p className="text-sm text-muted-foreground/60 mt-2">
+                                Nantikan informasi terbaru dari kami
               </p>
             </div>
           ) : (
@@ -132,10 +135,10 @@ export default async function BeritaPage({ searchParams }: Props) {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-12">
+                <div className="flex items-center justify-center gap-1.5 mt-12">
                   <Link
                     href={`/berita?page=${page - 1}`}
-                    className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page <= 1 ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-full border text-sm transition-all ${page <= 1 ? "pointer-events-none opacity-30 border-border/30" : "border-border hover:bg-secondary hover:border-primary/30"}`}
                     aria-disabled={page <= 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -144,14 +147,14 @@ export default async function BeritaPage({ searchParams }: Props) {
                     <Link
                       key={p}
                       href={`/berita?page=${p}`}
-                      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-secondary"}`}
+                      className={`inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-full text-sm font-medium transition-all ${p === page ? "bg-linear-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/20 scale-105" : "border border-border hover:bg-secondary hover:border-primary/30"}`}
                     >
                       {p}
                     </Link>
                   ))}
                   <Link
                     href={`/berita?page=${page + 1}`}
-                    className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page >= totalPages ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-full border text-sm transition-all ${page >= totalPages ? "pointer-events-none opacity-30 border-border/30" : "border-border hover:bg-secondary hover:border-primary/30"}`}
                     aria-disabled={page >= totalPages}
                   >
                     <ChevronRight className="h-4 w-4" />

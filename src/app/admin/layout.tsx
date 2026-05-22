@@ -43,7 +43,7 @@ export default async function AdminLayout({
       <aside className="w-64 shrink-0 border-r border-border bg-background flex flex-col">
         <div className="p-4 border-b border-border">
           <Link href="/admin" className="font-heading font-bold text-lg tracking-tight">
-            <span className="text-primary">PR</span> PMII
+            <span className="text-gradient">PR PMII</span>
           </Link>
           <p className="text-xs text-muted-foreground mt-0.5">Panel Admin</p>
         </div>
@@ -53,7 +53,7 @@ export default async function AdminLayout({
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-l-2 hover:border-primary transition-all"
             >
               <item.icon className="h-4 w-4 shrink-0" />
               {item.label}

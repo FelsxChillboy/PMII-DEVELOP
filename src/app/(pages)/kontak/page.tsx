@@ -132,6 +132,7 @@ export default function KontakPage() {
                       type="text"
                       placeholder="Nama Anda"
                       required
+                      className="focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary/30 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -143,6 +144,7 @@ export default function KontakPage() {
                       type="email"
                       placeholder="email@example.com"
                       required
+                      className="focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary/30 transition-all"
                     />
                   </div>
                 </div>
@@ -151,24 +153,26 @@ export default function KontakPage() {
                   <label className="text-sm font-medium text-foreground">
                     Subjek
                   </label>
-                  <Input
-                    name="subject"
-                    type="text"
-                    placeholder="Subjek pesan"
-                    required
-                  />
+                    <Input
+                      name="subject"
+                      type="text"
+                      placeholder="Subjek pesan"
+                      required
+                      className="focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary/30 transition-all"
+                    />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
                     Pesan
                   </label>
-                  <Textarea
-                    name="message"
-                    placeholder="Tulis pesan Anda..."
-                    rows={5}
-                    required
-                  />
+                    <Textarea
+                      name="message"
+                      placeholder="Tulis pesan Anda..."
+                      rows={5}
+                      required
+                      className="focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary/30 transition-all"
+                    />
                 </div>
 
                 {state?.error && !state.success && (

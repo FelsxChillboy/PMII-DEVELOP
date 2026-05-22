@@ -69,11 +69,11 @@ export default async function AdminBerita(props: { searchParams?: Promise<{ page
         </div>
       )}
 
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-xl border border-border overflow-hidden glass-panel">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-secondary/50 border-b border-border">
+              <tr className="bg-secondary/30 border-b border-border">
                 <th className="text-left p-4 font-medium text-muted-foreground">Judul</th>
                 <th className="text-left p-4 font-medium text-muted-foreground hidden md:table-cell">Penulis</th>
                 <th className="text-left p-4 font-medium text-muted-foreground hidden sm:table-cell">Status</th>
@@ -89,8 +89,8 @@ export default async function AdminBerita(props: { searchParams?: Promise<{ page
                   </td>
                 </tr>
               )}
-              {data?.news.map((item) => (
-                <tr key={item.id} className="hover:bg-secondary/30 transition-colors">
+              {data?.news.map((item, i) => (
+                <tr key={item.id} className="hover:bg-secondary/30 hover:scale-[1.002] transition-all duration-200 animate-scale-in" style={{ animationDelay: `${i * 0.03}s` }}>
                   <td className="p-4">
                     <p className="font-medium truncate max-w-xs">{item.title}</p>
                   </td>
@@ -127,10 +127,10 @@ export default async function AdminBerita(props: { searchParams?: Promise<{ page
       </div>
 
       {data && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
+        <div className="flex items-center justify-center gap-1.5 mt-6">
           <Link
             href={`/admin/berita?page=${page - 1}`}
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page <= 1 ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm transition-all ${page <= 1 ? "pointer-events-none opacity-30 border-border/30" : "border-border hover:bg-secondary hover:border-primary/30"}`}
             aria-disabled={page <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -139,14 +139,14 @@ export default async function AdminBerita(props: { searchParams?: Promise<{ page
             <Link
               key={p}
               href={`/admin/berita?page=${p}`}
-              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-primary text-primary-foreground" : "border border-border hover:bg-secondary"}`}
+              className={`inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full text-sm font-medium transition-all ${p === page ? "bg-linear-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/20 scale-105" : "border border-border hover:bg-secondary hover:border-primary/30"}`}
             >
               {p}
             </Link>
           ))}
           <Link
             href={`/admin/berita?page=${page + 1}`}
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-sm transition-colors ${page >= totalPages ? "pointer-events-none opacity-30" : "hover:bg-secondary"}`}
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm transition-all ${page >= totalPages ? "pointer-events-none opacity-30 border-border/30" : "border-border hover:bg-secondary hover:border-primary/30"}`}
             aria-disabled={page >= totalPages}
           >
             <ChevronRight className="h-4 w-4" />

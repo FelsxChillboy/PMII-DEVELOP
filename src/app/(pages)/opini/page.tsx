@@ -1,12 +1,14 @@
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, MessageSquare } from "lucide-react"
 import SectionTag from "@/components/SectionTag"
-import AnimatedSection from "@/components/AnimatedSection"
+import AnimatedSection, { StaggerItem } from "@/components/AnimatedSection"
+import Card3D from "@/components/Card3D"
 
 export default function OpiniPage() {
   return (
     <div className="divide-y divide-border">
       <AnimatedSection className="relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 section-grid-light opacity-[0.05]" />
+        <div className="absolute -top-40 -right-40 h-100 w-100 rounded-full bg-primary/3 blur-[100px] animate-float" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
             <SectionTag className="mb-4">WACANA</SectionTag>
@@ -20,7 +22,7 @@ export default function OpiniPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 lg:py-24">
+      <AnimatedSection variant="staggerContainer" className="py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 lg:grid-cols-2">
             {[
@@ -35,16 +37,23 @@ export default function OpiniPage() {
                   "Merespon tantangan masyarakat saat ini dengan gagasan segar dan aksi terukur demi kemajuan bersama.",
               },
             ].map((item) => (
-              <article key={item.title} className="rounded-3xl border border-border bg-card p-8 shadow-sm transition-shadow hover:shadow-lg">
-                <div className="flex items-center justify-between gap-3 mb-4">
-                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                    Opini
-                  </span>
-                  <ArrowRight className="h-5 w-5 text-primary" />
-                </div>
-                <h2 className="text-2xl font-semibold text-foreground mb-3">{item.title}</h2>
-                <p className="text-sm leading-7 text-muted-foreground">{item.description}</p>
-              </article>
+              <StaggerItem key={item.title}>
+                <Card3D className="p-8 h-full">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-linear-to-br from-accent/10 to-primary/10 flex items-center justify-center">
+                        <MessageSquare className="h-5 w-5 text-accent" />
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                        Opini
+                      </span>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-foreground mb-3">{item.title}</h2>
+                  <p className="text-sm leading-7 text-muted-foreground">{item.description}</p>
+                </Card3D>
+              </StaggerItem>
             ))}
           </div>
         </div>
