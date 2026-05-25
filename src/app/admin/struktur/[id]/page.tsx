@@ -1,40 +1,29 @@
-import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
-import { updateNews } from "@/lib/admin-actions"
+import { updateOrganizationMember } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
-export default async function EditBeritaPage({ params }: Props) {
+export default async function EditStrukturPage({ params }: Props) {
   const session = await auth()
   if (!session?.user) redirect("/login")
   const isAdmin = (session.user as { role?: string }).role === "ADMIN"
   if (!isAdmin) redirect("/admin")
 
   const { id } = await params
-  const news = await prisma.news.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      imageUrl: true,
-      content: true,
-      published: true,
-    },
-  })
-  if (!news) notFound()
+  const member = await prisma.organizationMember.findUnique({ where: { id } })
+  if (!member) notFound()
 
   return (
     <div>
       <div className="flex items-center gap-4 mb-8">
         <Link
-          href="/admin/berita"
+          href="/admin/struktur"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -42,95 +31,98 @@ export default async function EditBeritaPage({ params }: Props) {
         </Link>
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight mb-1">
-            Edit Berita
+            Edit Anggota
           </h1>
-          <p className="text-sm text-muted-foreground">{news.title}</p>
+          <p className="text-sm text-muted-foreground">{member.name}</p>
         </div>
       </div>
 
       <div className="max-w-2xl">
-        <form action={updateNews} className="space-y-6">
-          <input type="hidden" name="id" value={news.id} />
+        <form action={updateOrganizationMember} className="space-y-6">
+          <input type="hidden" name="id" value={member.id} />
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1.5">
-              Judul
+            <label htmlFor="name" className="block text-sm font-medium mb-1.5">
+              Nama
             </label>
             <input
-              id="title"
-              name="title"
+              id="name"
+              name="name"
               type="text"
               required
-              defaultValue={news.title}
+              defaultValue={member.name}
               className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium mb-1.5">
-              Slug
+            <label htmlFor="position" className="block text-sm font-medium mb-1.5">
+              Jabatan
             </label>
             <input
-              id="slug"
-              name="slug"
+              id="position"
+              name="position"
               type="text"
               required
-              defaultValue={news.slug}
+              defaultValue={member.position}
               className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              Gambar Saat Ini
+              Foto Saat Ini
             </label>
-            {news.imageUrl ? (
+            {member.photoUrl ? (
               <div className="mb-3">
-                <Image src={news.imageUrl} alt="" width={160} height={80} className="h-24 w-auto rounded-lg object-cover border border-border" unoptimized />
+                <img src={member.photoUrl} alt="" className="h-24 w-24 rounded-lg object-cover border border-border" />
               </div>
             ) : (
               <div className="h-24 w-24 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground text-xs mb-3">
-                Tidak ada gambar
+                Tidak ada foto
               </div>
             )}
-            <label htmlFor="image" className="block text-sm font-medium mb-1.5">
-              Ganti Gambar
+            <label htmlFor="photo" className="block text-sm font-medium mb-1.5">
+              Ganti Foto
             </label>
             <input
-              id="image"
-              name="image"
+              id="photo"
+              name="photo"
               type="file"
               accept="image/*"
               className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:opacity-90 file:cursor-pointer"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Kosongkan jika tidak ingin mengganti gambar. Format: JPG, PNG, WEBP.
+              Kosongkan jika tidak ingin mengganti foto. Format: JPG, PNG, WEBP.
             </p>
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-1.5">
-              Konten
+            <label htmlFor="instagramUrl" className="block text-sm font-medium mb-1.5">
+              Instagram (URL)
             </label>
-            <textarea
-              id="content"
-              name="content"
-              required
-              rows={16}
-              defaultValue={news.content}
-              className="w-full px-4 py-3 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-y font-mono"
+            <input
+              id="instagramUrl"
+              name="instagramUrl"
+              type="url"
+              defaultValue={member.instagramUrl || ""}
+              className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              placeholder="https://www.instagram.com/username"
             />
           </div>
 
-          <label className="flex items-center gap-3 cursor-pointer">
+          <div>
+            <label htmlFor="sortOrder" className="block text-sm font-medium mb-1.5">
+              Urutan
+            </label>
             <input
-              type="checkbox"
-              name="published"
-              defaultChecked={news.published}
-              className="h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-primary/50"
+              id="sortOrder"
+              name="sortOrder"
+              type="number"
+              defaultValue={member.sortOrder}
+              className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
-            <span className="text-sm">Publikasikan</span>
-          </label>
+          </div>
 
           <div className="flex items-center gap-3 pt-2">
             <button
@@ -140,7 +132,7 @@ export default async function EditBeritaPage({ params }: Props) {
               Simpan Perubahan
             </button>
             <Link
-              href="/admin/berita"
+              href="/admin/struktur"
               className="h-11 px-6 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors inline-flex items-center"
             >
               Batal

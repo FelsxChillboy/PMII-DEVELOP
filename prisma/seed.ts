@@ -11,46 +11,19 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   console.log("Seeding database...")
 
-  const hashedPassword = await bcrypt.hash("admin123", 12)
+  const adminPassword = await bcrypt.hash("teknikbersatutakbisadikalahkan", 12)
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@pmii-unusia.ac.id" },
+    where: { email: "rayonteknikunusia@gmail.com" },
     update: {},
     create: {
-      name: "Admin PMII",
-      email: "admin@pmii-unusia.ac.id",
-      password: hashedPassword,
+      name: "Admin Rayon Teknik",
+      email: "rayonteknikunusia@gmail.com",
+      password: adminPassword,
       role: "ADMIN",
     },
   })
-  console.log(`Admin user: ${admin.email} (password: admin123)`)
-
-  const member = await prisma.user.upsert({
-    where: { email: "member@pmii-unusia.ac.id" },
-    update: {},
-    create: {
-      name: "Member Rayon",
-      email: "member@pmii-unusia.ac.id",
-      password: hashedPassword,
-      role: "MEMBER",
-    },
-  })
-  console.log(`Member user: ${member.email} (password: admin123)`)
-
-  const users = [
-    { name: "Ahmad Fauzi", email: "ahmad@example.com", role: "USER" as const },
-    { name: "Siti Nurhaliza", email: "siti@example.com", role: "MEMBER" as const },
-    { name: "Budi Santoso", email: "budi@example.com", role: "USER" as const },
-    { name: "Dewi Lestari", email: "dewi@example.com", role: "MEMBER" as const },
-  ]
-  for (const u of users) {
-    await prisma.user.upsert({
-      where: { email: u.email },
-      update: {},
-      create: { ...u, password: hashedPassword },
-    })
-  }
-  console.log(`${users.length} additional users created`)
+  console.log(`Admin: ${admin.email}`)
 
   const newsData = [
     {

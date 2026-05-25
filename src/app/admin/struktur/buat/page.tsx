@@ -1,10 +1,10 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { createNews } from "@/lib/admin-actions"
+import { createOrganizationMember } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
-export default async function BuatBeritaPage(props: { searchParams?: Promise<{ error?: string }> }) {
+export default async function BuatStrukturPage(props: { searchParams?: Promise<{ error?: string }> }) {
   const sp = await props.searchParams
   const session = await auth()
   if (!session?.user) redirect("/login")
@@ -15,7 +15,7 @@ export default async function BuatBeritaPage(props: { searchParams?: Promise<{ e
     <div>
       <div className="flex items-center gap-4 mb-8">
         <Link
-          href="/admin/berita"
+          href="/admin/struktur"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -23,10 +23,10 @@ export default async function BuatBeritaPage(props: { searchParams?: Promise<{ e
         </Link>
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight mb-1">
-            Buat Berita
+            Tambah Anggota
           </h1>
           <p className="text-sm text-muted-foreground">
-            Publikasikan berita dan informasi baru
+            Tambah anggota struktur organisasi
           </p>
         </div>
       </div>
@@ -38,76 +38,83 @@ export default async function BuatBeritaPage(props: { searchParams?: Promise<{ e
       )}
 
       <div className="max-w-2xl">
-        <form action={createNews} className="space-y-6">
+        <form action={createOrganizationMember} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1.5">
-              Judul
+            <label htmlFor="name" className="block text-sm font-medium mb-1.5">
+              Nama
             </label>
             <input
-              id="title"
-              name="title"
+              id="name"
+              name="name"
               type="text"
               required
               className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-              placeholder="Judul berita"
+              placeholder="Nama lengkap"
             />
           </div>
 
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium mb-1.5">
-              Slug
+            <label htmlFor="position" className="block text-sm font-medium mb-1.5">
+              Jabatan
             </label>
             <input
-              id="slug"
-              name="slug"
+              id="position"
+              name="position"
               type="text"
               required
               className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-              placeholder="judul-berita-dalam-url"
+              placeholder="Ketua, Sekretaris, dll."
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Gunakan huruf kecil, tanpa spasi, tanda hubung sebagai pemisah
-            </p>
           </div>
 
           <div>
-            <label htmlFor="image" className="block text-sm font-medium mb-1.5">
-              Gambar
+            <label htmlFor="photo" className="block text-sm font-medium mb-1.5">
+              Foto
             </label>
             <input
-              id="image"
-              name="image"
+              id="photo"
+              name="photo"
               type="file"
               accept="image/*"
               className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:opacity-90 file:cursor-pointer"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Format: JPG, PNG, WEBP. Kosongkan jika tidak ingin menyertakan gambar.
+              Format: JPG, PNG, WEBP. Maks 5MB.
             </p>
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-1.5">
-              Konten
+            <label htmlFor="instagramUrl" className="block text-sm font-medium mb-1.5">
+              Instagram (URL)
             </label>
-            <textarea
-              id="content"
-              name="content"
-              required
-              rows={16}
-              className="w-full px-4 py-3 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-y font-mono"
-              placeholder="Tulis konten berita di sini... (bisa pakai HTML)"
+            <input
+              id="instagramUrl"
+              name="instagramUrl"
+              type="url"
+              className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              placeholder="https://www.instagram.com/username"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Link Instagram profil anggota (opsional)
+            </p>
           </div>
 
-          <label className="flex items-center gap-3 cursor-pointer">
+          <div>
+            <label htmlFor="sortOrder" className="block text-sm font-medium mb-1.5">
+              Urutan
+            </label>
             <input
-              type="checkbox"
-              name="published"
-              className="h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-primary/50"
+              id="sortOrder"
+              name="sortOrder"
+              type="number"
+              defaultValue={0}
+              className="w-full h-11 px-4 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              placeholder="0"
             />
-            <span className="text-sm">Publikasikan langsung</span>
-          </label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Urutan tampil (angka lebih kecil tampil lebih dulu)
+            </p>
+          </div>
 
           <div className="flex items-center gap-3 pt-2">
             <button
@@ -117,7 +124,7 @@ export default async function BuatBeritaPage(props: { searchParams?: Promise<{ e
               Simpan
             </button>
             <Link
-              href="/admin/berita"
+              href="/admin/struktur"
               className="h-11 px-6 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors inline-flex items-center"
             >
               Batal

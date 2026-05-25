@@ -8,9 +8,11 @@ import {
   NewsSchema,
   EventSchema,
   UpdateUserRoleSchema,
+  OrganizationMemberSchema,
 } from "@/lib/schemas"
 import { sanitizeContent } from "@/lib/sanitize"
 import { logAudit } from "@/lib/audit"
+import { uploadImage } from "@/lib/upload"
 
 function handlePrismaError(err: unknown, fallback: string): string | null {
   if (err && typeof err === "object" && "code" in err) {
@@ -40,11 +42,24 @@ export async function createNews(formData: FormData): Promise<void> {
   const { session, error: authErr } = await requireAdmin()
   if (authErr || !session?.user?.id) return
 
+  const imageFile = formData.get("image") as File | null
+  let imageUrl: string | undefined
+
+  if (imageFile && imageFile.size > 0) {
+    try {
+      imageUrl = await uploadImage(imageFile, "pmii-news")
+    } catch {
+      redirect("/admin/berita/buat?error=" + encodeURIComponent("Gagal upload gambar"))
+    }
+  } else {
+    imageUrl = safeString(formData.get("imageUrl")) || undefined
+  }
+
   const parsed = NewsSchema.safeParse({
     title: safeString(formData.get("title")),
     slug: safeString(formData.get("slug")),
     content: safeString(formData.get("content")),
-    imageUrl: safeString(formData.get("imageUrl")) || undefined,
+    imageUrl,
     published: formData.get("published") === "on",
   })
 
@@ -77,11 +92,24 @@ export async function updateNews(formData: FormData): Promise<void> {
   const newsId = safeString(formData.get("id"))
   if (!newsId) return
 
+  const imageFile = formData.get("image") as File | null
+  let imageUrl: string | undefined
+
+  if (imageFile && imageFile.size > 0) {
+    try {
+      imageUrl = await uploadImage(imageFile, "pmii-news")
+    } catch {
+      redirect("/admin/berita/" + newsId + "?error=" + encodeURIComponent("Gagal upload gambar"))
+    }
+  } else {
+    imageUrl = safeString(formData.get("imageUrl")) || undefined
+  }
+
   const parsed = NewsSchema.safeParse({
     title: safeString(formData.get("title")),
     slug: safeString(formData.get("slug")),
     content: safeString(formData.get("content")),
-    imageUrl: safeString(formData.get("imageUrl")) || undefined,
+    imageUrl,
     published: formData.get("published") === "on",
   })
 
@@ -314,6 +342,111 @@ export async function deleteRegistration(formData: FormData): Promise<void> {
     revalidatePath("/admin/kegiatan/[id]/registrations")
   } catch (err) {
     console.error("Delete registration failed:", handlePrismaError(err, ""))
+  }
+}
+
+export async function createOrganizationMember(formData: FormData): Promise<void> {
+  const { error: authErr } = await requireAdmin()
+  if (authErr) return
+
+  const photoFile = formData.get("photo") as File | null
+  let photoUrl: string | undefined
+
+  if (photoFile && photoFile.size > 0) {
+    try {
+      photoUrl = await uploadImage(photoFile, "pmii-struktur")
+    } catch {
+      redirect("/admin/struktur/buat?error=" + encodeURIComponent("Gagal upload foto"))
+    }
+  } else {
+    photoUrl = safeString(formData.get("photoUrl")) || undefined
+  }
+
+  const parsed = OrganizationMemberSchema.safeParse({
+    name: safeString(formData.get("name")),
+    position: safeString(formData.get("position")),
+    photoUrl,
+    instagramUrl: safeString(formData.get("instagramUrl")) || undefined,
+    sortOrder: parseInt(safeString(formData.get("sortOrder"))) || 0,
+  })
+
+  if (!parsed.success) {
+    redirect("/admin/struktur/buat?error=" + encodeURIComponent(parsed.error.issues[0].message))
+  }
+
+  try {
+    const member = await prisma.organizationMember.create({ data: parsed.data })
+    await logAudit("CREATE", "STRUKTUR", member.id, { name: parsed.data.name, position: parsed.data.position })
+    revalidatePath("/admin/struktur")
+    revalidatePath("/tentang")
+    redirect("/admin/struktur")
+  } catch (err) {
+    const result = handlePrismaError(err, "Gagal menambah anggota struktur")
+    if (result) redirect("/admin/struktur/buat?error=" + encodeURIComponent(result))
+  }
+}
+
+export async function updateOrganizationMember(formData: FormData): Promise<void> {
+  const { error: authErr } = await requireAdmin()
+  if (authErr) return
+
+  const id = safeString(formData.get("id"))
+  if (!id) return
+
+  const photoFile = formData.get("photo") as File | null
+  let photoUrl: string | undefined
+
+  if (photoFile && photoFile.size > 0) {
+    try {
+      photoUrl = await uploadImage(photoFile, "pmii-struktur")
+    } catch {
+      redirect("/admin/struktur/" + id + "?error=" + encodeURIComponent("Gagal upload foto"))
+    }
+  } else {
+    photoUrl = safeString(formData.get("photoUrl")) || undefined
+  }
+
+  const parsed = OrganizationMemberSchema.safeParse({
+    name: safeString(formData.get("name")),
+    position: safeString(formData.get("position")),
+    photoUrl,
+    instagramUrl: safeString(formData.get("instagramUrl")) || undefined,
+    sortOrder: parseInt(safeString(formData.get("sortOrder"))) || 0,
+  })
+
+  if (!parsed.success) {
+    redirect("/admin/struktur/" + id + "?error=" + encodeURIComponent(parsed.error.issues[0].message))
+  }
+
+  try {
+    await prisma.organizationMember.update({
+      where: { id },
+      data: parsed.data,
+    })
+    await logAudit("UPDATE", "STRUKTUR", id, { name: parsed.data.name, position: parsed.data.position })
+    revalidatePath("/admin/struktur")
+    revalidatePath("/tentang")
+    redirect("/admin/struktur")
+  } catch (err) {
+    const result = handlePrismaError(err, "Gagal memperbarui anggota struktur")
+    if (result) redirect("/admin/struktur/" + id + "?error=" + encodeURIComponent(result))
+  }
+}
+
+export async function deleteOrganizationMember(formData: FormData): Promise<void> {
+  const { error: authErr } = await requireAdmin()
+  if (authErr) return
+
+  const id = safeString(formData.get("id"))
+  if (!id) return
+
+  try {
+    await prisma.organizationMember.delete({ where: { id } })
+    await logAudit("DELETE", "STRUKTUR", id)
+    revalidatePath("/admin/struktur")
+    revalidatePath("/tentang")
+  } catch (err) {
+    console.error("Delete structure member failed:", handlePrismaError(err, ""))
   }
 }
 

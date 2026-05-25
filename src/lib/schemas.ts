@@ -39,3 +39,11 @@ export const UpdateRegistrationSchema = z.object({
 export const UpdateUserRoleSchema = z.object({
   role: z.enum(["USER", "MEMBER", "ADMIN"]),
 })
+
+export const OrganizationMemberSchema = z.object({
+  name: z.string().min(1, "Nama wajib diisi").max(200),
+  position: z.string().min(1, "Jabatan wajib diisi").max(200),
+  photoUrl: z.string().max(500).optional(),
+  instagramUrl: z.string().max(500).optional(),
+  sortOrder: z.number().int().min(0).default(0),
+})

@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { updateUserRole, deleteUser } from "@/lib/admin-actions"
+import { deleteUser } from "@/lib/admin-actions"
+import RoleSelect from "./RoleSelect"
 import { ChevronLeft, ChevronRight, Users, User as UserIcon, Trash2 } from "lucide-react"
 
 const PER_PAGE = 20
@@ -15,12 +16,6 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
   MEMBER: "Member",
   USER: "User",
-}
-
-const ROLE_COLORS: Record<string, string> = {
-  ADMIN: "bg-purple-500/10 text-purple-500",
-  MEMBER: "bg-blue-500/10 text-blue-500",
-  USER: "bg-gray-500/10 text-gray-400",
 }
 
 export default async function AdminPengguna({ searchParams }: Props) {
@@ -102,19 +97,7 @@ export default async function AdminPengguna({ searchParams }: Props) {
                     {user.email || "-"}
                   </td>
                   <td className="p-4">
-                    <form action={updateUserRole} className="flex items-center gap-1">
-                      <input type="hidden" name="userId" value={user.id} />
-                      <select
-                        name="role"
-                        defaultValue={user.role}
-                        onChange={(e) => e.target.form?.requestSubmit()}
-                        className={`text-xs px-2 py-1 rounded border-0 font-medium cursor-pointer ${ROLE_COLORS[user.role] || ""} bg-transparent`}
-                      >
-                        <option value="USER">User</option>
-                        <option value="MEMBER">Member</option>
-                        <option value="ADMIN">Admin</option>
-                      </select>
-                    </form>
+                    <RoleSelect userId={user.id} currentRole={user.role} />
                   </td>
                   <td className="p-4 text-muted-foreground hidden lg:table-cell">
                     <span className="text-xs">

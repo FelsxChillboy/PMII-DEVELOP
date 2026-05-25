@@ -31,6 +31,7 @@ const ENTITY_LABELS: Record<string, string> = {
   REGISTRATION: "Pendaftaran",
   CONTACT: "Kontak",
   MEDIA: "Media",
+  STRUKTUR: "Struktur",
 }
 
 export default async function AdminAudit({ searchParams }: Props) {

@@ -57,7 +57,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 
 export async function sendContactNotification(name: string, email: string, subject: string, message: string) {
   return sendEmail({
-    to: process.env.ADMIN_EMAIL || "admin@pmii-unusia.ac.id",
+    to: process.env.ADMIN_EMAIL || "rayonteknikunusia@gmail.com",
     subject: `[Kontak Baru] ${subject} - ${APP_NAME}`,
     html: `<!DOCTYPE html>
 <html>

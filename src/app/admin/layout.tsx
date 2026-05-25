@@ -11,6 +11,7 @@ import {
   Users,
   ImageIcon,
   ClipboardList,
+  GitBranch,
 } from "lucide-react"
 async function logoutAction() {
   "use server"
@@ -24,6 +25,7 @@ const SIDEBAR = [
   { label: "Media", href: "/admin/media", icon: ImageIcon },
   { label: "Audit Log", href: "/admin/audit", icon: ClipboardList },
   { label: "Kontak", href: "/admin/kontak", icon: Mail },
+  { label: "Struktur", href: "/admin/struktur", icon: GitBranch },
   { label: "Pengguna", href: "/admin/pengguna", icon: Users },
 ]
 
