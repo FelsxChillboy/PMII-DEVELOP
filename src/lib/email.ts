@@ -55,6 +55,15 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   })
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
 export async function sendContactNotification(name: string, email: string, subject: string, message: string) {
   return sendEmail({
     to: process.env.ADMIN_EMAIL || "rayonteknikunusia@gmail.com",
@@ -66,11 +75,11 @@ export async function sendContactNotification(name: string, email: string, subje
 <div style="max-width:480px;margin:auto;background:white;border-radius:12px;padding:32px">
 <h2 style="color:#333;margin:0 0 16px">Pesan Kontak Baru</h2>
 <table style="width:100%;font-size:13px;color:#333">
-<tr><td style="padding:4px 0;color:#666">Nama</td><td style="padding:4px 0">${name}</td></tr>
-<tr><td style="padding:4px 0;color:#666">Email</td><td style="padding:4px 0">${email}</td></tr>
-<tr><td style="padding:4px 0;color:#666">Subjek</td><td style="padding:4px 0">${subject}</td></tr>
+<tr><td style="padding:4px 0;color:#666">Nama</td><td style="padding:4px 0">${escapeHtml(name)}</td></tr>
+<tr><td style="padding:4px 0;color:#666">Email</td><td style="padding:4px 0">${escapeHtml(email)}</td></tr>
+<tr><td style="padding:4px 0;color:#666">Subjek</td><td style="padding:4px 0">${escapeHtml(subject)}</td></tr>
 </table>
-<div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;font-size:13px;color:#333;line-height:1.6">${message}</div>
+<div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;font-size:13px;color:#333;line-height:1.6">${escapeHtml(message)}</div>
 </div>
 </body>
 </html>`,

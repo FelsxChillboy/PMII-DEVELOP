@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/server/auth"
 import Link from "next/link"
+import Image from "next/image"
 import { deleteOrganizationMember } from "@/lib/admin-actions"
 import { Plus, ExternalLink, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -21,6 +22,7 @@ async function getMembers(page: number) {
         orderBy: { sortOrder: "asc" },
         take: PER_PAGE,
         skip: (page - 1) * PER_PAGE,
+        select: { id: true, photoUrl: true, name: true, position: true, sortOrder: true, instagramUrl: true },
       }),
       prisma.organizationMember.count(),
     ])
@@ -93,7 +95,7 @@ export default async function AdminStruktur(props: { searchParams?: Promise<{ pa
                 <tr key={item.id} className="hover:bg-secondary/30 hover:scale-[1.002] transition-all duration-200 animate-scale-in" style={{ animationDelay: `${i * 0.03}s` }}>
                   <td className="p-4">
                     {item.photoUrl ? (
-                      <img src={item.photoUrl} alt="" className="h-10 w-10 rounded-full object-cover border border-border" />
+                      <Image src={item.photoUrl} alt="" width={40} height={40} className="h-10 w-10 rounded-full object-cover border border-border" unoptimized />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground text-xs">
                         -

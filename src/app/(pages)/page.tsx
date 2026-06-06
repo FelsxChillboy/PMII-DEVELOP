@@ -3,7 +3,6 @@ import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import FeatureCard from "@/components/FeatureCard"
 import LazyLottie from "@/components/LazyLottie"
-import { Card, CardContent } from "@/components/ui/card"
 import { HeroSection as ClientHero } from "./ClientSections"
 import { Brain, Cog, ShieldCheck } from "lucide-react"
 

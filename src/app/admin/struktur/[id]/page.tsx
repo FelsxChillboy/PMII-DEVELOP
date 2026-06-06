@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { updateOrganizationMember } from "@/lib/admin-actions"
 import { ArrowLeft } from "lucide-react"
 
@@ -75,7 +76,7 @@ export default async function EditStrukturPage({ params }: Props) {
             </label>
             {member.photoUrl ? (
               <div className="mb-3">
-                <img src={member.photoUrl} alt="" className="h-24 w-24 rounded-lg object-cover border border-border" />
+                <Image src={member.photoUrl} alt="" width={96} height={96} className="h-24 w-24 rounded-lg object-cover border border-border" unoptimized />
               </div>
             ) : (
               <div className="h-24 w-24 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground text-xs mb-3">

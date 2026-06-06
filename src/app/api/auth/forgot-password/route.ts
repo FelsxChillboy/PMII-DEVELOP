@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { success, error, serverError } from "@/lib/api-response"
 import { sendPasswordResetEmail } from "@/lib/email"
 import { z } from "zod"
-import { randomBytes } from "crypto"
+import { randomBytes, createHash } from "crypto"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 const ForgotPasswordSchema = z.object({
@@ -29,11 +29,12 @@ export async function POST(request: Request) {
     }
 
     const token = randomBytes(32).toString("hex")
+    const hashedToken = createHash("sha256").update(token).digest("hex")
     const expiry = new Date(Date.now() + 3_600_000)
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { resetToken: token, resetTokenExpiry: expiry },
+      data: { resetToken: hashedToken, resetTokenExpiry: expiry },
     })
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"

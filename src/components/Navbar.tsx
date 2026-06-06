@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, memo } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion"
@@ -68,7 +69,7 @@ export default memo(function Navbar() {
       />
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <img src="/Logo-rayon.svg" alt="PR PMII" className="h-9 w-9 shrink-0" />
+          <Image src="/Logo-rayon.svg" alt="PR PMII" width={36} height={36} className="h-9 w-9 shrink-0" priority />
           <span className="hidden sm:inline font-heading text-sm font-semibold tracking-tight text-foreground">
             PR PMII<span className="text-primary"> Rayon Teknik</span>
           </span>

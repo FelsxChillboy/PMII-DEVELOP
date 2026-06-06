@@ -4,7 +4,8 @@ import { auth } from "@/lib/auth"
 import { uploadImage } from "@/lib/upload"
 import { revalidatePath } from "next/cache"
 import { logAudit } from "@/lib/audit"
-import { ImageIcon, Trash2, Upload, AlertTriangle } from "lucide-react"
+import NextImage from "next/image"
+import { ImageIcon, Trash2, Upload } from "lucide-react"
 import Link from "next/link"
 
 const PER_PAGE = 24
@@ -165,12 +166,14 @@ export default async function AdminMedia({ searchParams }: Props) {
         {media.map((m) => (
           <div key={m.id} className="group relative rounded-xl border border-border bg-card overflow-hidden">
             {m.mimeType.startsWith("image/") ? (
-              <div className="aspect-square bg-secondary/30">
-                <img
+              <div className="aspect-square bg-secondary/30 relative">
+                <NextImage
                   src={m.url}
                   alt={m.filename}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                 />
               </div>
             ) : (

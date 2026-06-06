@@ -15,6 +15,9 @@ import { logAudit } from "@/lib/audit"
 import { uploadImage } from "@/lib/upload"
 
 function handlePrismaError(err: unknown, fallback: string): string | null {
+  if (err instanceof Error && "digest" in err && typeof (err as any).digest === "string" && (err as any).digest.startsWith("NEXT_REDIRECT")) {
+    throw err
+  }
   if (err && typeof err === "object" && "code" in err) {
     const prismaErr = err as { code: string; meta?: { target?: string[] } }
     if (prismaErr.code === "P2002") {
@@ -187,6 +190,7 @@ export async function createEvent(formData: FormData): Promise<void> {
     })
     await logAudit("CREATE", "EVENT", ev.id, { title: parsed.data.title })
     revalidatePath("/admin/kegiatan")
+    revalidatePath("/kegiatan")
     redirect("/admin/kegiatan")
   } catch (err) {
     const result = handlePrismaError(err, "Gagal membuat kegiatan")
@@ -232,6 +236,7 @@ export async function updateEvent(formData: FormData): Promise<void> {
     })
     await logAudit("UPDATE", "EVENT", eventId, { title: parsed.data.title })
     revalidatePath("/admin/kegiatan")
+    revalidatePath("/kegiatan")
     redirect("/admin/kegiatan")
   } catch (err) {
     const result = handlePrismaError(err, "Gagal memperbarui kegiatan")
@@ -250,6 +255,7 @@ export async function deleteEvent(formData: FormData): Promise<void> {
     await prisma.event.delete({ where: { id } })
     await logAudit("DELETE", "EVENT", id)
     revalidatePath("/admin/kegiatan")
+    revalidatePath("/kegiatan")
   } catch (err) {
     console.error("Delete event failed:", handlePrismaError(err, ""))
   }
@@ -309,7 +315,7 @@ export async function approveRegistration(formData: FormData): Promise<void> {
   try {
     await prisma.registration.update({ where: { id }, data: { status: "APPROVED" } })
     await logAudit("UPDATE", "REGISTRATION", id, { status: "APPROVED" })
-    revalidatePath("/admin/kegiatan/[id]/registrations")
+    revalidatePath("/admin/kegiatan")
   } catch (err) {
     console.error("Approve registration failed:", handlePrismaError(err, ""))
   }
@@ -324,7 +330,7 @@ export async function rejectRegistration(formData: FormData): Promise<void> {
 
   try {
     await prisma.registration.update({ where: { id }, data: { status: "REJECTED" } })
-    revalidatePath("/admin/kegiatan/[id]/registrations")
+    revalidatePath("/admin/kegiatan")
   } catch (err) {
     console.error("Reject registration failed:", handlePrismaError(err, ""))
   }
@@ -339,7 +345,7 @@ export async function deleteRegistration(formData: FormData): Promise<void> {
 
   try {
     await prisma.registration.delete({ where: { id } })
-    revalidatePath("/admin/kegiatan/[id]/registrations")
+    revalidatePath("/admin/kegiatan")
   } catch (err) {
     console.error("Delete registration failed:", handlePrismaError(err, ""))
   }
@@ -457,11 +463,13 @@ export async function toggleMessageRead(id: string): Promise<void> {
   if (!id) return
 
   try {
-    const msg = await prisma.contact.findUnique({ where: { id } })
-    if (!msg) return
-    await prisma.contact.update({
-      where: { id },
-      data: { read: !msg.read },
+    await prisma.$transaction(async (tx) => {
+      const msg = await tx.contact.findUnique({ where: { id } })
+      if (!msg) return
+      await tx.contact.update({
+        where: { id },
+        data: { read: !msg.read },
+      })
     })
     revalidatePath("/admin/kontak")
   } catch (err) {

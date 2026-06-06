@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
 import SectionTag from "@/components/SectionTag"
@@ -44,12 +44,14 @@ const CONTACT_INFO = [
 export default function KontakPage() {
   const [state, formAction, pending] = useActionState(submitContact, null)
 
-  if (state?.success) {
-    toast.success("Pesan berhasil dikirim!")
-  }
-  if (state?.error) {
-    toast.error(state.error)
-  }
+  useEffect(() => {
+    if (state?.success) {
+      toast.success("Pesan berhasil dikirim!")
+    }
+    if (state?.error) {
+      toast.error(state.error)
+    }
+  }, [state])
 
   return (
     <div className="divide-y divide-border">

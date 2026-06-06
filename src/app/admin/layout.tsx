@@ -38,7 +38,7 @@ export default async function AdminLayout({
   if (!session?.user) redirect("/login")
 
   const isAdmin = (session.user as { role?: string }).role === "ADMIN"
-  if (!isAdmin) redirect("/dashboard")
+  if (!isAdmin) redirect("/")
 
   return (
     <div className="flex min-h-screen bg-[#0B1120]">

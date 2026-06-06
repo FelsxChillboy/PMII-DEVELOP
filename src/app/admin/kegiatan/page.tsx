@@ -11,7 +11,17 @@ async function getEvents(page: number) {
     const [events, total] = await Promise.all([
       prisma.event.findMany({
         orderBy: { date: "desc" },
-        include: { _count: { select: { registrations: true } } },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          slug: true,
+          date: true,
+          location: true,
+          capacity: true,
+          status: true,
+          _count: { select: { registrations: true } },
+        },
         take: PER_PAGE,
         skip: (page - 1) * PER_PAGE,
       }),

@@ -16,7 +16,23 @@ export default async function EditKegiatanPage({ params }: Props) {
   if (!isAdmin) redirect("/admin")
 
   const { id } = await params
-  const event = await prisma.event.findUnique({ where: { id } })
+  const event = await prisma.event.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      description: true,
+      type: true,
+      status: true,
+      date: true,
+      dateEnd: true,
+      time: true,
+      location: true,
+      capacity: true,
+      image: true,
+    },
+  })
   if (!event) notFound()
 
   const formatDate = (d: Date) => {

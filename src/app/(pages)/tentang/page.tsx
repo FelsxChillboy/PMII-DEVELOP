@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
+import Image from "next/image"
 import SectionTag from "@/components/SectionTag"
 import AnimatedSection from "@/components/AnimatedSection"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
@@ -52,6 +53,7 @@ async function getStruktur() {
   try {
     return await prisma.organizationMember.findMany({
       orderBy: { sortOrder: "asc" },
+      select: { id: true, photoUrl: true, name: true, position: true, instagramUrl: true },
     })
   } catch {
     return []
@@ -160,10 +162,13 @@ export default async function TentangPage() {
                 <CardContent className="p-0">
                   <div className="mx-auto mb-3">
                     {member.photoUrl ? (
-                      <img
+                      <Image
                         src={member.photoUrl}
                         alt={member.name}
+                        width={96}
+                        height={96}
                         className="h-24 w-24 rounded-full object-cover border-2 border-primary/20"
+                        unoptimized
                       />
                     ) : (
                       <div className="h-24 w-24 rounded-full bg-linear-to-br from-primary/10 to-accent/10 animate-gradient flex items-center justify-center mx-auto">

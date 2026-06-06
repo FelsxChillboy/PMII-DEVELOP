@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, Space_Grotesk, Geist } from "next/font/google"
+import { Geist } from "next/font/google"
 import "./globals.css"
 import Providers from "@/components/Providers"
 import ServiceWorker from "@/components/ServiceWorker"
@@ -7,18 +7,7 @@ import LenisProvider from "@/components/LenisProvider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-})
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["500", "700"],
-})
+const geist = Geist({subsets:['latin'],variable:'--font-sans',display:'swap'});
 
 const siteTitle = "PR PMII Rayon Teknik UNUSIA Jakarta Pusat"
 const siteDescription =
@@ -95,7 +84,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}
+        className="font-body antialiased"
       >
         <script
           type="application/ld+json"

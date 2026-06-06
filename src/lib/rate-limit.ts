@@ -4,8 +4,21 @@ const store = new Map<string, { count: number; reset: number }>()
 
 const WINDOW_MS = 60_000
 const MAX_REQUESTS = 10
+const CLEANUP_INTERVAL = 300_000
+
+let lastCleanup = Date.now()
+
+function cleanupExpiredEntries() {
+  const now = Date.now()
+  if (now - lastCleanup < CLEANUP_INTERVAL) return
+  lastCleanup = now
+  for (const [key, record] of store) {
+    if (now > record.reset) store.delete(key)
+  }
+}
 
 export async function checkRateLimit(key: string, maxRequests = MAX_REQUESTS, windowMs = WINDOW_MS) {
+  cleanupExpiredEntries()
   const redisResult = await rateLimitRedis(key, maxRequests, windowMs)
   if (redisResult) return redisResult
 

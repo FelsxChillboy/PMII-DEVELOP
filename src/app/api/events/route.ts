@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { success, serverError, parseSearchParams } from "@/lib/api-response"
+import { success, serverError, parseSearchParams, error } from "@/lib/api-response"
 
 export async function GET(request: Request) {
   try {
@@ -10,12 +10,23 @@ export async function GET(request: Request) {
     const endDate = searchParams.get("endDate")
 
     const where: Record<string, unknown> = {}
-    if (status) where.status = status
-    if (type) where.type = type
+    const VALID_STATUSES = ["TERBUKA", "PENUH", "BERLANGSUNG", "SELESAI", "DIBATALKAN"]
+    const VALID_TYPES = ["kegiatan", "workshop", "seminar", "rapat", "lainnya"]
+    if (status && VALID_STATUSES.includes(status)) where.status = status
+    if (!status) where.status = { not: "DRAFT" }
+    if (type && VALID_TYPES.includes(type)) where.type = type
     if (startDate || endDate) {
       const dateFilter: Record<string, Date> = {}
-      if (startDate) dateFilter.gte = new Date(startDate)
-      if (endDate) dateFilter.lte = new Date(endDate)
+      if (startDate) {
+        const d = new Date(startDate)
+        if (isNaN(d.getTime())) return error("Invalid startDate", 400)
+        dateFilter.gte = d
+      }
+      if (endDate) {
+        const d = new Date(endDate)
+        if (isNaN(d.getTime())) return error("Invalid endDate", 400)
+        dateFilter.lte = d
+      }
       where.date = dateFilter
     }
 

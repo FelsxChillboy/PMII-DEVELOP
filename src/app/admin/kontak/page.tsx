@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { Mail, CheckCircle2, XCircle, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { toggleMessageRead, deleteMessage } from "@/lib/admin-actions"
+import { requireAdmin } from "@/lib/server/auth"
 
 const PER_PAGE = 20
 
@@ -23,6 +25,9 @@ async function getMessages(page: number) {
 }
 
 export default async function AdminKontakPage(props: { searchParams?: Promise<{ page?: string }> }) {
+  const { session, error: authErr } = await requireAdmin()
+  if (authErr || !session?.user) redirect("/")
+
   const sp = await props.searchParams
   const page = Math.max(1, Number(sp?.page) || 1)
   const { messages, total } = await getMessages(page)

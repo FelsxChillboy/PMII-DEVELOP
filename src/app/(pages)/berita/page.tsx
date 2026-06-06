@@ -5,7 +5,6 @@ import AnimatedSection, { StaggerItem } from "@/components/AnimatedSection"
 import Card3D from "@/components/Card3D"
 import { Calendar, User, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
 const PER_PAGE = 9
 

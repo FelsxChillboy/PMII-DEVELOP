@@ -6,9 +6,15 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { env } from "@/lib/env"
-import { checkRateLimit } from "@/lib/rate-limit"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 const rateLimitStore = new Map<string, { count: number; reset: number }>()
+
+let _loginRequest: Request | undefined
+
+export function setLoginRequest(req: Request) {
+  _loginRequest = req
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -33,10 +39,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null
 
-        const ip = "global"
+        const ip = request ? getClientIp(request as unknown as Request) : (_loginRequest ? getClientIp(_loginRequest) : "global")
         const limit = await checkRateLimit(`auth:${credentials.email as string}:${ip}`, 5, 300_000)
         if (!limit.allowed) return null
 

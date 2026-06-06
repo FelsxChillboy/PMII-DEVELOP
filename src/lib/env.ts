@@ -1,9 +1,12 @@
 function requireEnv(key: string): string {
   const val = process.env[key]
-  if (!val && process.env.NODE_ENV === "production") {
-    console.warn(`⚠️ Missing required environment variable: ${key}`)
+  if (!val) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(`Environment variable ${key} is required but not set`)
+    }
+    return val || ""
   }
-  return val || ""
+  return val
 }
 
 export const env = {

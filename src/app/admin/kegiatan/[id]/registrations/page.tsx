@@ -5,8 +5,11 @@ import Link from "next/link"
 import { approveRegistration, rejectRegistration, deleteRegistration } from "@/lib/admin-actions"
 import { ArrowLeft, Check, X, Trash2, User } from "lucide-react"
 
+const PER_PAGE = 50
+
 interface Props {
   params: Promise<{ id: string }>
+  searchParams?: Promise<{ page?: string }>
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -15,21 +18,37 @@ const STATUS_COLORS: Record<string, string> = {
   REJECTED: "bg-red-500/10 text-red-500",
 }
 
-export default async function EventRegistrationsPage({ params }: Props) {
+export default async function EventRegistrationsPage({ params, searchParams }: Props) {
   const session = await auth()
   if (!session?.user) redirect("/login")
   const isAdmin = (session.user as { role?: string }).role === "ADMIN"
   if (!isAdmin) redirect("/admin")
 
   const { id } = await params
+  const sp = searchParams ? await searchParams : undefined
+  const page = Math.max(1, Number(sp?.page) || 1)
+  const skip = (page - 1) * PER_PAGE
+
   const event = await prisma.event.findUnique({ where: { id } })
   if (!event) notFound()
 
-  const registrations = await prisma.registration.findMany({
-    where: { eventId: id },
-    include: { user: { select: { id: true, name: true, email: true } } },
-    orderBy: { createdAt: "desc" },
-  })
+  const [registrations, total] = await Promise.all([
+    prisma.registration.findMany({
+      where: { eventId: id },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        user: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: PER_PAGE,
+      skip,
+    }),
+    prisma.registration.count({ where: { eventId: id } }),
+  ])
+
+  const totalPages = Math.ceil(total / PER_PAGE)
 
   return (
     <div>
@@ -50,7 +69,8 @@ export default async function EventRegistrationsPage({ params }: Props) {
       </div>
 
       <div className="mb-4 text-xs text-muted-foreground">
-        Total {registrations.length} pendaftar &middot; Kapasitas {event.capacity}
+        Total {total} pendaftar &middot; Kapasitas {event.capacity}
+        {totalPages > 1 && ` &middot; Halaman ${page} dari ${totalPages}`}
       </div>
 
       <div className="rounded-xl border border-border overflow-hidden">
@@ -132,6 +152,40 @@ export default async function EventRegistrationsPage({ params }: Props) {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Link
+            href={`/admin/kegiatan/${id}/registrations?page=${page - 1}`}
+            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm border border-border transition-colors ${
+              page <= 1 ? "pointer-events-none opacity-50" : "hover:bg-secondary/50"
+            }`}
+            aria-disabled={page <= 1}
+          >
+            Sebelumnya
+          </Link>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <Link
+              key={p}
+              href={`/admin/kegiatan/${id}/registrations?page=${p}`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded text-sm transition-colors ${
+                p === page ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50"
+              }`}
+            >
+              {p}
+            </Link>
+          ))}
+          <Link
+            href={`/admin/kegiatan/${id}/registrations?page=${page + 1}`}
+            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm border border-border transition-colors ${
+              page >= totalPages ? "pointer-events-none opacity-50" : "hover:bg-secondary/50"
+            }`}
+            aria-disabled={page >= totalPages}
+          >
+            Selanjutnya
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

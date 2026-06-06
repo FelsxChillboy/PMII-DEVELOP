@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { success, error, serverError } from "@/lib/api-response"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
+import { createHash } from "crypto"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 const ResetPasswordSchema = z.object({
@@ -23,9 +24,10 @@ export async function POST(request: Request) {
       return error(parsed.error.issues[0].message)
     }
 
+    const hashedToken = createHash("sha256").update(parsed.data.token).digest("hex")
     const user = await prisma.user.findFirst({
       where: {
-        resetToken: parsed.data.token,
+        resetToken: hashedToken,
         resetTokenExpiry: { gt: new Date() },
       },
     })

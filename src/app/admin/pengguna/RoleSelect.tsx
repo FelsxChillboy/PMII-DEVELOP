@@ -20,7 +20,7 @@ export default function RoleSelect({ userId, currentRole }: Props) {
       <select
         name="role"
         defaultValue={currentRole}
-        onChange={(e) => e.target.form?.requestSubmit()}
+        onChange={(e) => e.target.form?.submit()}
         className={`text-xs px-2 py-1 rounded border-0 font-medium cursor-pointer ${ROLE_COLORS[currentRole] || ""} bg-transparent`}
       >
         <option value="USER">User</option>
